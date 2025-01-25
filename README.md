@@ -1,1 +1,1 @@
-# SeniorProjectGroup4
+# AwsMinorityBusinessGroup4
