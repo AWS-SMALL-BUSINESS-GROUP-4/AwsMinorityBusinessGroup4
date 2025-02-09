@@ -1,6 +1,6 @@
 import { a } from '@aws-amplify/backend';
 
-export const Rating = a.model({
+export const Review = a.model({
   reviewId: a.id(),  //Unique identifier (matches Cognito sub).
   businessID: a.id(),
   userID: a.id(),
