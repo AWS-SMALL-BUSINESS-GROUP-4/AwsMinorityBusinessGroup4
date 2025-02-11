@@ -2,7 +2,13 @@ import { a } from '@aws-amplify/backend';
 
 export const Business = a.model({
   id: a.string(),  //Unique identifier (matches Cognito sub).
-  name: a.string(),  
-  email: a.string(),  // User’s email (optional, stored only if needed).
-  profilePic: a.string()  // URL of the profile picture.
+  ownerId: a.string(),
+  name: a.string(),
+  description: a.string(),
+  city: a.string(),
+  latitude: a.float(),
+  longitude: a.float(),
+  address: a.string(),
+  category: a.string(),
+  averageRating: a.float()  
 }).authorization((allow) => [allow.owner()]);
