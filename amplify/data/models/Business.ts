@@ -1,8 +1,8 @@
 import { a } from '@aws-amplify/backend';
 
 export const Business = a.model({
-  id: a.string(),  //Unique identifier (matches Cognito sub).
-  ownerId: a.string(),
+  businessID: a.string(),  //Unique identifier (matches Cognito sub).
+  ownerID: a.string(),
   name: a.string(),
   description: a.string(),
   city: a.string(),
