@@ -1,9 +1,10 @@
 type Business @model 
 @auth(rules: [
   { allow: owner },  # Business owner can create, read, update, and delete their own Business
-  { allow: public, provider: apiKey, operations: [read] },  # Public API key access for read-only
+#  { allow: public, provider: apiKey, operations: [read] },  # Public API key access for read-only
   { allow: groups, groups: ["Admin"], operations: [read, update, delete] }  # Admins can manage all businesses
-]) {
+]) 
+{
   businessId: ID! @primaryKey
   ownerId: ID! @index(name: "byUser")
   name: String!
@@ -31,9 +32,10 @@ type Business @model
 type Review @model 
 @auth(rules: [
   { allow: owner },
-  { allow: public, provider: apiKey, operations: [read] },
+#  { allow: public, provider: apiKey, operations: [read] },
   { allow: groups, groups: ["Admin"], operations: [read, update, delete] }
-]) {
+]) 
+{
   reviewId: ID! @primaryKey
   businessId: ID! @index(name: "byBusiness")
   business: Business @belongsTo(fields: ["businessId"])  # Enables nested queries
@@ -48,9 +50,10 @@ type User
 @model 
 @auth(rules: [
   { allow: owner },
-  { allow: public, provider: apiKey, operations: [read] },
+#  { allow: public, provider: apiKey, operations: [read] },
   { allow: groups, groups: ["Admin"], operations: [read, update, delete] }
-]) {
+]) 
+{
   userId: ID! @primaryKey
   name: String!
   email: String
