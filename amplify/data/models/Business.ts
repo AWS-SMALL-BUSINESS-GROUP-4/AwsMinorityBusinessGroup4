@@ -1,8 +1,8 @@
 import { a } from '@aws-amplify/backend';
 
 export const Business = a.model({
-  businessId: a.id().required(), 
-  ownerId: a.id().required(), 
+  ownerId: a.id(),   //reference field to match User identfier
+  owner: a.belongsTo('User', 'ownerId'), 
   name: a.string().required(),
   email: a.email().required(),
   phoneNumber: a.phone().required(), 
@@ -27,5 +27,5 @@ export const Business = a.model({
     allow.owner(), 
     allow.guest().to(['read']), 
     allow.groups(['Admin']).to(['read', 'update', 'delete'])
-]).secondaryIndexes((index) => [index("ownerId")]);
+])
 

@@ -1,13 +1,16 @@
 import { a } from '@aws-amplify/backend';
 
 export const User = a.model({
-  userId: a.id().required(),
-  name: a.string(),  
-  email: a.string(), 
+  name: a.customType({
+    firstName: a.string().required(),
+    lastName: a.string().required()
+  }),  
+  email: a.email().required(), 
   profilePic: a.url(),
-  joinedAt: a.timestamp().required(),
-  lastLogin: a.timestamp().required(),
-  reviews: a.hasMany('Review', 'businessId')
+  joinedAt: a.timestamp(),
+  lastLogin: a.timestamp(),
+  reviews: a.hasMany('Review', 'userId'),
+  businesses: a.hasMany('Business', 'ownerId')
 }).authorization((allow) => [
     allow.owner(), 
     allow.guest().to(['read']),
