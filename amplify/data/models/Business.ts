@@ -1,8 +1,8 @@
 import { a } from '@aws-amplify/backend';
 
 export const Business = a.model({
-  businessId: a.id().required(),  //Unique identifier (matches Cognito sub).
-  ownerId: a.id().required(),  // Foreign key to User
+  businessId: a.id().required(), 
+  ownerId: a.id().required(), 
   name: a.string().required(),
   email: a.email().required(),
   phoneNumber: a.phone().required(), 
@@ -18,14 +18,14 @@ export const Business = a.model({
     lattitude: a.float(),
     longitude: a.float()
 }),
-  businessHours: a.json(),  // Store structured business hours
+  businessHours: a.json(), 
   description: a.string().required(),
-  photos: a.url().array(), // Store URLs of uploaded photos
+  photos: a.url().array(),
   averageRating: a.float(),
   reviews: a.hasMany('Review', 'businessId')
 }).authorization((allow) => [
-    allow.owner(),    // Business owner can create, read, update and delete their own Business data
-    allow.guest().to(['read']),  // Allow anyone auth'd with an API key to read everyone's posts.()
+    allow.owner(), 
+    allow.guest().to(['read']), 
     allow.groups(['Admin']).to(['read', 'update', 'delete'])
 ]).secondaryIndexes((index) => [index("ownerId")]);
 

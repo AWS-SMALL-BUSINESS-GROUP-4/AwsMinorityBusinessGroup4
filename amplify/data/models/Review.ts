@@ -1,7 +1,7 @@
 import { a } from '@aws-amplify/backend';
 
 export const Review = a.model({
-  reviewId: a.id().required(),  //Unique identifier (matches Cognito sub).
+  reviewId: a.id().required(), 
   businessId: a.id().required(),
   business: a.belongsTo('Business', 'businessId'),
   userId: a.string().required(),
@@ -11,6 +11,6 @@ export const Review = a.model({
   reviewDate: a.timestamp()
 }).authorization((allow) => [
     allow.owner(), 
-    allow.guest().to(['read']),  // Allow anyone auth'd with an API key to read everyone's posts.()
+    allow.guest().to(['read']),
     allow.groups(['Admin']).to(['read', 'update', 'delete'])
 ]).secondaryIndexes((index) => [index("businessId"), index("userId")]);
