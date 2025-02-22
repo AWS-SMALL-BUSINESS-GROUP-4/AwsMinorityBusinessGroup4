@@ -12,4 +12,4 @@ export const Review = a.model({
     allow.owner(), 
     allow.guest().to(['read']),
     allow.groups(['Admin']).to(['read', 'update', 'delete'])
-]).secondaryIndexes((index) => [index("businessId"), index("userId")]);
+])

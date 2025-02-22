@@ -1,8 +1,8 @@
 import { a } from '@aws-amplify/backend';
 
 export const Business = a.model({
-  ownerId: a.id(),   //reference field to match User identfier
-  owner: a.belongsTo('User', 'ownerId'), 
+  businessOwnerId: a.id(),   //reference field to match User identfier
+  businessOwner: a.belongsTo('User', 'businessOwnerId'), 
   name: a.string().required(),
   email: a.email().required(),
   phoneNumber: a.phone().required(), 

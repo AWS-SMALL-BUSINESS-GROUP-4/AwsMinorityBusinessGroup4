@@ -10,7 +10,7 @@ export const User = a.model({
   joinedAt: a.timestamp(),
   lastLogin: a.timestamp(),
   reviews: a.hasMany('Review', 'userId'),
-  businesses: a.hasMany('Business', 'ownerId')
+  businesses: a.hasMany('Business', 'businessOwnerId')
 }).authorization((allow) => [
     allow.owner(), 
     allow.guest().to(['read']),
