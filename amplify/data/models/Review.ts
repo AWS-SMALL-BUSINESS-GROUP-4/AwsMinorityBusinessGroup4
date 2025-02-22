@@ -1,8 +1,7 @@
 import { a } from '@aws-amplify/backend';
 
-export const Review = a.model({
-  reviewId: a.id(), 
-  businessId: a.id(),
+export const Review = a.model({ 
+  businessId: a.id(),  // reference field to match Business identifier
   business: a.belongsTo('Business', 'businessId'),
   userId: a.id(),  // reference field to match User identifier
   user: a.belongsTo('User', 'userId'),
