@@ -55,7 +55,6 @@
     justify-content: left;
   }
   
-  /* Grey container for steps 1–7 and step 8 */
   .grey-container {
     background-color: #D9D9D9;
     width: 650px;
@@ -64,6 +63,11 @@
     position: relative;
     margin: 0 auto;
     height: 700px; /* auto-size to fit content */
+  }
+  
+  .grey-container.wide {
+    width: 900px;
+    height: auto; /* Adjust height for content */
   }
   
   .back-button {
@@ -110,6 +114,18 @@
     border-radius: 6px;
     font-size: 16px;
     background-color: white;
+  }
+  
+  textarea {
+    color: black;
+    width: 600px;
+    height: 250px;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: white;
+    resize: vertical;
   }
   
   .search-icon {
@@ -248,7 +264,7 @@
     font-size: 16px;
     width: 52%;
     font-weight: 500;
-    display: flex; /* So the logo and text can align properly */
+    display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
@@ -260,17 +276,17 @@
     background-color: white;
   }
   
-  /* ======= Step 8 layout (3-column) ======= */
+  /* ======= Step 8+ layout (3-column) ======= */
   .step8-wrapper {
     display: flex;
     padding: 24px;
+    color: black;
     justify-content: flex-start;
     align-items: flex-start;
     gap: 24px;
     flex: 1;
   }
   
-  /* Left sidebar with clickable links */
   .sidebar {
     background-color: #D9D9D9;
     width: 300px;
@@ -296,22 +312,12 @@
     color: #FC941D;
   }
   
-  /* Middle content */
   .step8-content {
-    width: 650px;
+    width: 900px;
   }
   
-  /* Blank space on the right */
   .right-space {
     flex: 1;
-  }
-  
-  /* Additional styling for hours list */
-  .hours-container {
-    position: relative;
-    color: black;
-    width: 900px;
-    height: auto;
   }
   
   .hours-list {
@@ -326,7 +332,6 @@
     width: 800px;
     justify-content: space-between;
   }
-
   
   .day-name {
     width: 100px;
@@ -339,12 +344,10 @@
     flex-direction: column;
   }
   
-  /* Place checkboxes side-by-side with white backgrounds */
   .checkbox-group {
     display: flex;
     gap: 16px;
     align-items: center;
-    
   }
   
   #isopen24 {
@@ -352,19 +355,18 @@
     justify-content: space-between;
     width: 150px;
   }
-
+  
   #isclosed {
     display: flex;
     justify-content: space-between;
     width: 80px;
   }
-
-  .checkbox{
+  
+  .checkbox {
     width: 20px;
     background-color: white;
   }
   
-  /* Step 8 custom buttons */
   .step8-buttons {
     display: flex;
     align-items: center;
@@ -373,7 +375,6 @@
   }
   
   .save-continue-button {
-    /* re-using .continue-button styles plus a unique class for clarity */
     width: auto;
   }
   
@@ -395,4 +396,40 @@
     justify-content: space-evenly;
   }
 
+    /* Photo upload styling */
+    .photo-upload {
+    margin-top: 20px;
+    text-align: center;
+    }
+
+    .photo-upload-label {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 600px;
+        height: 300px;
+        background-color: white;
+        border: 2px dashed #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        color: #666;
+        gap: 10px;
+      }
+      
+      .uploaded-photos {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+        justify-content: center;
+      }
+      
+      .photo-preview img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 6px;
+      }
   

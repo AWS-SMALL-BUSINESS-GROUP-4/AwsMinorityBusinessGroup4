@@ -21,7 +21,8 @@ const MultiStepForm = () => {
     lastName: '',
     emailaddress: '',
     password: '',
-    // New field for business hours
+    description: '',
+    photos: [], // Added for Step 10
     businessHours: [
       { day: 'Monday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
       { day: 'Tuesday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
@@ -34,14 +35,20 @@ const MultiStepForm = () => {
   });
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value
-    }));
+    const { name, value, files } = e.target;
+    if (name === 'photos') {
+      setFormData(prevState => ({
+        ...prevState,
+        photos: Array.from(files), // Store uploaded files
+      }));
+    } else {
+      setFormData(prevState => ({
+        ...prevState,
+        [name]: value,
+      }));
+    }
   };
 
-  // Handler for changing business hours
   const handleHoursChange = (index, field, value) => {
     setFormData(prev => {
       const updatedHours = [...prev.businessHours];
@@ -56,13 +63,6 @@ const MultiStepForm = () => {
 
   const prevStep = () => {
     setStep(step - 1);
-  };
-
-  // Optional: handle side navigation in step 8 (Business hours, Description, Photos)
-  // For now, we'll keep them as placeholders with href="#"
-  const handleSidebarNav = (e) => {
-    e.preventDefault();
-    // You could manage different "sub-views" for step 8 here if needed
   };
 
   return (
@@ -82,7 +82,7 @@ const MultiStepForm = () => {
         </div>
       </header>
 
-      {/* For steps 1–7, we use the original layout. */}
+      {/* Steps 1–7 */}
       {step < 8 && (
         <div className="form-area">
           <div className="grey-container">
@@ -332,49 +332,48 @@ const MultiStepForm = () => {
         </div>
       )}
 
-      {/* For step 8, we create a 3-column layout: sidebar, main content (grey box), and blank space. */}
+      {/* Step 8: Business Hours */}
       {step === 8 && (
         <div className="form-area step8-wrapper">
-          {/* Left sidebar with links */}
+          {/* Sidebar */}
           <div className="sidebar">
-            <a href="#" className="active" onClick={handleSidebarNav}>Business hours</a>
-            <a href="#" onClick={handleSidebarNav}>Description</a>
-            <a href="#" onClick={handleSidebarNav}>Photos</a>
+            <a href="#" className={step === 8 ? "active" : ""} onClick={() => setStep(8)}>Business hours</a>
+            <a href="#" className={step === 9 ? "active" : ""} onClick={() => setStep(9)}>Description</a>
+            <a href="#" className={step === 10 ? "active" : ""} onClick={() => setStep(10)}>Photos</a>
           </div>
 
-          {/* Middle content (grey container) */}
+          {/* Middle content */}
           <div className="step8-content">
-            <div className="grey-container hours-container">
+            <div className="grey-container wide">
               <div className="form-step">
                 <h1>Business Hours</h1>
                 <p>Let customers know when you're open by adding your regular hours.</p>
-                
                 <div className="hours-list">
                   {formData.businessHours.map((dayObj, index) => (
                     <div key={index} className="day-row">
                       <div className="day-name">{dayObj.day}</div>
-                      <div class="time-slot">
+                      <div className="time-slot">
                         <div className="time-select">
-                            <label>Opens at</label>
-                            <input
+                          <label>Opens at</label>
+                          <input
                             type="time"
                             value={dayObj.openTime}
                             onChange={(e) => handleHoursChange(index, 'openTime', e.target.value)}
-                            />
+                          />
                         </div>
                         <div className="time-select">
-                            <label>Closes at</label>
-                            <input
+                          <label>Closes at</label>
+                          <input
                             type="time"
                             value={dayObj.closeTime}
                             onChange={(e) => handleHoursChange(index, 'closeTime', e.target.value)}
-                            />
+                          />
                         </div>
                       </div>
                       <div className="checkbox-group">
                         <div id="isopen24">
                           <input
-                            className='checkbox'
+                            className="checkbox"
                             type="checkbox"
                             checked={dayObj.isOpen24}
                             onChange={(e) => handleHoursChange(index, 'isOpen24', e.target.checked)}
@@ -383,7 +382,7 @@ const MultiStepForm = () => {
                         </div>
                         <div id="isclosed">
                           <input
-                            className='checkbox'
+                            className="checkbox"
                             type="checkbox"
                             checked={dayObj.isClosed}
                             onChange={(e) => handleHoursChange(index, 'isClosed', e.target.checked)}
@@ -394,7 +393,6 @@ const MultiStepForm = () => {
                     </div>
                   ))}
                 </div>
-
                 <div className="button-group step8-buttons">
                   <button className="continue-button save-continue-button" onClick={nextStep}>
                     Save and continue
@@ -407,10 +405,120 @@ const MultiStepForm = () => {
             </div>
           </div>
 
-          {/* Blank space on the right */}
+          {/* Right space */}
           <div className="right-space"></div>
         </div>
       )}
+
+      {/* Step 9: Description */}
+      {step === 9 && (
+        <div className="form-area step8-wrapper">
+          {/* Sidebar */}
+          <div className="sidebar">
+            <a href="#" className={step === 8 ? "active" : ""} onClick={() => setStep(8)}>Business hours</a>
+            <a href="#" className={step === 9 ? "active" : ""} onClick={() => setStep(9)}>Description</a>
+            <a href="#" className={step === 10 ? "active" : ""} onClick={() => setStep(10)}>Photos</a>
+          </div>
+
+          {/* Middle content */}
+          <div className="step8-content">
+            <div className="grey-container wide">
+              <div className="form-step">
+                <h1>Description</h1>
+                <p>Share a short description that highlights your business and sets you apart from competitors. <strong>What makes you stand out?</strong></p>
+                <textarea
+                  name="description"
+                  placeholder="Showcase what makes your business truly unique and why customers should choose you."
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  rows="5"
+                />
+                <div className="button-group step8-buttons">
+                  <button className="continue-button save-continue-button" onClick={nextStep}>
+                    Save and continue
+                  </button>
+                  <button className="skip-button" onClick={nextStep}>
+                    Skip for now
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right space */}
+          <div className="right-space"></div>
+        </div>
+      )}
+
+        {step === 10 && (
+        <div className="form-area step8-wrapper">
+            {/* Sidebar */}
+            <div className="sidebar">
+            <a href="#" className={step === 8 ? "active" : ""} onClick={() => setStep(8)}>Business hours</a>
+            <a href="#" className={step === 9 ? "active" : ""} onClick={() => setStep(9)}>Description</a>
+            <a href="#" className={step === 10 ? "active" : ""} onClick={() => setStep(10)}>Photos</a>
+            </div>
+
+            {/* Middle content */}
+            <div className="step8-content">
+            <div className="grey-container wide">
+                <div className="form-step">
+                <h1>Photos</h1>
+                <p>Upload photos of your business to help customers get a better sense of what you offer.</p>
+                <div className="photo-upload">
+                    <input
+                    type="file"
+                    name="photos"
+                    multiple
+                    onChange={handleInputChange}
+                    style={{ display: 'none' }}
+                    id="photo-upload-input"
+                    />
+                    <label htmlFor="photo-upload-input" className="photo-upload-label">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="48"
+                        height="48"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#000"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <path d="M16 16l-4-4-4 4"></path>
+                        <path d="M12 12v9"></path>
+                        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                        <path d="M16 16l-4-4-4 4"></path>
+                    </svg>
+                    <span>Drag and drop or click to upload</span>
+                    </label>
+                    {formData.photos.length > 0 && (
+                    <div className="uploaded-photos">
+                        {formData.photos.map((photo, index) => (
+                        <div key={index} className="photo-preview">
+                            <img src={URL.createObjectURL(photo)} alt={`Uploaded photo ${index + 1}`} />
+                        </div>
+                        ))}
+                    </div>
+                    )}
+                </div>
+                <div className="button-group step8-buttons">
+                    <button className="continue-button save-continue-button" onClick={nextStep}>
+                    Save and continue
+                    </button>
+                    <button className="skip-button" onClick={nextStep}>
+                    Skip for now
+                    </button>
+                </div>
+                </div>
+            </div>
+            </div>
+
+            {/* Right space */}
+            <div className="right-space"></div>
+        </div>
+        )}
     </div>
   );
 };
