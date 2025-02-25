@@ -63,7 +63,7 @@
     padding: 40px;
     position: relative;
     margin: 0 auto;
-    height: auto; /* auto-size to fit content */
+    height: 700px; /* auto-size to fit content */
   }
   
   .back-button {
@@ -311,6 +311,7 @@
     position: relative;
     color: black;
     width: 900px;
+    height: auto;
   }
   
   .hours-list {
