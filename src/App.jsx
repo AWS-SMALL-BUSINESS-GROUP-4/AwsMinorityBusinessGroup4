@@ -4,13 +4,14 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import BusinessNavBar from './components/BusinessNavBar'
 import BusinessManagementPage from './pages/BusinessManagementPage'
+import ReviewPage from './pages/ReviewPage'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <div>
-      <BusinessManagementPage/>
+      <ReviewPage/>
     </div>
   )
 

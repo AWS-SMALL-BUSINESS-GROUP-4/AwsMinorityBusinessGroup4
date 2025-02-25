@@ -38,7 +38,7 @@ function BusinessManagementPage() {
                 <div class="main">
                     <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}>
                         <h1>Business Information</h1>
-                        <a href=''>Edit</a>
+                        <button>Edit</button>
                     </div>
                     <hr/>
                     <h2>Basic Information</h2>
