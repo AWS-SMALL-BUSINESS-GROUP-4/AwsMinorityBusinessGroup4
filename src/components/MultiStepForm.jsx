@@ -58,6 +58,13 @@ const MultiStepForm = () => {
     setStep(step - 1);
   };
 
+  // Optional: handle side navigation in step 8 (Business hours, Description, Photos)
+  // For now, we'll keep them as placeholders with href="#"
+  const handleSidebarNav = (e) => {
+    e.preventDefault();
+    // You could manage different "sub-views" for step 8 here if needed
+  };
+
   return (
     <div className="form-container">
       {/* Header */}
@@ -328,14 +335,14 @@ const MultiStepForm = () => {
       {/* For step 8, we create a 3-column layout: sidebar, main content (grey box), and blank space. */}
       {step === 8 && (
         <div className="form-area step8-wrapper">
-          {/* Left sidebar */}
+          {/* Left sidebar with links */}
           <div className="sidebar">
-            <p className="active">Business hours</p>
-            <p>Description</p>
-            <p>Photos</p>
+            <a href="#" className="active" onClick={handleSidebarNav}>Business hours</a>
+            <a href="#" onClick={handleSidebarNav}>Description</a>
+            <a href="#" onClick={handleSidebarNav}>Photos</a>
           </div>
 
-          {/* Middle content */}
+          {/* Middle content (grey container) */}
           <div className="step8-content">
             <div className="grey-container hours-container">
               <div className="form-step">
@@ -346,46 +353,55 @@ const MultiStepForm = () => {
                   {formData.businessHours.map((dayObj, index) => (
                     <div key={index} className="day-row">
                       <div className="day-name">{dayObj.day}</div>
-                      <div className="time-select">
-                        <label>Opens at</label>
-                        <input
-                          type="time"
-                          value={dayObj.openTime}
-                          onChange={(e) => handleHoursChange(index, 'openTime', e.target.value)}
-                        />
-                      </div>
-                      <div className="time-select">
-                        <label>Closes at</label>
-                        <input
-                          type="time"
-                          value={dayObj.closeTime}
-                          onChange={(e) => handleHoursChange(index, 'closeTime', e.target.value)}
-                        />
+                      <div class="time-slot">
+                        <div className="time-select">
+                            <label>Opens at</label>
+                            <input
+                            type="time"
+                            value={dayObj.openTime}
+                            onChange={(e) => handleHoursChange(index, 'openTime', e.target.value)}
+                            />
+                        </div>
+                        <div className="time-select">
+                            <label>Closes at</label>
+                            <input
+                            type="time"
+                            value={dayObj.closeTime}
+                            onChange={(e) => handleHoursChange(index, 'closeTime', e.target.value)}
+                            />
+                        </div>
                       </div>
                       <div className="checkbox-group">
-                        <label>
+                        <div id="isopen24">
                           <input
+                            className='checkbox'
                             type="checkbox"
                             checked={dayObj.isOpen24}
                             onChange={(e) => handleHoursChange(index, 'isOpen24', e.target.checked)}
                           />
                           Open 24 hours
-                        </label>
-                        <label>
+                        </div>
+                        <div id="isclosed">
                           <input
+                            className='checkbox'
                             type="checkbox"
                             checked={dayObj.isClosed}
                             onChange={(e) => handleHoursChange(index, 'isClosed', e.target.checked)}
                           />
                           Closed
-                        </label>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="button-group">
-                  <button className="continue-button" onClick={nextStep}>Continue</button>
+                <div className="button-group step8-buttons">
+                  <button className="continue-button save-continue-button" onClick={nextStep}>
+                    Save and continue
+                  </button>
+                  <button className="skip-button" onClick={nextStep}>
+                    Skip for now
+                  </button>
                 </div>
               </div>
             </div>

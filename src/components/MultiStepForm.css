@@ -55,15 +55,15 @@
     justify-content: left;
   }
   
-  /* Grey container for steps 1–7 */
+  /* Grey container for steps 1–7 and step 8 */
   .grey-container {
     background-color: #D9D9D9;
     width: 650px;
     border-radius: 8px;
     padding: 40px;
     position: relative;
-    /* Let the container auto-size in height to fit content */
-    height: auto;
+    margin: 0 auto;
+    height: auto; /* auto-size to fit content */
   }
   
   .back-button {
@@ -263,7 +263,6 @@
   /* ======= Step 8 layout (3-column) ======= */
   .step8-wrapper {
     display: flex;
-    /* Overwrite the default 'form-area' styles if needed */
     padding: 24px;
     justify-content: flex-start;
     align-items: flex-start;
@@ -271,42 +270,49 @@
     flex: 1;
   }
   
+  /* Left sidebar with clickable links */
   .sidebar {
-    width: 150px;
+    background-color: #D9D9D9;
+    width: 300px;
+    height: 300px;
+    padding: 40px 20px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 16px;
+    border-radius: 8px;
   }
   
-  .sidebar p {
+  .sidebar a {
     cursor: pointer;
     font-size: 16px;
     margin: 0;
+    color: #333;
+    text-decoration: none;
   }
   
-  .sidebar p.active {
+  .sidebar a.active {
     font-weight: bold;
+    color: #FC941D;
   }
   
+  /* Middle content */
   .step8-content {
     width: 650px;
   }
   
+  /* Blank space on the right */
   .right-space {
-    flex: 1; /* Fills remaining space on the right */
-  }
-  
-  /* The grey container for hours */
-  .hours-container {
-    background-color: #D9D9D9;
-    border-radius: 8px;
-    padding: 40px;
-    position: relative;
-    width: 650px;
-    height: auto;
+    flex: 1;
   }
   
   /* Additional styling for hours list */
+  .hours-container {
+    position: relative;
+    color: black;
+    width: 900px;
+  }
+  
   .hours-list {
     display: flex;
     flex-direction: column;
@@ -316,12 +322,15 @@
   .day-row {
     display: flex;
     align-items: center;
-    gap: 16px;
+    width: 800px;
+    justify-content: space-between;
   }
+
   
   .day-name {
-    width: 80px;
+    width: 100px;
     font-weight: 500;
+    box-sizing: border-box;
   }
   
   .time-select {
@@ -329,10 +338,60 @@
     flex-direction: column;
   }
   
+  /* Place checkboxes side-by-side with white backgrounds */
   .checkbox-group {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-left: auto; /* pushes checkboxes to the right */
+    gap: 16px;
+    align-items: center;
+    
   }
+  
+  #isopen24 {
+    display: flex;
+    justify-content: space-between;
+    width: 150px;
+  }
+
+  #isclosed {
+    display: flex;
+    justify-content: space-between;
+    width: 80px;
+  }
+
+  .checkbox{
+    width: 20px;
+    background-color: white;
+  }
+  
+  /* Step 8 custom buttons */
+  .step8-buttons {
+    display: flex;
+    align-items: center;
+    margin-top: 30px;
+    gap: 16px;
+  }
+  
+  .save-continue-button {
+    /* re-using .continue-button styles plus a unique class for clarity */
+    width: auto;
+  }
+  
+  .skip-button {
+    background-color: #FFFFFF;
+    color: #FC941D;
+    border: 1px solid #FC941D;
+    padding: 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 25px;
+  }
+  
+  .time-slot {
+    display: flex;
+    width: 400px;
+    justify-content: space-evenly;
+  }
+
   

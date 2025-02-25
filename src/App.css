@@ -10,3 +10,9 @@
 body {
   background-color: #FFFFFF;
 }
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
