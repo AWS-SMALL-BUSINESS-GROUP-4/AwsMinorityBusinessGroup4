@@ -441,3 +441,10 @@
 		display: block;
 		margin-top: 2px;
 	  }
+
+	  /* Add to MultiStepForm.css */
+	.save-continue-button.disabled {
+		background-color: #ccc;
+		cursor: not-allowed;
+		border: 1px solid #ccc;
+	}

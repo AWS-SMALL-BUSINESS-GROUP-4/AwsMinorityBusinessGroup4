@@ -37,7 +37,7 @@ const MultiStepForm = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{}|;:,.<>?]).{8,}$/;
   const phoneRegex = /^\d{10}$/;
-  const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/; // Added for URL validation**
+  const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
 
   const requiredFields = {
     1: ['businessName'],
@@ -47,9 +47,9 @@ const MultiStepForm = () => {
     5: ['categories'],
     6: ['street', 'city', 'state', 'zip', 'country'],
     7: ['firstName', 'lastName', 'emailaddress', 'password'],
-    8: [],
-    9: [],
-    10: [],
+    8: [], // Business hours will have custom validation
+    9: [], // Description will have custom validation
+    10: [], // Photos will have custom validation
   };
 
   const fieldDisplayNames = {
@@ -89,7 +89,7 @@ const MultiStepForm = () => {
       if (!phoneRegex.test(value)) {
         return 'Please enter a valid 10-digit phone number';
       }
-    } else if (field === 'website' && value.trim() && !urlRegex.test(value)) { // Validate website if not empty
+    } else if (field === 'website' && value.trim() && !urlRegex.test(value)) {
       return 'Please enter a valid website URL (e.g., https://example.com)';
     }
     return '';
@@ -121,9 +121,44 @@ const MultiStepForm = () => {
   const handleHoursChange = (index, field, value) => {
     setFormData((prev) => {
       const updatedHours = [...prev.businessHours];
-      updatedHours[index][field] = value;
+      if (field === 'isOpen24') {
+        updatedHours[index].isOpen24 = value;
+        if (value) {
+          updatedHours[index].openTime = '00:00'; // 12:00 AM
+          updatedHours[index].closeTime = '00:00'; // 12:00 AM
+          updatedHours[index].isClosed = false; // Uncheck "Closed"
+        } else {
+          updatedHours[index].openTime = '';
+          updatedHours[index].closeTime = '';
+        }
+      } else if (field === 'isClosed') {
+        updatedHours[index].isClosed = value;
+        if (value) {
+          updatedHours[index].isOpen24 = false; // Uncheck "Open 24 hours"
+          updatedHours[index].openTime = ''; // Clear "Opens at"
+          updatedHours[index].closeTime = ''; // Clear "Closes at"
+        }
+      } else {
+        updatedHours[index][field] = value;
+      }
       return { ...prev, businessHours: updatedHours };
     });
+  };
+
+  const isStepComplete = (step) => {
+    if (step === 8) {
+      return formData.businessHours.every((day) => {
+        if (day.isOpen24 || day.isClosed) {
+          return true;
+        }
+        return day.openTime && day.closeTime;
+      });
+    } else if (step === 9) {
+      return formData.description.trim() !== '';
+    } else if (step === 10) {
+      return formData.photos.length > 0;
+    }
+    return true; // For other steps, assume complete (for now)
   };
 
   const validateStep = (step, formData) => {
@@ -135,7 +170,6 @@ const MultiStepForm = () => {
         errors[field] = error;
       }
     });
-    // Special validation for step 4 when using "Continue"
     if (step === 4 && formData.website.trim() && !urlRegex.test(formData.website)) {
       errors.website = 'Please enter a valid website URL (e.g., https://example.com)';
     }
@@ -144,7 +178,6 @@ const MultiStepForm = () => {
 
   const nextStep = () => {
     if (step === 4) {
-      // Check website field for "Continue" button
       if (!formData.website.trim()) {
         setErrors({ website: 'Website is required to continue' });
         return;
@@ -167,8 +200,8 @@ const MultiStepForm = () => {
   };
 
   const skipWebsite = () => {
-    setErrors({}); // Clear any existing errors
-    setStep(step + 1); // Proceed without validation
+    setErrors({});
+    setStep(step + 1);
   };
 
   return (
@@ -554,8 +587,9 @@ const MultiStepForm = () => {
                             type="time"
                             value={dayObj.openTime}
                             onChange={(e) =>
-                              handleHoursChange(index, 'openTime', e.target.value)
+                              !dayObj.isOpen24 && !dayObj.isClosed && handleHoursChange(index, 'openTime', e.target.value)
                             }
+                            disabled={dayObj.isOpen24 || dayObj.isClosed}
                           />
                         </div>
                         <div className="time-select">
@@ -564,8 +598,9 @@ const MultiStepForm = () => {
                             type="time"
                             value={dayObj.closeTime}
                             onChange={(e) =>
-                              handleHoursChange(index, 'closeTime', e.target.value)
+                              !dayObj.isOpen24 && !dayObj.isClosed && handleHoursChange(index, 'closeTime', e.target.value)
                             }
+                            disabled={dayObj.isOpen24 || dayObj.isClosed}
                           />
                         </div>
                       </div>
@@ -575,9 +610,7 @@ const MultiStepForm = () => {
                             className="checkbox"
                             type="checkbox"
                             checked={dayObj.isOpen24}
-                            onChange={(e) =>
-                              handleHoursChange(index, 'isOpen24', e.target.checked)
-                            }
+                            onChange={(e) => handleHoursChange(index, 'isOpen24', e.target.checked)}
                           />
                           Open 24 hours
                         </div>
@@ -586,9 +619,7 @@ const MultiStepForm = () => {
                             className="checkbox"
                             type="checkbox"
                             checked={dayObj.isClosed}
-                            onChange={(e) =>
-                              handleHoursChange(index, 'isClosed', e.target.checked)
-                            }
+                            onChange={(e) => handleHoursChange(index, 'isClosed', e.target.checked)}
                           />
                           Closed
                         </div>
@@ -597,7 +628,11 @@ const MultiStepForm = () => {
                   ))}
                 </div>
                 <div className="button-group step8-buttons">
-                  <button className="continue-button save-continue-button" onClick={nextStep}>
+                  <button
+                    className={`continue-button save-continue-button ${!isStepComplete(step) ? 'disabled' : ''}`}
+                    onClick={nextStep}
+                    disabled={!isStepComplete(step)}
+                  >
                     Save and continue
                   </button>
                   <button className="skip-button" onClick={nextStep}>
@@ -631,13 +666,17 @@ const MultiStepForm = () => {
                 <p>Share a short description that highlights your business and sets you apart from competitors. <strong>What makes you stand out?</strong></p>
                 <textarea
                   name="description"
-                  placeholder="Showcase what makes your business truly unique... "
+                  placeholder="Showcase what makes your business truly unique..."
                   value={formData.description}
                   onChange={handleInputChange}
                   rows="5"
                 />
                 <div className="button-group step8-buttons">
-                  <button className="continue-button save-continue-button" onClick={nextStep}>
+                  <button
+                    className={`continue-button save-continue-button ${!isStepComplete(step) ? 'disabled' : ''}`}
+                    onClick={nextStep}
+                    disabled={!isStepComplete(step)}
+                  >
                     Save and continue
                   </button>
                   <button className="skip-button" onClick={nextStep}>
@@ -711,7 +750,11 @@ const MultiStepForm = () => {
                   )}
                 </div>
                 <div className="button-group step8-buttons">
-                  <button className="continue-button save-continue-button" onClick={nextStep}>
+                  <button
+                    className={`continue-button save-continue-button ${!isStepComplete(step) ? 'disabled' : ''}`}
+                    onClick={nextStep}
+                    disabled={!isStepComplete(step)}
+                  >
                     Save and continue
                   </button>
                   <button className="skip-button" onClick={nextStep}>
