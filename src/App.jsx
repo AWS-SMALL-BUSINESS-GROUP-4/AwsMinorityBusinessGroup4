@@ -1,4 +1,3 @@
-// App.jsx
 import React from 'react';
 import './App.css';
 import MultiStepForm from './components/MultiStepForm';
