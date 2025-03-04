@@ -62,7 +62,8 @@
     padding: 40px;
     position: relative;
     margin: 0 auto;
-    height: 700px; /* auto-size to fit content */
+	min-height: 700px;
+    height: 100%; /* auto-size to fit content */
   }
   
   .grey-container.wide {
@@ -103,7 +104,7 @@
   .search-container {
     position: relative;
     width: 100%;
-    margin-bottom: 24px;
+	margin-bottom: 24px;
   }
   
   input {
@@ -131,7 +132,7 @@
   .search-icon {
     position: absolute;
     right: 14px;
-    top: 50%;
+    top: 25px;
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -183,7 +184,7 @@
     display: flex;
     gap: 16px;
     width: 100%;
-    margin-bottom: 24px;
+    margin-bottom: 2px;
   }
   
   .country-code {
@@ -201,7 +202,7 @@
   }
   
   input[type="email"] {
-    margin-bottom: 24px;
+    margin-bottom: 2px;
   }
   
   .innerLocation {
@@ -433,3 +434,11 @@
         border-radius: 6px;
       }
   
+
+	  .error {
+		color: red;
+		font-size: 14px;
+		display: block;
+		margin-top: 2px;
+		border: 5px dotted blue;
+	  }
