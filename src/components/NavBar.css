@@ -7,6 +7,10 @@ ul.nav {
     width: 100%;
   }
   
+  .orange-background {
+    background: #FC941D;
+}
+
   li.nav {
     float: right;
   }

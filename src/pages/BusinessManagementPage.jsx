@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import '../App.css'
-import '../styles/styles.css'
+import '../components/ContainerStyles.css'
+import './BusinessManagementPage.css'
+import '../components/TextStyles.css'
 import BusinessNavBar from '../components/BusinessNavBar'
 
 function BusinessManagementPage() {

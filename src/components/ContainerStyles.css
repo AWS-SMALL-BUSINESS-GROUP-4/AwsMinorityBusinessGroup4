@@ -1,0 +1,33 @@
+.container {
+    height: 100vh;
+    width: 100vw;
+}
+
+.spread {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1em;
+}
+
+.container-spread {
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    width: auto;
+    height: auto;
+}
+
+.stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.default-pad {
+    padding: 20px 40px;
+}
