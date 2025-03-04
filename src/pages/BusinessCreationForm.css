@@ -1,0 +1,450 @@
+/* BusinessCreationForm.css */
+
+/* ======= Global container & header ======= */
+.form-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header {
+    background-color: #FC941D;
+    width: 100vw;
+    height: 56px;
+    display: block;
+  }
+  
+  .nav-content {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    height: 100%;
+  }
+  
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .logo-text, .for-businesses {
+    color: white;
+    font-weight: 400;
+    font-size: 16px;
+  }
+  
+  .header-nav {
+    display: flex;
+    gap: 32px;
+  }
+  
+  .header-nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 400;
+    font-size: 14px;
+  }
+  
+  /* ======= Steps 1–7 layout ======= */
+  .form-area {
+    flex: 1;
+    padding: 24px;
+    display: flex;
+    justify-content: left;
+  }
+  
+  .grey-container {
+    background-color: #D9D9D9;
+    width: 650px;
+    border-radius: 8px;
+    padding: 40px;
+    position: relative;
+    margin: 0 auto;
+	min-height: 700px;
+    height: 100%; /* auto-size to fit content */
+  }
+  
+  .grey-container.wide {
+    width: 900px;
+    height: auto; /* Adjust height for content */
+  }
+  
+  .back-button {
+    position: absolute;
+    left: 20px;
+    top: 40px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+  }
+  
+  .form-step {
+    max-width: 450px;
+    margin: 50px 10px 50px 10px;
+  }
+  
+  .form-step h1 {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #333;
+  }
+  
+  .form-step p {
+    color: black;
+    margin-bottom: 32px;
+    line-height: 1.5;
+    font-size: 16px;
+  }
+  
+  .search-container {
+    position: relative;
+    width: 100%;
+	margin-bottom: 24px;
+  }
+  
+  input {
+    color: black;
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: white;
+  }
+  
+  textarea {
+    color: black;
+    width: 600px;
+    height: 250px;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: white;
+    resize: vertical;
+  }
+  
+  .search-icon {
+    position: absolute;
+    right: 14px;
+    top: 25px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .continue-button {
+    background-color: #FC941D;
+    color: white;
+    border: 1px solid #FC941D;
+    padding: 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 30%;
+    font-weight: 500;
+    margin-top: 25px;
+  }
+  
+  .no-website-button {
+    background: none;
+    border: 1px solid #FC941D;
+    color: #FC941D;
+    padding: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 60%;
+    font-weight: 500;
+    margin-top: 16px;
+    margin-left: 10%;
+  }
+  
+  .no-website-button:hover {
+    border: 1px solid #FC941D;
+    background-color: #FC941D;
+    color: white;
+  }
+  
+  .button-group {
+    width: 100%;
+  }
+  
+  .phone-input {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    margin-bottom: 2px;
+  }
+  
+  .country-code {
+    width: 100px;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  input::placeholder {
+    color: #999;
+  }
+  
+  input[type="email"] {
+    margin-bottom: 2px;
+  }
+  
+  .innerLocation {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 10px;
+  }
+  
+  .street {
+    margin-right: 5px;
+  }
+  
+  .apt {
+    width: 50%;
+  }
+  
+  .outerLocation {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .city, .state, .zip, .country {
+    width: 23%;
+  }
+  
+  .full-name {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  
+  .first-name, .last-name {
+    width: 48%;
+  }
+  
+  .emailaddress {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .separator {
+    width: 40%;
+    height: 15px;
+    border-bottom: 1px solid black;
+  }
+  
+  .signup-separator {
+    display: flex;
+    justify-content: space-between;
+    width: 30%;
+    margin-top: 10px;
+  }
+  
+  .google-button {
+    background-color: #ffffff;
+    color: black;
+    border: 1px solid white;
+    padding: 14px;
+    border-radius: 7px;
+    font-size: 16px;
+    width: 52%;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  
+  .google-logo {
+    width: 30px;
+    height: 30px;
+    background-color: white;
+  }
+  
+  /* ======= Step 8+ layout (3-column) ======= */
+  .step8-wrapper {
+    display: flex;
+    padding: 24px;
+    color: black;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 24px;
+    flex: 1;
+  }
+  
+  .sidebar {
+    background-color: #D9D9D9;
+    width: 300px;
+    height: 300px;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+    border-radius: 8px;
+  }
+  
+  .sidebar a {
+    cursor: pointer;
+    font-size: 16px;
+    margin: 0;
+    color: #333;
+    text-decoration: none;
+  }
+  
+  .sidebar a.active {
+    font-weight: bold;
+    color: #FC941D;
+  }
+  
+  .step8-content {
+    width: 900px;
+  }
+  
+  .right-space {
+    flex: 1;
+  }
+  
+  .hours-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .day-row {
+    display: flex;
+    align-items: center;
+    width: 800px;
+    justify-content: space-between;
+  }
+  
+  .day-name {
+    width: 100px;
+    font-weight: 500;
+    box-sizing: border-box;
+  }
+  
+  .time-select {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .checkbox-group {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  
+  #isopen24 {
+    display: flex;
+    justify-content: space-between;
+    width: 150px;
+  }
+  
+  #isclosed {
+    display: flex;
+    justify-content: space-between;
+    width: 80px;
+  }
+  
+  .checkbox {
+    width: 20px;
+    background-color: white;
+  }
+  
+  .step8-buttons {
+    display: flex;
+    align-items: center;
+    margin-top: 30px;
+    gap: 16px;
+  }
+  
+  .save-continue-button {
+    width: auto;
+  }
+  
+  .skip-button {
+    background-color: #FFFFFF;
+    color: #FC941D;
+    border: 1px solid #FC941D;
+    padding: 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 25px;
+  }
+  
+  .time-slot {
+    display: flex;
+    width: 400px;
+    justify-content: space-evenly;
+  }
+
+    /* Photo upload styling */
+    .photo-upload {
+    margin-top: 20px;
+    text-align: center;
+    }
+
+    .photo-upload-label {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 600px;
+        height: 300px;
+        background-color: white;
+        border: 2px dashed #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        color: #666;
+        gap: 10px;
+      }
+      
+      .uploaded-photos {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+        justify-content: center;
+      }
+      
+      .photo-preview img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 6px;
+      }
+  
+
+	  .error {
+		color: red;
+		font-size: 14px;
+		display: block;
+		margin-top: 2px;
+	  }
+
+	  /* Add to BusinessCreationForm.css */
+	.save-continue-button.disabled {
+		background-color: #ccc;
+		cursor: not-allowed;
+		border: 1px solid #ccc;
+	}
