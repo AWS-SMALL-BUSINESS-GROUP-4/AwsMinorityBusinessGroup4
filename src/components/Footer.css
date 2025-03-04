@@ -1,0 +1,17 @@
+/* Footer Styles */
+.footer {
+  background-color: #e0e0e0;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: auto; /* This pushes the footer to the bottom */
+  width: 100%;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  text-align: center;
+}

@@ -12,8 +12,8 @@ import {
   FaEllipsisH,
 } from "react-icons/fa";
 
-import Header from "./shared/Header";
-import Footer from "./shared/Footer";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 import "./HomePage.css";
 
