@@ -1,0 +1,186 @@
+/* BusinessManagementPage.css */
+
+/* Global Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  /*body {
+    background-color: #f5f5f5;
+  }*/
+  
+  /* Main Content Styles */
+  .main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    gap: 40px;
+  }
+  
+  .review-form-container {
+    flex: 3;
+    padding-right: 20px;
+  }
+  
+  .recent-reviews-container {
+    flex: 2;
+  }
+  
+  /* Business Name */
+  .business-name {
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  /* Review Form Styles */
+  .review-form {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow: hidden;
+    /*background-color: white;*/
+    margin-bottom: 20px;
+  }
+  
+  .rating-section {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+  }
+  
+  .review-textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: 15px;
+    border: none;
+    resize: vertical;
+    font-size: 16px;
+    outline: none;
+  }
+  
+  /* Star Rating Styles */
+  .star, .star-interactive {
+    font-size: 22px;
+    margin-right: 5px;
+  }
+  
+  .star-interactive {
+    cursor: pointer;
+  }
+  
+  .star-interactive:hover {
+    color: #ff9927;
+  }
+  
+  /* Color for unfilled stars */
+  .star-selected {
+    color: #ccc;
+  }
+
+  /* Color for filled stars */
+  .star-selected {
+    color: #ff9927;
+  }
+  
+  /* Post Review Button */
+  .post-review-button {
+    background-color: #ff9927;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-size: 18px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .post-review-button:hover {
+    background-color: #e88c1e;
+  }
+  
+  /* Recent Reviews Section */
+  .recent-reviews-title {
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .review-item {
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .review-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+  
+  .user-profile {
+    display: flex;
+    align-items: center;
+  }
+  
+  .avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e6d4f8;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .user-name {
+    font-weight: bold;
+    font-size: 18px;
+  }
+  
+  .review-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  
+  .review-date {
+    color: #777;
+    margin-top: 5px;
+  }
+  
+  .review-content {
+    line-height: 1.5;
+    color: #333;
+  }
+  
+  /* Media Queries for Responsiveness */
+  @media (max-width: 768px) {
+    .header {
+      padding: 15px 20px;
+    }
+    
+    .main-content {
+      flex-direction: column;
+    }
+    
+    .review-form-container {
+      padding-right: 0;
+    }
+    
+    .nav-links a {
+      margin-left: 15px;
+      font-size: 16px;
+    }
+    
+    .login-btn {
+      font-size: 20px !important;
+    }
+  }
+  
