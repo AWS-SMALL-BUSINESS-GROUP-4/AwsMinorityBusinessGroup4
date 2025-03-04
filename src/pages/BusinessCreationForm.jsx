@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import './MultiStepForm.css';
+import './BusinessCreationForm.css';
 
-const MultiStepForm = () => {
+const BusinessCreationForm = () => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     businessName: '',
@@ -771,4 +771,4 @@ const MultiStepForm = () => {
   );
 };
 
-export default MultiStepForm;
+export default BusinessCreationForm;

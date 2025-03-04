@@ -1,4 +1,4 @@
-/* MultiStepForm.css */
+/* BusinessCreationForm.css */
 
 /* ======= Global container & header ======= */
 .form-container {
@@ -442,7 +442,7 @@
 		margin-top: 2px;
 	  }
 
-	  /* Add to MultiStepForm.css */
+	  /* Add to BusinessCreationForm.css */
 	.save-continue-button.disabled {
 		background-color: #ccc;
 		cursor: not-allowed;
