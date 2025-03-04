@@ -1,0 +1,18 @@
+.default-font {
+    font-family: 'Inter';
+    font-style: normal;
+}
+
+.default-text {
+    font-weight: 400;
+    text-align: center;
+}
+
+.left-text {
+    font-weight: 400;
+    text-align: left;
+}
+
+.text-drop-shadow {
+    text-shadow: 0px 4px 4px black;
+}

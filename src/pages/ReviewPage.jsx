@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import NavBar from '../components/NavBar.jsx'
-import '../styles/reviewpagestyles.css'
+import './ReviewPage.css'
 
 function ReviewPage() {
   const [rating, setRating] = useState(0);

@@ -1,6 +1,6 @@
 import '../App.css'
-import '../styles/styles.css'
-import '../styles/navbarstyles.css'
+import './NavBar.css'
+import './TextStyles.css'
 
 function NavBar() {
     function handleclick() {

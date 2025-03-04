@@ -2,8 +2,6 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import BusinessNavBar from './components/BusinessNavBar'
-import BusinessManagementPage from './pages/BusinessManagementPage'
 import ReviewPage from './pages/ReviewPage'
 
 function App() {
