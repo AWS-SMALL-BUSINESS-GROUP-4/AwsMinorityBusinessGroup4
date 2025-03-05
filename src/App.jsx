@@ -1,23 +1,24 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import ReviewPage from './pages/ReviewPage'
-import BusinessNavBar from './components/BusinessNavBar'
-import BusinessManagementPage from './pages/BusinessManagementPage'
-import React from 'react';
-import BusinessCreationForm from './pages/BusinessCreationForm';
+import { useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
+import ReviewPage from "./pages/ReviewPage";
+import BusinessNavBar from "./components/BusinessNavBar";
+import BusinessManagementPage from "./pages/BusinessManagementPage";
+import React from "react";
+import BusinessCreationForm from "./pages/BusinessCreationForm";
+import SearchResultPage from "./pages/SearchResultPage";
 
 function App() {
   return (
-  //   <div>
-  //     <ReviewPage/>
-  //   </div>
-  // )
+    //   <div>
+    //     <ReviewPage/>
+    //   </div>
+    // )
 
-  /*return (
+    /*return (
     <>
       <div>
         <a href="https://vite.dev" target="_blank">
@@ -50,10 +51,7 @@ function App() {
         {/* <Route path="/search" element={<SearchResultPage />} /> */}
 
         {/* Business Routes */}
-        <Route
-          path="/search"
-          element={<div>Search Result Page (Coming Soon)</div>}
-        />
+        <Route path="/search" element={<SearchResultPage />} />
 
         <Route
           path="/my-businesses"
@@ -73,13 +71,26 @@ function App() {
       </Routes>
     </Router>
   );
-    // <div>
-    //   <BusinessManagementPage/>
-    // </div>
-//  <div className="App">
-//    <BusinessCreationForm />
-//  </div>
+  // <div>
+  //   <BusinessManagementPage/>
+  // </div>
+  //  <div className="App">
+  //    <BusinessCreationForm />
+  //  </div>
   // );
 }
+
+/* Old page rendering for Business Search Result Page*/
+// function App() {
+//   return (
+//     <Router>
+//       <Routes>
+//         <Route path="/" element={<SearchResultPage />} />
+//         <Route path="/search" element={<SearchResultPage />} />
+//         <Route path="*" element={<div>404 Not Found</div>} />
+//       </Routes>
+//     </Router>
+//   );
+// }
 
 export default App;
