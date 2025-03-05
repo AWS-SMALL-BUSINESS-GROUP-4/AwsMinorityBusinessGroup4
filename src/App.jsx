@@ -5,7 +5,7 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import ReviewPage from "./pages/ReviewPage";
-import BusinessNavBar from "./components/BusinessNavBar";
+import BusinessNavBar from "./components/NavBar";
 import BusinessManagementPage from "./pages/BusinessManagementPage";
 import React from "react";
 import BusinessCreationForm from "./pages/BusinessCreationForm";
@@ -53,10 +53,7 @@ function App() {
         {/* Business Routes */}
         <Route path="/search" element={<SearchResultPage />} />
 
-        <Route
-          path="/my-businesses"
-          element={<div>My Businesses Page (Coming Soon)</div>}
-        />
+        <Route path="/my-businesses" element={<BusinessCreationForm />} />
         <Route
           path="/write-review"
           element={<div>Write Review Page (Coming Soon)</div>}
