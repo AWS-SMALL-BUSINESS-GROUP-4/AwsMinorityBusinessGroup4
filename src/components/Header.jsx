@@ -25,9 +25,4 @@ function Header() {
   );
 }
 
-// In Header.jsx
-function Header() {
-  console.log("Header rendered");
-  // ... rest of header code
-}
 export default Header;

@@ -3,8 +3,9 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaSearch, FaArrowLeft } from "react-icons/fa";
-// import Header from "../components/Header";
+import Header from "../components/Header";
 import Footer from "../components/Footer";
+import "./SearchResultPage.css";
 
 // Mock data - this would be replaced with API calls later
 const mockBusinesses = [
