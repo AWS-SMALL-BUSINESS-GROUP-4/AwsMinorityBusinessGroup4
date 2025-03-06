@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+// import { Auth } from 'aws-amplify';
 import './BusinessCreationForm.css';
 
 const BusinessCreationForm = () => {
@@ -32,6 +34,7 @@ const BusinessCreationForm = () => {
     ],
   });
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   // Regular expressions for validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -191,7 +194,11 @@ const BusinessCreationForm = () => {
       setErrors(stepErrors);
     } else {
       setErrors({});
-      setStep(step + 1);
+      if (step < 10) {
+        setStep(step + 1);
+      } else if (step === 10) {
+        navigate('/business-profile', { state: { formData } });
+      }
     }
   };
 
@@ -202,6 +209,18 @@ const BusinessCreationForm = () => {
   const skipWebsite = () => {
     setErrors({});
     setStep(step + 1);
+  };
+
+  // Function to handle Google Sign-In
+  const signInWithGoogle = async () => {
+    try {
+      await Auth.federatedSignIn({ provider: 'Google' });
+      // After successful authentication, proceed to the next step
+      nextStep();
+    } catch (error) {
+      console.error("Google sign-in error: ", error);
+      // Optionally, update your error state to notify the user
+    }
   };
 
   return (
@@ -543,7 +562,7 @@ const BusinessCreationForm = () => {
                   <span className="separator"></span>
                 </div>
                 <div className="button-group">
-                  <button className="google-button">
+                  <button className="google-button" onClick={signInWithGoogle}>
                     <img
                       src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/150px-Google_%22G%22_logo.svg.png"
                       alt="Google logo"

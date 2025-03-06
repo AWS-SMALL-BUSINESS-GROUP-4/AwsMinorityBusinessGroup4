@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import "../App.css";
 import "../components/ContainerStyles.css";
 import "./BusinessManagementPage.css";
@@ -6,31 +8,53 @@ import "../components/TextStyles.css";
 import BusinessNavBar from "../components/NavBar";
 
 function BusinessManagementPage() {
-  // State to track if edit mode is active
+  const location = useLocation();
+  const { formData } = location.state || {};
+
   const [isEditing, setIsEditing] = useState(false);
 
   const [business, setBusiness] = useState({
-    name: "Negril",
-    address_1: "2301 Georgia Ave. NW",
-    address_2: "Washington, DC 20001",
-    phone: "(202) 332-3737",
-    categories: "Restaurants, Jamaican",
-    website: "negrileats.com",
-    hours: [
-      "10:30 am - 7:30 pm",
-      "10:30 am - 7:30 pm",
-      "10:30 am - 7:30 pm",
-      "10:30 am - 7:30 pm",
-      "10:30 am - 7:30 pm",
-      "Closed",
-      "Closed",
-    ],
-    about: `Founded in 1979 by Jamaican native Earl Chinn, Negril Jamaican Eatery is a family-owned, fast casual storefront serving up a taste of the island. In 1975 Earl visited his sister in Washington, DC where he couldn’t find any authentic Jamaican eateries, so he later returned to open his own, supplying the bold foods and flavors of his homeland to Caribbean expats and local fans of Jamaican cuisine.
-                Negril Eats’ popularity in DC—and today’s growing Caribbean communities in the DC Metro Area—led to the gradual expansion of Negril the Jamaican Eatery into Mitchellville, Silver Spring, and Laurel, MD. Each location offers the complete menu, highlighting the most popular favorites of each storefront.
-                Today, Earl’s sister, Marguerite, his two sons, and his extended family manage the four Negril Eats locations. Like their father before them, Earl’s sons subscribe to the Jamaican national motto, “Out of Many, One People.” For the Chinns, traditionally prepared, tasty to-go meals unite their customers as blue-collar laborers, lawyers, retail salespeople, clerks, and other DC professionals line up together to pick up their jerk chicken, oxtail, or escoveitch fish.`,
+    name: '',
+    address_1: '',
+    address_2: '',
+    phone: '',
+    categories: '',
+    website: '',
+    hours: [],
+    about: '',
   });
 
   const [storedState, setStoredState] = useState(business);
+
+  useEffect(() => {
+    if (formData) {
+      const hours = formData.businessHours.map(dayObj => {
+        if (dayObj.isClosed) {
+          return 'Closed';
+        } else if (dayObj.isOpen24) {
+          return 'Open 24 hours';
+        } else if (dayObj.openTime && dayObj.closeTime) {
+          return `${dayObj.openTime} - ${dayObj.closeTime}`;
+        } else {
+          return 'Not set';
+        }
+      });
+
+      const newBusiness = {
+        name: formData.businessName,
+        address_1: formData.street,
+        address_2: `${formData.city}, ${formData.state} ${formData.zip}`,
+        phone: formData.phoneNumber,
+        categories: formData.categories,
+        website: formData.website,
+        hours: hours,
+        about: formData.description,
+      };
+
+      setBusiness(newBusiness);
+      setStoredState(newBusiness);
+    }
+  }, [formData]);
 
   // Handle input changes
   const handleChange = (e, field, index = null) => {
