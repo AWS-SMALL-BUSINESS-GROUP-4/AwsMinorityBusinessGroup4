@@ -1,6 +1,6 @@
 {
   "auth": {
-    "awsminoritybusinessg77a670ea": {
+    "awsminoritybusinessgd3efbd9c": {
       "customAuth": false,
       "dependsOn": [],
       "frontendAuthConfig": {
@@ -15,7 +15,9 @@
         "signupAttributes": [
           "EMAIL"
         ],
-        "socialProviders": [],
+        "socialProviders": [
+          "GOOGLE"
+        ],
         "usernameAttributes": [
           "EMAIL"
         ],

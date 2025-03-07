@@ -10,9 +10,14 @@ import BusinessManagementPage from "./pages/BusinessManagementPage";
 import React from "react";
 import BusinessCreationForm from "./pages/BusinessCreationForm";
 import SearchResultPage from "./pages/SearchResultPage";
-// import Amplify from 'aws-amplify';
-// import awsExports from './aws-exports';
-// Amplify.configure(awsExports);
+import { Amplify } from '@aws-amplify/core'; // Updated import
+import awsExports from './aws-exports';
+
+try {
+  Amplify.configure(awsExports);
+} catch (error) {
+  console.error('Amplify configuration failed:', error);
+}
 
 function App() {
   return (
@@ -21,12 +26,8 @@ function App() {
         {/* Main Routes */}
         <Route path="/" element={<HomePage />} />
 
-        {/* Authentication Routes */}
-        {/* <Route path="/search" element={<SearchResultPage />} /> */}
-
         {/* Business Routes */}
         <Route path="/search" element={<SearchResultPage />} />
-
         <Route path="/my-businesses" element={<BusinessCreationForm />} />
         <Route path="/business-profile" element={<BusinessManagementPage />} />
         <Route

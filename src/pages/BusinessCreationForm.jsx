@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { Auth } from 'aws-amplify';
+import { Auth } from '@aws-amplify/auth'; // Updated import
+import { Hub } from '@aws-amplify/core'; // Updated import
 import './BusinessCreationForm.css';
 
 const BusinessCreationForm = () => {
@@ -215,13 +216,44 @@ const BusinessCreationForm = () => {
   const signInWithGoogle = async () => {
     try {
       await Auth.federatedSignIn({ provider: 'Google' });
-      // After successful authentication, proceed to the next step
-      nextStep();
     } catch (error) {
       console.error("Google sign-in error: ", error);
-      // Optionally, update your error state to notify the user
+      setErrors({ google: 'Failed to sign in with Google. Please try again.' });
     }
   };
+
+  // Listen for authentication events
+  useEffect(() => {
+    const listener = async (data) => {
+      switch (data.payload.event) {
+        case 'signIn':
+          try {
+            const user = await Auth.currentAuthenticatedUser();
+            const { attributes } = user;
+            setFormData((prev) => ({
+              ...prev,
+              firstName: attributes.given_name || '',
+              lastName: attributes.family_name || '',
+              emailaddress: attributes.email || '',
+              password: '', // No password needed for Google auth
+            }));
+            setStep(8); // Redirect to step 8 after sign-in
+          } catch (error) {
+            console.error('Error retrieving user info:', error);
+            setErrors({ google: 'Authentication failed. Please try again.' });
+          }
+          break;
+        case 'signIn_failure':
+          setErrors({ google: 'Google sign-in failed. Please try again.' });
+          break;
+        default:
+          break;
+      }
+    };
+
+    Hub.listen('auth', listener);
+    return () => Hub.remove('auth', listener); // Cleanup on unmount
+  }, []);
 
   return (
     <div className="form-container">
@@ -570,6 +602,7 @@ const BusinessCreationForm = () => {
                     />
                     <span>Continue with Google</span>
                   </button>
+                  {errors.google && <span className="error">{errors.google}</span>}
                 </div>
               </div>
             )}

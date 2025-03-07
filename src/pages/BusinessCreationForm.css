@@ -62,7 +62,7 @@
     padding: 40px;
     position: relative;
     margin: 0 auto;
-	min-height: 700px;
+	  min-height: 700px;
     height: 100%; /* auto-size to fit content */
   }
   
