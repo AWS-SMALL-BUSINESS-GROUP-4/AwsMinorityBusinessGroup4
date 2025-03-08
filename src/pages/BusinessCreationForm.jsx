@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Auth } from '@aws-amplify/auth'; // Updated import
-import { Hub } from '@aws-amplify/core'; // Updated import
+// Import Hub from @aws-amplify/core (correct location in Amplify v6)
+import { Hub } from '@aws-amplify/core';
+// Import Auth from the dedicated auth module
+import * as Auth from 'aws-amplify/auth';
 import './BusinessCreationForm.css';
 
 const BusinessCreationForm = () => {
@@ -37,9 +39,9 @@ const BusinessCreationForm = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  // Regular expressions for validation
+  // Regular expressions and field validation functions remain unchanged
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{}|;:,.<>?]).{8,}$/;
+  const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{}|;:,.<>?]).{8,}$/;
   const phoneRegex = /^\d{10}$/;
   const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
 
@@ -47,13 +49,13 @@ const BusinessCreationForm = () => {
     1: ['businessName'],
     2: ['email'],
     3: ['phoneNumber'],
-    4: [], // Website is optional but validated conditionally
+    4: [],
     5: ['categories'],
     6: ['street', 'city', 'state', 'zip', 'country'],
     7: ['firstName', 'lastName', 'emailaddress', 'password'],
-    8: [], // Business hours will have custom validation
-    9: [], // Description will have custom validation
-    10: [], // Photos will have custom validation
+    8: [],
+    9: [],
+    10: [],
   };
 
   const fieldDisplayNames = {
@@ -73,26 +75,19 @@ const BusinessCreationForm = () => {
     password: 'Password',
   };
 
-  const toTitleCase = (str) => {
-    return str.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase());
-  };
+  const toTitleCase = (str) =>
+    str.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase());
 
   const validateField = (field, value) => {
     if (requiredFields[step].includes(field) && !value.trim()) {
       return `${fieldDisplayNames[field] || toTitleCase(field)} is required`;
     }
-    if (field === 'email' || field === 'emailaddress') {
-      if (!emailRegex.test(value)) {
-        return 'Please enter a valid email address';
-      }
-    } else if (field === 'password') {
-      if (!passwordRegex.test(value)) {
-        return 'Password must be at least 8 characters long and include letters, numbers, and symbols';
-      }
-    } else if (field === 'phoneNumber') {
-      if (!phoneRegex.test(value)) {
-        return 'Please enter a valid 10-digit phone number';
-      }
+    if ((field === 'email' || field === 'emailaddress') && !emailRegex.test(value)) {
+      return 'Please enter a valid email address';
+    } else if (field === 'password' && !passwordRegex.test(value)) {
+      return 'Password must be at least 8 characters long and include letters, numbers, and symbols';
+    } else if (field === 'phoneNumber' && !phoneRegex.test(value)) {
+      return 'Please enter a valid 10-digit phone number';
     } else if (field === 'website' && value.trim() && !urlRegex.test(value)) {
       return 'Please enter a valid website URL (e.g., https://example.com)';
     }
@@ -128,9 +123,9 @@ const BusinessCreationForm = () => {
       if (field === 'isOpen24') {
         updatedHours[index].isOpen24 = value;
         if (value) {
-          updatedHours[index].openTime = '00:00'; // 12:00 AM
-          updatedHours[index].closeTime = '00:00'; // 12:00 AM
-          updatedHours[index].isClosed = false; // Uncheck "Closed"
+          updatedHours[index].openTime = '00:00';
+          updatedHours[index].closeTime = '00:00';
+          updatedHours[index].isClosed = false;
         } else {
           updatedHours[index].openTime = '';
           updatedHours[index].closeTime = '';
@@ -138,9 +133,9 @@ const BusinessCreationForm = () => {
       } else if (field === 'isClosed') {
         updatedHours[index].isClosed = value;
         if (value) {
-          updatedHours[index].isOpen24 = false; // Uncheck "Open 24 hours"
-          updatedHours[index].openTime = ''; // Clear "Opens at"
-          updatedHours[index].closeTime = ''; // Clear "Closes at"
+          updatedHours[index].isOpen24 = false;
+          updatedHours[index].openTime = '';
+          updatedHours[index].closeTime = '';
         }
       } else {
         updatedHours[index][field] = value;
@@ -162,22 +157,22 @@ const BusinessCreationForm = () => {
     } else if (step === 10) {
       return formData.photos.length > 0;
     }
-    return true; // For other steps, assume complete (for now)
+    return true;
   };
 
   const validateStep = (step, formData) => {
-    const errors = {};
+    const stepErrors = {};
     const fields = requiredFields[step] || [];
     fields.forEach((field) => {
       const error = validateField(field, formData[field]);
       if (error) {
-        errors[field] = error;
+        stepErrors[field] = error;
       }
     });
     if (step === 4 && formData.website.trim() && !urlRegex.test(formData.website)) {
-      errors.website = 'Please enter a valid website URL (e.g., https://example.com)';
+      stepErrors.website = 'Please enter a valid website URL (e.g., https://example.com)';
     }
-    return errors;
+    return stepErrors;
   };
 
   const nextStep = () => {
@@ -212,36 +207,40 @@ const BusinessCreationForm = () => {
     setStep(step + 1);
   };
 
-  // Function to handle Google Sign-In
+  // Google Sign-In handler using the modular Auth functions
   const signInWithGoogle = async () => {
+    console.log("Google button clicked. Auth object:", Auth);
     try {
       await Auth.federatedSignIn({ provider: 'Google' });
+      console.log("Federated sign in initiated.");
     } catch (error) {
-      console.error("Google sign-in error: ", error);
+      console.error('Google sign-in error:', error);
       setErrors({ google: 'Failed to sign in with Google. Please try again.' });
     }
   };
 
-  // Listen for authentication events
+  // Set up Hub listener for authentication events using the new Hub API
   useEffect(() => {
-    const listener = async (data) => {
+    const listener = (data) => {
+      console.log("Hub event:", data);
       switch (data.payload.event) {
         case 'signIn':
-          try {
-            const user = await Auth.currentAuthenticatedUser();
-            const { attributes } = user;
-            setFormData((prev) => ({
-              ...prev,
-              firstName: attributes.given_name || '',
-              lastName: attributes.family_name || '',
-              emailaddress: attributes.email || '',
-              password: '', // No password needed for Google auth
-            }));
-            setStep(8); // Redirect to step 8 after sign-in
-          } catch (error) {
-            console.error('Error retrieving user info:', error);
-            setErrors({ google: 'Authentication failed. Please try again.' });
-          }
+          Auth.currentAuthenticatedUser()
+            .then(user => {
+              const { attributes } = user;
+              setFormData((prev) => ({
+                ...prev,
+                firstName: attributes.given_name || '',
+                lastName: attributes.family_name || '',
+                emailaddress: attributes.email || '',
+                password: '',
+              }));
+              setStep(8);
+            })
+            .catch(error => {
+              console.error('Error retrieving user info:', error);
+              setErrors({ google: 'Authentication failed. Please try again.' });
+            });
           break;
         case 'signIn_failure':
           setErrors({ google: 'Google sign-in failed. Please try again.' });
@@ -251,8 +250,11 @@ const BusinessCreationForm = () => {
       }
     };
 
-    Hub.listen('auth', listener);
-    return () => Hub.remove('auth', listener); // Cleanup on unmount
+    // Hub.listen now returns an unsubscribe function in Amplify v6.
+    const unsubscribe = Hub.listen('auth', listener);
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   return (
@@ -282,8 +284,7 @@ const BusinessCreationForm = () => {
               <div className="form-step">
                 <h1>Let's start with your business name!</h1>
                 <p>
-                  Search for your business. If you can't find it, you can add a new listing
-                  to get your business up and running in no time
+                  Search for your business. If you can't find it, you can add a new listing to get your business up and running in no time.
                 </p>
                 <div className="search-container">
                   <input
@@ -594,7 +595,11 @@ const BusinessCreationForm = () => {
                   <span className="separator"></span>
                 </div>
                 <div className="button-group">
-                  <button className="google-button" onClick={signInWithGoogle}>
+                  <button
+                    className="google-button"
+                    onClick={signInWithGoogle}
+                    disabled={false}
+                  >
                     <img
                       src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/150px-Google_%22G%22_logo.svg.png"
                       alt="Google logo"
@@ -715,7 +720,9 @@ const BusinessCreationForm = () => {
             <div className="grey-container wide">
               <div className="form-step">
                 <h1>Description</h1>
-                <p>Share a short description that highlights your business and sets you apart from competitors. <strong>What makes you stand out?</strong></p>
+                <p>
+                  Share a short description that highlights your business and sets you apart from competitors. <strong>What makes you stand out?</strong>
+                </p>
                 <textarea
                   name="description"
                   placeholder="Showcase what makes your business truly unique..."
@@ -759,7 +766,9 @@ const BusinessCreationForm = () => {
             <div className="grey-container wide">
               <div className="form-step">
                 <h1>Photos</h1>
-                <p>Photos play a key role in showcasing your business. Upload multiple images to help potential customers learn about—and choose—you over the competition.</p>
+                <p>
+                  Photos play a key role in showcasing your business. Upload multiple images to help potential customers learn about—and choose—you over the competition.
+                </p>
                 <div className="photo-upload">
                   <input
                     type="file"

@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "auth": {
+      "awsminoritybusinessgd3efbd9c": [
+        "create",
+        "read",
+        "update"
+      ]
+    }
+  },
+  "lambdaLayers": [],
+  "environmentVariableList": [
+    {
+      "cloudFormationParameterName": "authAwsminoritybusinessgd3Efbd9CUserpoolid",
+      "environmentVariableName": "AUTH_AWSMINORITYBUSINESSGD3EFBD9C_USERPOOLID"
+    }
+  ]
+}

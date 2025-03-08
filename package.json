@@ -12,7 +12,6 @@
   "dependencies": {
     "@aws-amplify/auth": "^6.11.4",
     "@aws-amplify/core": "^6.10.4",
-    "@aws-amplify/ui-react": "^6.9.3",
     "@emotion/react": "^11.14.0",
     "@mui/icons-material": "^6.4.4",
     "@mui/material": "^6.4.4",
@@ -35,7 +34,7 @@
     "aws-cdk": "^2.177.0",
     "aws-cdk-lib": "^2.177.0",
     "constructs": "^10.4.2",
-    "esbuild": "^0.24.2",
+    "esbuild": "^0.25.0",
     "eslint": "^9.17.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",

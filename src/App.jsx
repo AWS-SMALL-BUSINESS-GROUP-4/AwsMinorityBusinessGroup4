@@ -1,23 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
 import ReviewPage from "./pages/ReviewPage";
 import BusinessNavBar from "./components/NavBar";
 import BusinessManagementPage from "./pages/BusinessManagementPage";
-import React from "react";
 import BusinessCreationForm from "./pages/BusinessCreationForm";
 import SearchResultPage from "./pages/SearchResultPage";
-import { Amplify } from '@aws-amplify/core'; // Updated import
-import awsExports from './aws-exports';
+import React from "react";
+import "./App.css";
 
-try {
-  Amplify.configure(awsExports);
-} catch (error) {
-  console.error('Amplify configuration failed:', error);
-}
+// No need to import or configure Amplify here since it's done in AmplifyClient.js
 
 function App() {
   return (
