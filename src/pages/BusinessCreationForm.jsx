@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// Import Hub from @aws-amplify/core (correct location in Amplify v6)
 import { Hub } from '@aws-amplify/core';
-// Import Auth from the dedicated auth module
-import * as Auth from 'aws-amplify/auth';
+import { signInWithRedirect, fetchUserAttributes } from 'aws-amplify/auth';
 import './BusinessCreationForm.css';
 
 const BusinessCreationForm = () => {
@@ -209,25 +207,26 @@ const BusinessCreationForm = () => {
 
   // Google Sign-In handler using the modular Auth functions
   const signInWithGoogle = async () => {
-    console.log("Google button clicked. Auth object:", Auth);
+    console.log("Google button clicked.");
     try {
-      await Auth.federatedSignIn({ provider: 'Google' });
-      console.log("Federated sign in initiated.");
+      await signInWithRedirect({ provider: 'Google' });
+      console.log("Sign-in with redirect initiated.");
     } catch (error) {
       console.error('Google sign-in error:', error);
       setErrors({ google: 'Failed to sign in with Google. Please try again.' });
     }
   };
 
-  // Set up Hub listener for authentication events using the new Hub API
+  // Authentication Listener (Updated for Amplify v6)
   useEffect(() => {
     const listener = (data) => {
-      console.log("Hub event:", data);
+      console.log("Hub event received:", data);
       switch (data.payload.event) {
         case 'signIn':
-          Auth.currentAuthenticatedUser()
-            .then(user => {
-              const { attributes } = user;
+          console.log("Sign-in event detected with payload:", data.payload);
+          fetchUserAttributes()
+            .then(attributes => {
+              console.log("User attributes:", attributes);
               setFormData((prev) => ({
                 ...prev,
                 firstName: attributes.given_name || '',
@@ -238,19 +237,20 @@ const BusinessCreationForm = () => {
               setStep(8);
             })
             .catch(error => {
-              console.error('Error retrieving user info:', error);
+              console.error('Error retrieving user attributes:', error);
               setErrors({ google: 'Authentication failed. Please try again.' });
             });
           break;
         case 'signIn_failure':
+          console.error("Sign-in failure:", data.payload.data);
           setErrors({ google: 'Google sign-in failed. Please try again.' });
           break;
         default:
+          console.log("Unhandled auth event:", data.payload.event);
           break;
       }
     };
 
-    // Hub.listen now returns an unsubscribe function in Amplify v6.
     const unsubscribe = Hub.listen('auth', listener);
     return () => {
       unsubscribe();

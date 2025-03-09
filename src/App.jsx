@@ -7,8 +7,7 @@ import BusinessCreationForm from "./pages/BusinessCreationForm";
 import SearchResultPage from "./pages/SearchResultPage";
 import React from "react";
 import "./App.css";
-
-// No need to import or configure Amplify here since it's done in AmplifyClient.js
+import './AmplifyClient'; // Import to configure Amplify
 
 function App() {
   return (
