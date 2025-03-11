@@ -35,6 +35,7 @@ function ReviewPage() {
   const handlePostReview = () => {
     // Logic to post the review
     console.log('Posting review:', { rating, reviewText });
+    handleUpload();
     // Reset form after submission
     setRating(0);
     setReviewText('');
@@ -57,6 +58,27 @@ function ReviewPage() {
     return stars;
   };
 
+  // Handle file upload
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleUpload = () => {
+    if (file) {
+      console.log("Uploading:", file.name);
+      // Add your upload logic here (e.g., sending to a server)
+      uploadData({
+        path: `users/{user_id}/pictures/${file.name}`,
+        data: file,
+        options: {
+          bucket: 'AWSMBG4-private'
+        }
+      });
+    } else {
+      console.log("No file selected");
+    }
+  };
+
   return (
     <div className="business-management-container">
       {/* Header/Navigation */}
@@ -77,6 +99,7 @@ function ReviewPage() {
               value={reviewText}
               onChange={handleReviewTextChange}
             />
+            <input type="file" onChange={handleFileChange}/>
           </div>
           <button 
             className="post-review-button"
