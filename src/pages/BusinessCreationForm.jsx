@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Hub } from '@aws-amplify/core';
-import { signInWithRedirect, fetchUserAttributes } from 'aws-amplify/auth';
+import { signInWithRedirect, fetchUserAttributes, signUp, signIn, getCurrentUser, confirmSignUp } from 'aws-amplify/auth';
 import './BusinessCreationForm.css';
 
 const BusinessCreationForm = () => {
@@ -34,10 +34,12 @@ const BusinessCreationForm = () => {
       { day: 'Sunday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
     ],
   });
+  const [businessOwnerId, setBusinessOwnerId] = useState(null);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  // Regular expressions and field validation functions remain unchanged
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{}|;:,.<>?]).{8,}$/;
   const phoneRegex = /^\d{10}$/;
@@ -173,7 +175,7 @@ const BusinessCreationForm = () => {
     return stepErrors;
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
     if (step === 4) {
       if (!formData.website.trim()) {
         setErrors({ website: 'Website is required to continue' });
@@ -188,16 +190,70 @@ const BusinessCreationForm = () => {
       setErrors(stepErrors);
     } else {
       setErrors({});
-      if (step < 10) {
-        setStep(step + 1);
+      if (step === 7 && !isSignedIn) {
+        try {
+          console.log('Attempting manual sign-up with:', {
+            email: formData.emailaddress,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+          });
+          const signUpResult = await signUp({
+            username: formData.emailaddress,
+            password: formData.password,
+            attributes: {
+              given_name: formData.firstName,
+              family_name: formData.lastName,
+            },
+          });
+          console.log('Sign-up successful, userSub:', signUpResult.userSub);
+          setBusinessOwnerId(signUpResult.userSub);
+          setStep(7.5);
+        } catch (error) {
+          console.error('Error during manual sign-up:', error);
+          setErrors({
+            manualSignUp: error.message || 'Failed to create account. Please try again.',
+          });
+        }
+      } else if (step === 7.5) {
+        try {
+          await confirmSignUp({
+            username: formData.emailaddress,
+            confirmationCode: verificationCode,
+          });
+          console.log('Email verified successfully');
+          await signIn({
+            username: formData.emailaddress,
+            password: formData.password,
+          });
+          console.log('Sign-in successful');
+          setIsSignedIn(true);
+          setStep(8);
+        } catch (error) {
+          console.error('Error verifying code or signing in:', error);
+          setErrors({
+            verification: error.message || 'Invalid code. Please try again.',
+          });
+        }
+      } else if (step < 10) {
+        if (isSignedIn && step === 6) {
+          setStep(8);
+        } else {
+          setStep(step + 1);
+        }
       } else if (step === 10) {
-        navigate('/business-profile', { state: { formData } });
+        navigate('/business-profile', { state: { formData, businessOwnerId } });
       }
     }
   };
 
   const prevStep = () => {
-    setStep(step - 1);
+    if (isSignedIn && step === 8) {
+      setStep(6);
+    } else if (step === 7.5) {
+      setStep(7);
+    } else {
+      setStep(step - 1);
+    }
   };
 
   const skipWebsite = () => {
@@ -205,28 +261,50 @@ const BusinessCreationForm = () => {
     setStep(step + 1);
   };
 
-  // Google Sign-In handler using the modular Auth functions
   const signInWithGoogle = async () => {
-    console.log("Google button clicked.");
+    console.log('Google button clicked.');
     try {
+      localStorage.setItem('businessFormStep', '8');
       await signInWithRedirect({ provider: 'Google' });
-      console.log("Sign-in with redirect initiated.");
+      console.log('Sign-in with redirect initiated.');
     } catch (error) {
       console.error('Google sign-in error:', error);
       setErrors({ google: 'Failed to sign in with Google. Please try again.' });
     }
   };
 
-  // Authentication Listener (Updated for Amplify v6)
   useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const user = await getCurrentUser();
+        const attributes = await fetchUserAttributes();
+        setIsSignedIn(true);
+        setBusinessOwnerId(attributes.sub);
+        setFormData((prev) => ({
+          ...prev,
+          firstName: attributes.given_name || '',
+          lastName: attributes.family_name || '',
+          emailaddress: attributes.email || '',
+        }));
+        const storedStep = localStorage.getItem('businessFormStep');
+        if (storedStep) {
+          setStep(parseInt(storedStep, 10));
+          localStorage.removeItem('businessFormStep');
+        }
+      } catch (error) {
+        setIsSignedIn(false);
+      }
+    };
+    checkUser();
+
     const listener = (data) => {
-      console.log("Hub event received:", data);
+      console.log('Hub event received:', data);
       switch (data.payload.event) {
         case 'signIn':
-          console.log("Sign-in event detected with payload:", data.payload);
+          console.log('Sign-in event detected with payload:', data.payload);
           fetchUserAttributes()
-            .then(attributes => {
-              console.log("User attributes:", attributes);
+            .then((attributes) => {
+              console.log('User attributes:', attributes);
               setFormData((prev) => ({
                 ...prev,
                 firstName: attributes.given_name || '',
@@ -234,19 +312,20 @@ const BusinessCreationForm = () => {
                 emailaddress: attributes.email || '',
                 password: '',
               }));
-              setStep(8);
+              setBusinessOwnerId(attributes.sub);
+              console.log('BusinessOwnerId set to:', attributes.sub);
             })
-            .catch(error => {
+            .catch((error) => {
               console.error('Error retrieving user attributes:', error);
               setErrors({ google: 'Authentication failed. Please try again.' });
             });
           break;
         case 'signIn_failure':
-          console.error("Sign-in failure:", data.payload.data);
+          console.error('Sign-in failure:', data.payload.data);
           setErrors({ google: 'Google sign-in failed. Please try again.' });
           break;
         default:
-          console.log("Unhandled auth event:", data.payload.event);
+          console.log('Unhandled auth event:', data.payload.event);
           break;
       }
     };
@@ -277,7 +356,9 @@ const BusinessCreationForm = () => {
         <div className="form-area">
           <div className="grey-container">
             {step > 1 && (
-              <button className="back-button" onClick={prevStep}>←</button>
+              <button className="back-button" onClick={prevStep}>
+                ←
+              </button>
             )}
 
             {step === 1 && (
@@ -298,7 +379,9 @@ const BusinessCreationForm = () => {
                     aria-describedby="businessName-error"
                   />
                   {errors.businessName && (
-                    <span id="businessName-error" className="error">{errors.businessName}</span>
+                    <span id="businessName-error" className="error">
+                      {errors.businessName}
+                    </span>
                   )}
                   <button className="search-icon">
                     <svg
@@ -337,7 +420,9 @@ const BusinessCreationForm = () => {
                   required
                   aria-describedby="email-error"
                 />
-                {errors.email && <span id="email-error" className="error">{errors.email}</span>}
+                {errors.email && (
+                  <span id="email-error" className="error">{errors.email}</span>
+                )}
                 <button className="continue-button" onClick={nextStep}>
                   Continue
                 </button>
@@ -366,7 +451,9 @@ const BusinessCreationForm = () => {
                   />
                 </div>
                 {errors.phoneNumber && (
-                  <span id="phoneNumber-error" className="error">{errors.phoneNumber}</span>
+                  <span id="phoneNumber-error" className="error">
+                    {errors.phoneNumber}
+                  </span>
                 )}
                 <button className="continue-button" onClick={nextStep}>
                   Continue
@@ -444,7 +531,9 @@ const BusinessCreationForm = () => {
                       required
                       aria-describedby="street-error"
                     />
-                    {errors.street && <span id="street-error" className="error">{errors.street}</span>}
+                    {errors.street && (
+                      <span id="street-error" className="error">{errors.street}</span>
+                    )}
                   </div>
                   <div className="apt">
                     <input
@@ -481,7 +570,9 @@ const BusinessCreationForm = () => {
                       required
                       aria-describedby="state-error"
                     />
-                    {errors.state && <span id="state-error" className="error">{errors.state}</span>}
+                    {errors.state && (
+                      <span id="state-error" className="error">{errors.state}</span>
+                    )}
                   </div>
                   <div className="zip">
                     <input
@@ -507,7 +598,9 @@ const BusinessCreationForm = () => {
                       required
                       aria-describedby="country-error"
                     />
-                    {errors.country && <span id="country-error" className="error">{errors.country}</span>}
+                    {errors.country && (
+                      <span id="country-error" className="error">{errors.country}</span>
+                    )}
                   </div>
                 </div>
                 <div className="button-group">
@@ -518,7 +611,7 @@ const BusinessCreationForm = () => {
               </div>
             )}
 
-            {step === 7 && (
+            {step === 7 && !isSignedIn && (
               <div className="form-step">
                 <h1>Great job so far! Now let’s create your business account.</h1>
                 <p>With a business account, you can manage your page, upload photos, and interact with reviews on our platform.</p>
@@ -566,7 +659,9 @@ const BusinessCreationForm = () => {
                     aria-describedby="emailaddress-error"
                   />
                   {errors.emailaddress && (
-                    <span id="emailaddress-error" className="error">{errors.emailaddress}</span>
+                    <span id="emailaddress-error" className="error">
+                      {errors.emailaddress}
+                    </span>
                   )}
                 </div>
                 <div className="password">
@@ -583,6 +678,9 @@ const BusinessCreationForm = () => {
                   {errors.password && (
                     <span id="password-error" className="error">{errors.password}</span>
                   )}
+                  {errors.manualSignUp && (
+                    <span className="error">{errors.manualSignUp}</span>
+                  )}
                 </div>
                 <div className="button-group">
                   <button className="continue-button" onClick={nextStep}>
@@ -595,11 +693,7 @@ const BusinessCreationForm = () => {
                   <span className="separator"></span>
                 </div>
                 <div className="button-group">
-                  <button
-                    className="google-button"
-                    onClick={signInWithGoogle}
-                    disabled={false}
-                  >
+                  <button className="google-button" onClick={signInWithGoogle} disabled={false}>
                     <img
                       src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/150px-Google_%22G%22_logo.svg.png"
                       alt="Google logo"
@@ -608,6 +702,28 @@ const BusinessCreationForm = () => {
                     <span>Continue with Google</span>
                   </button>
                   {errors.google && <span className="error">{errors.google}</span>}
+                </div>
+              </div>
+            )}
+
+            {step === 7.5 && (
+              <div className="form-step">
+                <h1>Verify Your Email</h1>
+                <p>We’ve sent a verification code to {formData.emailaddress}. Please enter it below.</p>
+                <input
+                  type="text"
+                  placeholder="Verification code"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  aria-describedby="verification-error"
+                />
+                {errors.verification && (
+                  <span id="verification-error" className="error">{errors.verification}</span>
+                )}
+                <div className="button-group">
+                  <button className="continue-button" onClick={nextStep}>
+                    Verify and Continue
+                  </button>
                 </div>
               </div>
             )}
@@ -644,7 +760,9 @@ const BusinessCreationForm = () => {
                             type="time"
                             value={dayObj.openTime}
                             onChange={(e) =>
-                              !dayObj.isOpen24 && !dayObj.isClosed && handleHoursChange(index, 'openTime', e.target.value)
+                              !dayObj.isOpen24 &&
+                              !dayObj.isClosed &&
+                              handleHoursChange(index, 'openTime', e.target.value)
                             }
                             disabled={dayObj.isOpen24 || dayObj.isClosed}
                           />
@@ -655,7 +773,9 @@ const BusinessCreationForm = () => {
                             type="time"
                             value={dayObj.closeTime}
                             onChange={(e) =>
-                              !dayObj.isOpen24 && !dayObj.isClosed && handleHoursChange(index, 'closeTime', e.target.value)
+                              !dayObj.isOpen24 &&
+                              !dayObj.isClosed &&
+                              handleHoursChange(index, 'closeTime', e.target.value)
                             }
                             disabled={dayObj.isOpen24 || dayObj.isClosed}
                           />
@@ -686,7 +806,9 @@ const BusinessCreationForm = () => {
                 </div>
                 <div className="button-group step8-buttons">
                   <button
-                    className={`continue-button save-continue-button ${!isStepComplete(step) ? 'disabled' : ''}`}
+                    className={`continue-button save-continue-button ${
+                      !isStepComplete(step) ? 'disabled' : ''
+                    }`}
                     onClick={nextStep}
                     disabled={!isStepComplete(step)}
                   >
@@ -732,7 +854,9 @@ const BusinessCreationForm = () => {
                 />
                 <div className="button-group step8-buttons">
                   <button
-                    className={`continue-button save-continue-button ${!isStepComplete(step) ? 'disabled' : ''}`}
+                    className={`continue-button save-continue-button ${
+                      !isStepComplete(step) ? 'disabled' : ''
+                    }`}
                     onClick={nextStep}
                     disabled={!isStepComplete(step)}
                   >
@@ -801,10 +925,7 @@ const BusinessCreationForm = () => {
                     <div className="uploaded-photos">
                       {formData.photos.map((photo, index) => (
                         <div key={index} className="photo-preview">
-                          <img
-                            src={URL.createObjectURL(photo)}
-                            alt={`Uploaded photo ${index + 1}`}
-                          />
+                          <img src={URL.createObjectURL(photo)} alt={`Uploaded photo ${index + 1}`} />
                         </div>
                       ))}
                     </div>
@@ -812,7 +933,9 @@ const BusinessCreationForm = () => {
                 </div>
                 <div className="button-group step8-buttons">
                   <button
-                    className={`continue-button save-continue-button ${!isStepComplete(step) ? 'disabled' : ''}`}
+                    className={`continue-button save-continue-button ${
+                      !isStepComplete(step) ? 'disabled' : ''
+                    }`}
                     onClick={nextStep}
                     disabled={!isStepComplete(step)}
                   >
