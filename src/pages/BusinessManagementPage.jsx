@@ -4,6 +4,7 @@ import '../components/ContainerStyles.css'
 import './BusinessManagementPage.css'
 import '../components/TextStyles.css'
 import BusinessNavBar from '../components/BusinessNavBar'
+import BusinessManagementSidebar from '../components/BusinessManagementSideBar';
 
 function BusinessManagementPage() {
     // State to track if edit mode is active
@@ -78,13 +79,7 @@ function BusinessManagementPage() {
         <>
             <BusinessNavBar/>
             <div className='sidebar-page-container'>
-                {/*Sidebar Nav*/}
-                <div className="sidebar">
-                    <a href="">Business Information</a>
-                    <a href="">Reviews</a>
-                    <a href="">Photos</a>
-                </div>
-
+                <BusinessManagementSidebar/>
                 {/*Main content*/}
                 <div className="main">
                     <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}>
