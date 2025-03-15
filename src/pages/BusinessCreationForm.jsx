@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
 import './BusinessCreationForm.css';
+import { generateClient } from 'aws-amplify/data';
+/**
+ * @type {import('aws-amplify/data').Client<import('../amplify/data/resource').Schema>}
+ */
+
+
+const client = generateClient({
+  authMode: "userPool",
+});
 
 const BusinessCreationForm = () => {
   const [step, setStep] = useState(1);
@@ -202,6 +211,91 @@ const BusinessCreationForm = () => {
   const skipWebsite = () => {
     setErrors({});
     setStep(step + 1);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // Prepare the data for the backend
+      const businessData = {
+        businessName: formData.businessName,
+        website: formData.website,
+        phoneNumber: formData.phoneNumber,
+        email: formData.email,
+        categories: formData.categories,
+        address: {
+          street: formData.street,
+          apt: formData.apt,
+          city: formData.city,
+          state: formData.state,
+          zip: formData.zip,
+          country: formData.country,
+        },
+        owner: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.emailaddress,
+          password: formData.password, // Note: Passwords should be handled securely (e.g., hashed)
+        },
+        description: formData.description,
+        businessHours: formData.businessHours,
+        // Photos will be handled separately (see below)
+      };
+  
+      // Create the business in the backend
+      const { errors, data: newBusiness } = await client.models.Business.create(businessData);
+  
+      if (errors) {
+        console.error('Error creating business:', errors);
+        alert('Failed to create business. Please try again.');
+        return;
+      }
+  
+      // Handle file uploads (if applicable)
+      if (formData.photos.length > 0) {
+        for (const photo of formData.photos) {
+          const fileKey = `business-photos/${newBusiness.id}/${photo.name}`;
+          await client.storage.uploadFile(fileKey, photo);
+        }
+      }
+  
+      // Success message
+      alert('Business created successfully!');
+      console.log('New business:', newBusiness);
+  
+      // Reset the form or navigate to another page
+      setStep(1);
+      setFormData({
+        businessName: '',
+        website: '',
+        phoneNumber: '',
+        email: '',
+        categories: '',
+        street: '',
+        apt: '',
+        city: '',
+        state: '',
+        zip: '',
+        country: '',
+        firstName: '',
+        lastName: '',
+        emailaddress: '',
+        password: '',
+        description: '',
+        photos: [],
+        businessHours: [
+          { day: 'Monday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+          { day: 'Tuesday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+          { day: 'Wednesday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+          { day: 'Thursday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+          { day: 'Friday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+          { day: 'Saturday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+          { day: 'Sunday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+        ],
+      });
+    } catch (error) {
+      console.error('Error during business creation:', error);
+      alert('An unexpected error occurred. Please try again.');
+    }
   };
 
   return (
@@ -752,7 +846,7 @@ const BusinessCreationForm = () => {
                 <div className="button-group step8-buttons">
                   <button
                     className={`continue-button save-continue-button ${!isStepComplete(step) ? 'disabled' : ''}`}
-                    onClick={nextStep}
+                    onClick={handleSubmit}
                     disabled={!isStepComplete(step)}
                   >
                     Save and continue
