@@ -14,6 +14,12 @@
     "categories": {
       "auth": {
         "awsminoritybusinessgd3efbd9c": {}
+      },
+      "function": {
+        "GoogleAuthHandler": {
+          "deploymentBucketName": "amplify-awsminoritybusinessg-dev-e13b7-deployment",
+          "s3Key": "amplify-builds/GoogleAuthHandler-50524a435a6b7a47666e-build.zip"
+        }
       }
     }
   }
