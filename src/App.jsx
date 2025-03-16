@@ -7,7 +7,7 @@ import BusinessManagementPage from "./pages/BusinessManagementPage";
 import SearchResultPage from "./pages/SearchResultPage";
 import React from "react";
 import "./App.css";
-import './AmplifyClient'; // Import to configure Amplify
+import '../AmplifyClient'; // Import to configure Amplify
 
 // The multi-step routes
 import BusinessFormRoutes from "./pages/BusinessFormRoutes";
