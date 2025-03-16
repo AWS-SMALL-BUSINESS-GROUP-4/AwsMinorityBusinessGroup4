@@ -17,13 +17,13 @@ function BusinessManagementPage() {
     categories: "Restaurants, Jamaican",
     website: "negrileats.com",
     hours: [
-      "10:30 am - 7:30 pm",
-      "10:30 am - 7:30 pm",
-      "10:30 am - 7:30 pm",
-      "10:30 am - 7:30 pm",
-      "10:30 am - 7:30 pm",
-      "Closed",
-      "Closed",
+      {day: "Monday", openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Tuesday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Wednesday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Thursday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Friday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Saturday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: true },
+      {day: "Sunday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: true },
     ],
     about: `Founded in 1979 by Jamaican native Earl Chinn, Negril Jamaican Eatery is a family-owned, fast casual storefront serving up a taste of the island. In 1975 Earl visited his sister in Washington, DC where he couldn’t find any authentic Jamaican eateries, so he later returned to open his own, supplying the bold foods and flavors of his homeland to Caribbean expats and local fans of Jamaican cuisine.
                 Negril Eats’ popularity in DC—and today’s growing Caribbean communities in the DC Metro Area—led to the gradual expansion of Negril the Jamaican Eatery into Mitchellville, Silver Spring, and Laurel, MD. Each location offers the complete menu, highlighting the most popular favorites of each storefront.
@@ -71,8 +71,12 @@ function BusinessManagementPage() {
     setBusiness(storedState);
   };
 
-  // Day names for hours table
-  const days = ["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"];
+  function convertTo12Hour(time) {
+    let [hours, minutes] = time.split(":").map(Number);
+    let period = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12; // Convert 0 to 12 for midnight
+    return `${hours}:${minutes.toString().padStart(2, "0")} ${period}`;
+}
 
   return (
     <>
@@ -224,17 +228,24 @@ function BusinessManagementPage() {
             <tbody>
               {business.hours.map((hour, index) => (
                 <tr key={index}>
-                  <th>{days[index]}</th>
-                  <td>
+                  <th>{hour.day}</th>
+                  <td className="spread">
                     {isEditing ? (
-                      <input
-                        type="text"
-                        value={hour}
-                        onChange={(e) => handleChange(e, "hours", index)}
-                        style={{ width: "100%", padding: "5px" }}
-                      />
+                      <>
+                        <input
+                          type="time"
+                          value={hour.openTime}
+                          onChange={(e) => handleChange(e, "hours", index)}
+                          style={{ width: "100%", padding: "5px" }}
+                        /> - <input
+                          type="time"
+                          value={hour.closeTime}
+                          onChange={(e) => handleChange(e, "hours", index)}
+                          style={{ width: "100%", padding: "5px" }}
+                        />
+                      </>
                     ) : (
-                      hour
+                      <p>{convertTo12Hour(hour.openTime)} - {convertTo12Hour(hour.closeTime)}</p>
                     )}
                   </td>
                 </tr>
