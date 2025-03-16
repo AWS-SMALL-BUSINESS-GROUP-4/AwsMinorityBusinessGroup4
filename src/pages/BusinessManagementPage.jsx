@@ -72,138 +72,197 @@ function BusinessManagementPage() {
     setBusiness(storedState);
   };
 
-    // Day names for hours table
-    const days = ["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"];
+  function convertTo12Hour(time) {
+    let [hours, minutes] = time.split(":").map(Number);
+    let period = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12; // Convert 0 to 12 for midnight
+    return `${hours}:${minutes.toString().padStart(2, "0")} ${period}`;
+}
 
-    return(
-        <>
-            <BusinessNavBar/>
-            <div className='sidebar-page-container'>
-                <BusinessManagementSidebar/>
-                {/*Main content*/}
-                <div className="main">
-                    <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}>
-                        <h1>Business Information</h1>
-                        {isEditing ? (
-                            <div>
-                                <button onClick={saveChanges}>Save</button>
-                                <button onClick={cancelEdit}>Cancel</button>
-                            </div>
+  return (
+    <>
+      <BusinessNavBar />
+      <div className="sidebar-page-container">
+        <BusinessManagementSidebar/>
 
-                        ) : (
-                            <button onClick={toggleEditMode}>Edit</button>
-                        )}
-                    </div>
-                    <hr/>
-                    <h2>Basic Information</h2>
-                    {isEditing ? (
-                        <div style={{marginBottom: '20px'}}>
-                            <div style={{marginBottom: '10px'}}>
-                                <label style={{display: 'block', marginBottom: '5px'}}>Business Name:</label>
-                                <input 
-                                    type="text" 
-                                    value={business.name} 
-                                    onChange={(e) => handleChange(e, 'name')}
-                                    style={{width: '100%', padding: '8px', marginBottom: '10px'}}
-                                />
-                            </div>
-                            
-                            <div style={{marginBottom: '10px'}}>
-                                <label style={{display: 'block', marginBottom: '5px'}}>Address Line 1:</label>
-                                <input 
-                                    type="text" 
-                                    value={business.address_1} 
-                                    onChange={(e) => handleChange(e, 'address_1')}
-                                    style={{width: '100%', padding: '8px', marginBottom: '10px'}}
-                                />
-                            </div>
-                            
-                            <div style={{marginBottom: '10px'}}>
-                                <label style={{display: 'block', marginBottom: '5px'}}>Address Line 2:</label>
-                                <input 
-                                    type="text" 
-                                    value={business.address_2} 
-                                    onChange={(e) => handleChange(e, 'address_2')}
-                                    style={{width: '100%', padding: '8px', marginBottom: '10px'}}
-                                />
-                            </div>
-                            
-                            <div style={{marginBottom: '10px'}}>
-                                <label style={{display: 'block', marginBottom: '5px'}}>Phone:</label>
-                                <input 
-                                    type="text" 
-                                    value={business.phone} 
-                                    onChange={(e) => handleChange(e, 'phone')}
-                                    style={{width: '100%', padding: '8px', marginBottom: '10px'}}
-                                />
-                            </div>
-                            
-                            <div style={{marginBottom: '10px'}}>
-                                <label style={{display: 'block', marginBottom: '5px'}}>Categories:</label>
-                                <input 
-                                    type="text" 
-                                    value={business.categories} 
-                                    onChange={(e) => handleChange(e, 'categories')}
-                                    style={{width: '100%', padding: '8px', marginBottom: '10px'}}
-                                />
-                            </div>
-                            
-                            <div style={{marginBottom: '10px'}}>
-                                <label style={{display: 'block', marginBottom: '5px'}}>Website:</label>
-                                <input 
-                                    type="text" 
-                                    value={business.website} 
-                                    onChange={(e) => handleChange(e, 'website')}
-                                    style={{width: '100%', padding: '8px'}}
-                                />
-                            </div>
-                        </div>
-                    ) : (
-                    <p>
-                        {business.name}<br/>
-                        {business.address_1}<br/>
-                        {business.address_2}<br/><br/>
-                        {business.phone}<br/><br/>
-                        <b>Categories</b>: {business.categories}<br/>
-                        {business.website}
-                    </p>
-                    )}
-                    <hr/>
-                    <h2>Hours</h2>
-                    <table className='hours'>
-                        <tbody>
-                            {business.hours.map((hour, index) => (
-                                <tr key={index}>
-                                    <th>{days[index]}</th>
-                                    <td>
-                                        {isEditing ? (
-                                            <input 
-                                                type="text" 
-                                                value={hour} 
-                                                onChange={(e) => handleChange(e, 'hours', index)}
-                                                style={{width: '100%', padding: '5px'}}
-                                            />
-                                        ) : hour}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    <hr/>
-                    <h2>About</h2>
-                    {isEditing ? (
-                        <textarea 
-                            value={business.about} 
-                            onChange={(e) => handleChange(e, 'about')}
-                            style={{width: '100%', minHeight: '200px', padding: '10px'}}
-                        />
-                    ) : (
-                        <p>{business.about}</p>
-                    )}
-                </div>
+        {/*Main content*/}
+        <div className="main">
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <h1 className='blue-text'>Business Information</h1>
+            {isEditing ? (
+              <div>
+                <button className="btn" onClick={saveChanges}>Save</button>
+                <button className="btn" onClick={cancelEdit}>Cancel</button>
+              </div>
+            ) : (
+              <button className="btn" onClick={toggleEditMode}>Edit</button>
+            )}
+          </div>
+          <hr />
+          <h2 className='blue-text'>Basic Information</h2>
+          {isEditing ? (
+            <div style={{ marginBottom: "20px" }}>
+              <div style={{ marginBottom: "10px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>
+                  Business Name:
+                </label>
+                <input
+                  type="text"
+                  value={business.name}
+                  onChange={(e) => handleChange(e, "name")}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    marginBottom: "10px",
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: "10px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>
+                  Address Line 1:
+                </label>
+                <input
+                  type="text"
+                  value={business.address_1}
+                  onChange={(e) => handleChange(e, "address_1")}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    marginBottom: "10px",
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: "10px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>
+                  Address Line 2:
+                </label>
+                <input
+                  type="text"
+                  value={business.address_2}
+                  onChange={(e) => handleChange(e, "address_2")}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    marginBottom: "10px",
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: "10px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>
+                  Phone:
+                </label>
+                <input
+                  type="text"
+                  value={business.phone}
+                  onChange={(e) => handleChange(e, "phone")}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    marginBottom: "10px",
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: "10px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>
+                  Categories:
+                </label>
+                <input
+                  type="text"
+                  value={business.categories}
+                  onChange={(e) => handleChange(e, "categories")}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    marginBottom: "10px",
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: "10px" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>
+                  Website:
+                </label>
+                <input
+                  type="text"
+                  value={business.website}
+                  onChange={(e) => handleChange(e, "website")}
+                  style={{ width: "100%", padding: "8px" }}
+                />
+              </div>
             </div>
-        </>
-    )
+          ) : (
+            <p>
+              {business.name}
+              <br />
+              {business.address_1}
+              <br />
+              {business.address_2}
+              <br />
+              <br />
+              {business.phone}
+              <br />
+              <br />
+              <b>Categories</b>: {business.categories}
+              <br />
+              {business.website}
+            </p>
+          )}
+          <hr />
+          <h2 className='blue-text'>Hours</h2>
+          <table className="hours">
+            <tbody>
+              {business.hours.map((hour, index) => (
+                <tr key={index}>
+                  <th>{hour.day}</th>
+                  <td className="spread">
+                    {isEditing ? (
+                      <>
+                        <input
+                          type="time"
+                          value={hour.openTime}
+                          onChange={(e) => handleChange(e, "hours", index)}
+                          style={{ width: "100%", padding: "5px" }}
+                        /> - <input
+                          type="time"
+                          value={hour.closeTime}
+                          onChange={(e) => handleChange(e, "hours", index)}
+                          style={{ width: "100%", padding: "5px" }}
+                        />
+                      </>
+                    ) : (
+                      <p>{convertTo12Hour(hour.openTime)} - {convertTo12Hour(hour.closeTime)}</p>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <hr />
+          <h2 className='blue-text'>About</h2>
+          {isEditing ? (
+            <textarea
+              value={business.about}
+              onChange={(e) => handleChange(e, "about")}
+              style={{ width: "100%", minHeight: "200px", padding: "10px" }}
+            />
+          ) : (
+            <p>{business.about}</p>
+          )}
+        </div>
+      </div>
+    </>
+  );
 }
 
 export default BusinessManagementPage;
