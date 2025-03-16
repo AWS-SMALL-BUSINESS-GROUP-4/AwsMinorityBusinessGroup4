@@ -29,35 +29,5 @@
       "service": "Cognito"
     }
   },
-  "function": {
-    "GoogleAuthHandler": {
-      "dependsOn": [
-        {
-          "attributes": [
-            "UserPoolId"
-          ],
-          "category": "auth",
-          "resourceName": "awsminoritybusinessgd3efbd9c"
-        }
-      ]
-    }
-  },
-  "parameters": {
-    "AMPLIFY_function_GoogleAuthHandler_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "GoogleAuthHandler"
-        }
-      ]
-    },
-    "AMPLIFY_function_GoogleAuthHandler_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "GoogleAuthHandler"
-        }
-      ]
-    }
-  }
+  "function": {}
 }
