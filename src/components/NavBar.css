@@ -27,3 +27,7 @@ ul.nav {
   li.nav a:hover {
     background-color: #1399FF;
   }
+
+  .orange-background {
+    background: #FC941D;
+}

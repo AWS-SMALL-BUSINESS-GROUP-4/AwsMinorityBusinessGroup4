@@ -7,70 +7,70 @@ import BusinessNavBar from '../components/BusinessNavBar'
 import BusinessManagementSidebar from '../components/BusinessManagementSideBar';
 
 function BusinessManagementPage() {
-    // State to track if edit mode is active
-    const [isEditing, setIsEditing] = useState(false);
+  // State to track if edit mode is active
+  const [isEditing, setIsEditing] = useState(false);
 
-    const [business, setBusiness] = useState({
-        name: "Negril",
-        address_1: "2301 Georgia Ave. NW",
-        address_2: "Washington, DC 20001",
-        phone: "(202) 332-3737",
-        categories: "Restaurants, Jamaican",
-        website: "negrileats.com",
-        hours: [
-            "10:30 am - 7:30 pm",
-            "10:30 am - 7:30 pm",
-            "10:30 am - 7:30 pm",
-            "10:30 am - 7:30 pm",
-            "10:30 am - 7:30 pm",
-            "Closed",
-            "Closed"
-        ],
-        about: `Founded in 1979 by Jamaican native Earl Chinn, Negril Jamaican Eatery is a family-owned, fast casual storefront serving up a taste of the island. In 1975 Earl visited his sister in Washington, DC where he couldn’t find any authentic Jamaican eateries, so he later returned to open his own, supplying the bold foods and flavors of his homeland to Caribbean expats and local fans of Jamaican cuisine.
+  const [business, setBusiness] = useState({
+    name: "Negril",
+    address_1: "2301 Georgia Ave. NW",
+    address_2: "Washington, DC 20001",
+    phone: "(202) 332-3737",
+    categories: "Restaurants, Jamaican",
+    website: "negrileats.com",
+    hours: [
+      {day: "Monday", openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Tuesday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Wednesday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Thursday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Friday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Saturday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: true },
+      {day: "Sunday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: true },
+    ],
+    about: `Founded in 1979 by Jamaican native Earl Chinn, Negril Jamaican Eatery is a family-owned, fast casual storefront serving up a taste of the island. In 1975 Earl visited his sister in Washington, DC where he couldn’t find any authentic Jamaican eateries, so he later returned to open his own, supplying the bold foods and flavors of his homeland to Caribbean expats and local fans of Jamaican cuisine.
                 Negril Eats’ popularity in DC—and today’s growing Caribbean communities in the DC Metro Area—led to the gradual expansion of Negril the Jamaican Eatery into Mitchellville, Silver Spring, and Laurel, MD. Each location offers the complete menu, highlighting the most popular favorites of each storefront.
-                Today, Earl’s sister, Marguerite, his two sons, and his extended family manage the four Negril Eats locations. Like their father before them, Earl’s sons subscribe to the Jamaican national motto, “Out of Many, One People.” For the Chinns, traditionally prepared, tasty to-go meals unite their customers as blue-collar laborers, lawyers, retail salespeople, clerks, and other DC professionals line up together to pick up their jerk chicken, oxtail, or escoveitch fish.`
-    });
+                Today, Earl’s sister, Marguerite, his two sons, and his extended family manage the four Negril Eats locations. Like their father before them, Earl’s sons subscribe to the Jamaican national motto, “Out of Many, One People.” For the Chinns, traditionally prepared, tasty to-go meals unite their customers as blue-collar laborers, lawyers, retail salespeople, clerks, and other DC professionals line up together to pick up their jerk chicken, oxtail, or escoveitch fish.`,
+  });
 
-    const [storedState, setStoredState] = useState(business);
+  const [storedState, setStoredState] = useState(business);
 
-    // Handle input changes
-    const handleChange = (e, field, index = null) => {
-        if (index !== null) {
-            // Handle hours array update
-            const updatedHours = [...business.hours];
-            updatedHours[index] = e.target.value;
-            setBusiness({
-                ...business,
-                hours: updatedHours
-            });
-        } else {
-            // Handle regular field update
-            setBusiness({
-                ...business,
-                [field]: e.target.value
-            });
-        }
-    };
-    
-    // Toggle edit mode
-    const toggleEditMode = () => {
-        setIsEditing(!isEditing);
-    };
+  // Handle input changes
+  const handleChange = (e, field, index = null) => {
+    if (index !== null) {
+      // Handle hours array update
+      const updatedHours = [...business.hours];
+      updatedHours[index] = e.target.value;
+      setBusiness({
+        ...business,
+        hours: updatedHours,
+      });
+    } else {
+      // Handle regular field update
+      setBusiness({
+        ...business,
+        [field]: e.target.value,
+      });
+    }
+  };
 
-    // Save changes
-    const saveChanges = () => {
-        // Here you would typically send updated data to your backend
-        console.log("Saving changes:", business);
-        setStoredState(business);
-        setIsEditing(false);
-    };
+  // Toggle edit mode
+  const toggleEditMode = () => {
+    setIsEditing(!isEditing);
+  };
 
-    // Cancel editing
-    const cancelEdit = () => {
-        // Reset to original data if needed
-        setIsEditing(false);
-        setBusiness(storedState);
-    };
+  // Save changes
+  const saveChanges = () => {
+    // Here you would typically send updated data to your backend
+    console.log("Saving changes:", business);
+    setStoredState(business);
+    setIsEditing(false);
+  };
+
+  // Cancel editing
+  const cancelEdit = () => {
+    // Reset to original data if needed
+    setIsEditing(false);
+    setBusiness(storedState);
+  };
 
     // Day names for hours table
     const days = ["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"];
@@ -206,4 +206,4 @@ function BusinessManagementPage() {
     )
 }
 
-export default BusinessManagementPage
+export default BusinessManagementPage;
