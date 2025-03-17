@@ -13,7 +13,7 @@
     "@emotion/react": "^11.14.0",
     "@mui/icons-material": "^6.4.4",
     "@mui/material": "^6.4.4",
-    "aws-amplify": "^6.12.2",
+    "aws-amplify": "^6.13.5",
     "lucide-react": "^0.475.0",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",

@@ -230,33 +230,61 @@ const BusinessCreationForm = () => {
     setStep(step + 1);
   };
 
-  const handleSubmit = async () => {
+  const createUser = async () => {
     try {
-      // Prepare the data for the backend
-      const businessData = {
-        businessName: formData.businessName,
-        website: formData.website,
-        phoneNumber: formData.phoneNumber,
-        email: formData.email,
-        categories: formData.categories,
-        address: {
-          street: formData.street,
-          apt: formData.apt,
-          city: formData.city,
-          state: formData.state,
-          zip: formData.zip,
-          country: formData.country,
-        },
-        owner: {
+      const { errors, data: newUser } = await client.models.User.create({
+        name: {
           firstName: formData.firstName,
           lastName: formData.lastName,
-          email: formData.emailaddress,
-          password: formData.password, // Note: Passwords should be handled securely (e.g., hashed)
         },
-        description: formData.description,
+        email: formData.emailaddress,
+        password: formData.password, // Note: Passwords should be hashed
+      });
+  
+      if (errors) {
+        console.error('Error creating user:', errors);
+        throw new Error('Failed to create user');
+      }
+  
+      console.log('New user created:', newUser);
+      return newUser;
+    } catch (error) {
+      console.error('Error during user creation:', error);
+      throw error;
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      console.log('Form data:', formData); // Log the form data
+  
+      // Step 1: Create a User
+      const newUser = await createUser();
+  
+      // Step 2: Create a Business linked to the User
+      const businessData = {
+        businessOwnerId: newUser.id, // Link the business to the user
+        name: formData.businessName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        website: formData.website,
+        category: formData.categories,
+        streetAddress: formData.street,
+        aptSuiteOther: formData.apt,
+        city: formData.city,
+        state: formData.state,
+        zipcode: formData.zip,
+        country: formData.country,
+        location: {
+          lattitude: 0, // Replace with actual latitude
+          longitude: 0, // Replace with actual longitude
+        },
         businessHours: formData.businessHours,
-        // Photos will be handled separately (see below)
+        description: formData.description,
+        photos: formData.photos.map((photo) => URL.createObjectURL(photo)), // Convert files to URLs
       };
+  
+      console.log('Business data to be saved:', businessData); // Log the data being sent
   
       // Create the business in the backend
       const { errors, data: newBusiness } = await client.models.Business.create(businessData);
@@ -266,6 +294,8 @@ const BusinessCreationForm = () => {
         alert('Failed to create business. Please try again.');
         return;
       }
+  
+      console.log('New business created:', newBusiness); // Log the response
   
       // Handle file uploads (if applicable)
       if (formData.photos.length > 0) {
@@ -277,8 +307,7 @@ const BusinessCreationForm = () => {
   
       // Success message
       alert('Business created successfully!');
-      console.log('New business:', newBusiness);
-  
+
       // Reset the form or navigate to another page
       setStep(1);
       setFormData({
@@ -862,11 +891,11 @@ const BusinessCreationForm = () => {
                 </div>
                 <div className="button-group step8-buttons">
                   <button
-                    className={`continue-button save-continue-button ${!isStepComplete(step) ? 'disabled' : ''}`}
-                    onClick={handleSubmit}
+                    className={`submit-button ${!isStepComplete(step) ? 'disabled' : ''}`}
+                    onClick={handleSubmit} // Call handleSubmit here
                     disabled={!isStepComplete(step)}
                   >
-                    Save and continue
+                    Submit
                   </button>
                   <button className="skip-button" onClick={nextStep}>
                     Skip for now
