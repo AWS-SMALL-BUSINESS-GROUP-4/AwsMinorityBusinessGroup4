@@ -165,7 +165,24 @@ const BusinessCreationForm = () => {
     } else if (step === 9) {
       return formData.description.trim() !== '';
     } else if (step === 10) {
-      return formData.photos.length > 0;
+      // Validate all required fields for Step 10
+      return (
+        formData.businessName &&
+        formData.email &&
+        formData.phoneNumber &&
+        formData.categories &&
+        formData.street &&
+        formData.city &&
+        formData.state &&
+        formData.zip &&
+        formData.country &&
+        formData.firstName &&
+        formData.lastName &&
+        formData.emailaddress &&
+        formData.password &&
+        formData.description &&
+        formData.photos.length > 0
+      );
     }
     return true; // For other steps, assume complete (for now)
   };
