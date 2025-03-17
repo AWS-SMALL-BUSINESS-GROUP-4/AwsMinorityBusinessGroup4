@@ -7,30 +7,23 @@ import {
   signUp,
   signIn,
   getCurrentUser,
-  confirmSignUp
+  confirmSignUp,
 } from 'aws-amplify/auth';
 
-/**
- * Maps numerical "step" values to descriptive route paths.
- * For step 7.5 (the verify screen), treat it as /business-account/verify.
- */
 export const stepToRouteMap = {
-  1:  '/my-businesses/business-name',
-  2:  '/my-businesses/business-email',
-  3:  '/my-businesses/business-phone',
-  4:  '/my-businesses/business-website',
-  5:  '/my-businesses/business-categories',
-  6:  '/my-businesses/business-address',
-  7:  '/my-businesses/business-account',
+  1: '/my-businesses/business-name',
+  2: '/my-businesses/business-email',
+  3: '/my-businesses/business-phone',
+  4: '/my-businesses/business-website',
+  5: '/my-businesses/business-categories',
+  6: '/my-businesses/business-address',
+  7: '/my-businesses/business-account',
   7.5: '/my-businesses/business-account/verify',
-  8:  '/my-businesses/business-hours',
-  9:  '/my-businesses/business-description',
+  8: '/my-businesses/business-hours',
+  9: '/my-businesses/business-description',
   10: '/my-businesses/business-photos',
 };
 
-/**
- * Reverse map: given a route, figure out which step it corresponds to.
- */
 const routeToStepMap = {
   '/my-businesses/business-name': 1,
   '/my-businesses/business-email': 2,
@@ -47,6 +40,8 @@ const routeToStepMap = {
 
 const BusinessFormContext = createContext();
 
+
+
 export function useBusinessForm() {
   return useContext(BusinessFormContext);
 }
@@ -55,7 +50,6 @@ export function BusinessFormProvider({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Strip trailing slash if present
   useEffect(() => {
     if (location.pathname.length > 1 && location.pathname.endsWith('/')) {
       const trimmedPath = location.pathname.slice(0, -1);
@@ -100,7 +94,6 @@ export function BusinessFormProvider({ children }) {
   const [verificationCode, setVerificationCode] = useState('');
   const [errors, setErrors] = useState({});
 
-  // Validation Patterns
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{}|;:,.<>?]).{8,}$/;
   const phoneRegex = /^\d{10}$/;
@@ -137,11 +130,9 @@ export function BusinessFormProvider({ children }) {
     password: 'Password',
   };
 
-  // Helper: Convert field names to Title Case.
   const toTitleCase = (str) =>
     str.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase());
 
-  // Validate a single field.
   function validateField(field, value) {
     if (requiredFields[step]?.includes(field) && !value.trim()) {
       return `${fieldDisplayNames[field] || toTitleCase(field)} is required`;
@@ -161,7 +152,6 @@ export function BusinessFormProvider({ children }) {
     return '';
   }
 
-  // Input change handler.
   function handleInputChange(e) {
     const { name, value, files } = e.target;
     if (name === 'photos') {
@@ -173,14 +163,12 @@ export function BusinessFormProvider({ children }) {
     }
   }
 
-  // OnBlur handler.
   function handleBlur(e) {
     const { name, value } = e.target;
     const error = validateField(name, value);
     setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
   }
 
-  // Handle business hours change.
   function handleHoursChange(index, field, value) {
     setFormData((prev) => {
       const updated = [...prev.businessHours];
@@ -208,7 +196,6 @@ export function BusinessFormProvider({ children }) {
     });
   }
 
-  // Check if a step is complete.
   function isStepComplete(stepNumber) {
     if (stepNumber === 8) {
       return formData.businessHours.every((day) => {
@@ -225,7 +212,6 @@ export function BusinessFormProvider({ children }) {
     return true;
   }
 
-  // Validate entire step.
   function validateStep(stepNumber, data) {
     const stepErrors = {};
     const fields = requiredFields[stepNumber] || [];
@@ -239,7 +225,6 @@ export function BusinessFormProvider({ children }) {
     return stepErrors;
   }
 
-  // nextStep handler.
   async function nextStep() {
     if (step === 4) {
       if (!formData.website.trim()) {
@@ -257,26 +242,30 @@ export function BusinessFormProvider({ children }) {
       return;
     }
     setErrors({});
+    // Replace the signUp function call in your nextStep function (around line 245)
     if (step === 7 && !isSignedIn) {
-      try {
+        try {
         const signUpResult = await signUp({
-          username: formData.emailaddress,
-          password: formData.password,
-          attributes: {
-            given_name: formData.firstName,
-            family_name: formData.lastName,
-          },
+            username: formData.emailaddress,
+            password: formData.password,
+            attributes: {
+            // Change these attribute names to match what Cognito expects
+            givenName: formData.firstName,  // Changed from given_name
+            familyName: formData.lastName,  // Changed from family_name
+            email: formData.emailaddress,
+            },
         });
         setBusinessOwnerId(signUpResult.userSub);
         setStep(7.5);
         navigate('/my-businesses/business-account/verify');
         return;
-      } catch (error) {
+        } catch (error) {
         setErrors({
-          manualSignUp: error.message || 'Failed to create account. Please try again.',
+            manualSignUp: error.message || 'Failed to create account. Please try again.',
         });
+        console.error('Sign-up error:', error);
         return;
-      }
+        }
     }
     if (step === 7.5) {
       try {
@@ -315,7 +304,6 @@ export function BusinessFormProvider({ children }) {
     }
   }
 
-  // prevStep handler.
   function prevStep() {
     if (step === 7.5) {
       setStep(7);
@@ -335,7 +323,6 @@ export function BusinessFormProvider({ children }) {
     }
   }
 
-  // skipWebsite handler.
   function skipWebsite() {
     setErrors({});
     const newStep = step + 1;
@@ -344,7 +331,6 @@ export function BusinessFormProvider({ children }) {
     if (route) navigate(route);
   }
 
-  // signInWithGoogle handler.
   async function signInWithGoogle() {
     try {
       localStorage.setItem('businessFormStep', '8');
@@ -354,7 +340,6 @@ export function BusinessFormProvider({ children }) {
     }
   }
 
-  // On mount: set step from the current path or localStorage.
   useEffect(() => {
     const pathNoSlash = location.pathname.replace(/\/$/, '');
     if (routeToStepMap[pathNoSlash]) {
@@ -377,13 +362,11 @@ export function BusinessFormProvider({ children }) {
     }
   }, [location.pathname, navigate]);
 
-  // Persist step & form data.
   useEffect(() => {
     localStorage.setItem('businessFormStep', step.toString());
     localStorage.setItem('businessFormData', JSON.stringify(formData));
   }, [step, formData]);
 
-  // Check user & Hub listener.
   useEffect(() => {
     const checkUser = async () => {
       try {
@@ -391,11 +374,12 @@ export function BusinessFormProvider({ children }) {
         const attributes = await fetchUserAttributes();
         setIsSignedIn(true);
         setBusinessOwnerId(attributes.sub);
+        // In your useEffect where you fetch user attributes
         setFormData((prev) => ({
-          ...prev,
-          firstName: attributes.given_name || '',
-          lastName: attributes.family_name || '',
-          emailaddress: attributes.email || '',
+            ...prev,
+            firstName: attributes.givenName || '',  // Changed from given_name
+            lastName: attributes.familyName || '',  // Changed from family_name
+            emailaddress: attributes.email || '',
         }));
       } catch {
         setIsSignedIn(false);
@@ -403,24 +387,25 @@ export function BusinessFormProvider({ children }) {
     };
     checkUser();
 
+        // In your Hub listener
     const listener = (data) => {
-      switch (data.payload.event) {
+        switch (data.payload.event) {
         case 'signIn':
-          fetchUserAttributes()
+            fetchUserAttributes()
             .then((attributes) => {
-              setFormData((prev) => ({
+                setFormData((prev) => ({
                 ...prev,
-                firstName: attributes.given_name || '',
-                lastName: attributes.family_name || '',
+                firstName: attributes.givenName || '',  // Changed from given_name
+                lastName: attributes.familyName || '',  // Changed from family_name
                 emailaddress: attributes.email || '',
                 password: '',
-              }));
-              setBusinessOwnerId(attributes.sub);
+                }));
+                setBusinessOwnerId(attributes.sub);
             })
             .catch(() => {
-              setErrors({ google: 'Authentication failed. Please try again.' });
+                setErrors({ google: 'Authentication failed. Please try again.' });
             });
-          break;
+            break;
         case 'signIn_failure':
           setErrors({ google: 'Google sign-in failed. Please try again.' });
           break;

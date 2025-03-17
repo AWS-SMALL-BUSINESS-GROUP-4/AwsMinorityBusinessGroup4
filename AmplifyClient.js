@@ -1,8 +1,6 @@
 import { Amplify } from 'aws-amplify';
-import awsExports from './aws-exports';
+import amplifyOutputs from './amplify_outputs.json'; // Adjust path if needed
 
-// Configure Amplify with your aws-exports settings.
-Amplify.configure(awsExports);
+Amplify.configure(amplifyOutputs);
 
-// (Optionally) export Amplify if you need it elsewhere.
 export default Amplify;
