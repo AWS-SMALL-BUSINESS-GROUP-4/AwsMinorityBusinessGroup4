@@ -52,7 +52,7 @@ function BusinessManagementPicturesPage() {
                         <div className='spread'>
                             <h2>Outside</h2>
                             <input type='file' ref={outsideImgUpload} accept='image/*' className='hidden'/>
-                            <button onClick={handleOutsideImgUpload}>Upload Image</button>
+                            <button className="btn" onClick={handleOutsideImgUpload}>Upload Image</button>
                         </div>
                         <div className='spread scroll'>
                             {images.map((source, index) => (
@@ -68,7 +68,7 @@ function BusinessManagementPicturesPage() {
                         <div className='spread'>
                             <h2>Inside</h2>
                             <input type='file' ref={outsideImgUpload} accept='image/*' className='hidden'/>
-                            <button onClick={handleOutsideImgUpload}>Upload Image</button>
+                            <button className="btn" onClick={handleOutsideImgUpload}>Upload Image</button>
                         </div>
                     </div>
                     <hr/>
@@ -76,7 +76,7 @@ function BusinessManagementPicturesPage() {
                         <div className='spread'>
                             <h2>Menu Items</h2>
                             <input type='file' ref={outsideImgUpload} accept='image/*' className='hidden'/>
-                            <button onClick={handleOutsideImgUpload}>Upload Image</button>
+                            <button className="btn" onClick={handleOutsideImgUpload}>Upload Image</button>
                         </div>
                     </div>
                     <hr/>
@@ -84,7 +84,7 @@ function BusinessManagementPicturesPage() {
                         <div className='spread'>
                             <h2>All Pictures</h2>
                             <input type='file' ref={outsideImgUpload} accept='image/*' className='hidden'/>
-                            <button onClick={handleOutsideImgUpload}>Upload Image</button>
+                            <button className="btn" onClick={handleOutsideImgUpload}>Upload Image</button>
                         </div>
                     </div>
                 </div>
