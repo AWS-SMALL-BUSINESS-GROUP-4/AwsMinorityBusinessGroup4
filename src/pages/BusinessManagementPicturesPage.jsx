@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { uploadData } from 'aws-amplify/storage';
 import reactLogo from '../assets/react.svg'
 import '../App.css'
 import '../components/ContainerStyles.css'
@@ -27,6 +28,8 @@ function BusinessManagementPicturesPage() {
         'https://i0.wp.com/images-prod.healthline.com/hlcmsresource/images/AN_images/healthy-eating-ingredients-1296x728-header.jpg?w=1155&h=1528',
     ]);
 
+    const [newImg, setNewImg] = useState();
+
     const handleDelete = (index) => {
         //const confirm = window.confirm("Are you sure you want to delete this picture?");
         if(confirm) {
@@ -36,6 +39,19 @@ function BusinessManagementPicturesPage() {
 
     const handleOutsideImgUpload = () => {
         outsideImgUpload.current.click();
+    }
+
+    const handleFileUpload = (event) => {
+        setNewImg(event.target.files?.[0]);
+
+        uploadData({
+            path: `business-photos/guest/${newImg.name}`,
+            data: file,
+            options: {             
+                // Specify a target bucket using name assigned in Amplify Backend
+                bucket: 'AWSMBG4-private'
+            }
+        });
     }
 
 
@@ -83,7 +99,7 @@ function BusinessManagementPicturesPage() {
                     <div>
                         <div className='spread'>
                             <h2>All Pictures</h2>
-                            <input type='file' ref={outsideImgUpload} accept='image/*' className='hidden'/>
+                            <input type='file' ref={outsideImgUpload} accept='image/*' className='hidden' onChange={handleFileUpload}/>
                             <button className="btn" onClick={handleOutsideImgUpload}>Upload Image</button>
                         </div>
                         <div className='spread scroll'>
