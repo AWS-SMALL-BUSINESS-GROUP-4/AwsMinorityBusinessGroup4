@@ -9,7 +9,8 @@ import {
   signIn,
   getCurrentUser,
   confirmSignUp,
-} from 'aws-amplify/auth';
+  resendSignUpCode,
+} from '@aws-amplify/auth';
 import axios from 'axios';
 
 export const stepToRouteMap = {
@@ -50,7 +51,6 @@ export function BusinessFormProvider({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Initialize state from localStorage if available
   const [step, setStep] = useState(() => {
     const savedStep = localStorage.getItem('businessFormStep');
     return savedStep ? parseFloat(savedStep) : 1;
@@ -152,13 +152,13 @@ export function BusinessFormProvider({ children }) {
 
   function handleInputChange(e) {
     const { name, value, files } = e.target;
-    console.log(`Updating ${name} to ${value || files}`); // Debug log
+    console.log(`Updating ${name} to ${value || files}`);
     if (name === 'photos') {
       setFormData((prev) => ({ ...prev, photos: Array.from(files) }));
     } else {
       setFormData((prev) => {
         const updated = { ...prev, [name]: value };
-        console.log('Updated formData:', updated); // Debug log
+        console.log('Updated formData:', updated);
         return updated;
       });
       const error = validateField(name, value);
@@ -173,7 +173,7 @@ export function BusinessFormProvider({ children }) {
   }
 
   function handleHoursChange(index, field, value) {
-    console.log(`Updating businessHours[${index}].${field} to ${value}`); // Debug log
+    console.log(`Updating businessHours[${index}].${field} to ${value}`);
     setFormData((prev) => {
       const updated = [...prev.businessHours];
       if (field === 'isOpen24') {
@@ -238,35 +238,62 @@ export function BusinessFormProvider({ children }) {
     setErrors({});
     if (step === 7 && !isSignedIn) {
       try {
+        console.log('Attempting sign-up with:', {
+          username: formData.emailaddress,
+          password: formData.password,
+          attributes: {
+            'name.givenName': formData.firstName,
+            'name.familyName': formData.lastName,
+          },
+        });
+        const signUpResult = await signUp({
+          username: formData.emailaddress,
+          password: formData.password,
+          attributes: {
+            'name.givenName': formData.firstName, // Adjusted to match schema
+            'name.familyName': formData.lastName, // Adjusted to match schema
+          },
+        });
+        console.log('Sign-up result:', signUpResult);
         setStep(7.5);
         navigate('/my-businesses/business-account/verify');
-        return;
       } catch (error) {
+        console.error('Sign-up failed:', error);
         setErrors({
           manualSignUp: error.message || 'Failed to create account. Please try again.',
         });
-        console.error('Sign-up error:', error);
-        return;
       }
+      return;
     }
     if (step === 7.5 && !isSignedIn) {
       try {
+        console.log('Attempting to confirm sign-up with:', {
+          username: formData.emailaddress,
+          code: verificationCode,
+        });
+        await confirmSignUp({
+          username: formData.emailaddress,
+          confirmationCode: verificationCode,
+        });
+        console.log('Sign-up confirmed, attempting sign-in');
+        await signIn({
+          username: formData.emailaddress,
+          password: formData.password,
+        });
+        console.log('Sign-in successful');
         setIsSignedIn(true);
         setStep(8);
         navigate('/my-businesses/business-hours');
-        return;
       } catch (error) {
+        console.error('Verification or sign-in failed:', error);
         setErrors({ verification: error.message || 'Invalid code. Please try again.' });
-        return;
       }
+      return;
     }
     if (step === 10) {
       try {
         console.log('Navigating to /business-profile with formData:', formData);
         navigate('/business-profile', { state: { formData } });
-        // Clear localStorage after submission if desired
-        // localStorage.removeItem('businessFormStep');
-        // localStorage.removeItem('businessFormData');
       } catch (error) {
         console.error('Error during submission:', error);
         setErrors({ submit: 'Failed to submit. Please try again.' });
@@ -316,12 +343,26 @@ export function BusinessFormProvider({ children }) {
       localStorage.setItem('businessFormStep', '8');
       await signInWithRedirect({ provider: 'Google' });
     } catch (error) {
-      setErrors({ google: 'Failed to sign in with Google. Please try again.' });
       console.error('Google sign-in error:', error);
+      setErrors({ google: 'Failed to sign in with Google. Please try again.' });
     }
   }
 
-  // Restore form state on mount and handle route changes
+  async function resendVerificationCode() {
+    try {
+      console.log('Attempting to resend verification code for:', formData.emailaddress);
+      const resendResult = await resendSignUpCode({ username: formData.emailaddress });
+      console.log('Resend result:', resendResult);
+      setErrors((prev) => ({ ...prev, verification: 'Code resent. Check your email.' }));
+    } catch (error) {
+      console.error('Error resending verification code:', error);
+      setErrors((prev) => ({
+        ...prev,
+        verification: error.message || 'Failed to resend code. Please try again.',
+      }));
+    }
+  }
+
   useEffect(() => {
     const pathNoSlash = location.pathname.replace(/\/$/, '');
     const storedStep = localStorage.getItem('businessFormStep');
@@ -340,14 +381,12 @@ export function BusinessFormProvider({ children }) {
     }
   }, [location.pathname, navigate]);
 
-  // Save form state to localStorage
   useEffect(() => {
     console.log('Saving to localStorage:', { step, formData });
     localStorage.setItem('businessFormStep', step.toString());
     localStorage.setItem('businessFormData', JSON.stringify(formData));
   }, [step, formData]);
 
-  // Authentication handling
   useEffect(() => {
     const checkUser = async () => {
       try {
@@ -358,8 +397,8 @@ export function BusinessFormProvider({ children }) {
         setBusinessOwnerId(attributes.sub);
         setFormData((prev) => ({
           ...prev,
-          firstName: attributes.given_name || '',
-          lastName: attributes.family_name || '',
+          firstName: attributes['name.givenName'] || '', // Adjust for schema
+          lastName: attributes['name.familyName'] || '', // Adjust for schema
           emailaddress: attributes.email || '',
         }));
       } catch (error) {
@@ -377,8 +416,8 @@ export function BusinessFormProvider({ children }) {
             .then((attributes) => {
               setFormData((prev) => ({
                 ...prev,
-                firstName: attributes.given_name || '',
-                lastName: attributes.family_name || '',
+                firstName: attributes['name.givenName'] || '',
+                lastName: attributes['name.familyName'] || '',
                 emailaddress: attributes.email || '',
                 password: '',
               }));
@@ -423,6 +462,7 @@ export function BusinessFormProvider({ children }) {
     nextStep,
     prevStep,
     isStepComplete,
+    resendVerificationCode,
   };
 
   return (
