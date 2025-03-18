@@ -54,7 +54,7 @@ function App() {
         {/* Business Routes */}
         <Route path="/search" element={<SearchResultPage />} />
 
-        <Route path="/add-businesses" element={<BusinessCreationForm />} />
+        <Route path="/add-business" element={<BusinessCreationForm />} />
         <Route path="/write-review" element={<ReviewPage />} />
         <Route path="/business/:id" element={<BusinessProfilePage />} />
 
