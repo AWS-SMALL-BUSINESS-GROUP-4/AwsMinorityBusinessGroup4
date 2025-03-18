@@ -49,15 +49,13 @@ function App() {
 
         {/* Authentication Routes */}
         {/* <Route path="/search" element={<SearchResultPage />} /> */}
+        {/* <Route path="/business-login" element={<SearchResultPage />} /> */}
 
         {/* Business Routes */}
         <Route path="/search" element={<SearchResultPage />} />
 
-        <Route path="/my-businesses" element={<BusinessCreationForm />} />
-        <Route
-          path="/write-review"
-          element={<div>Write Review Page (Coming Soon)</div>}
-        />
+        <Route path="/add-business" element={<BusinessCreationForm />} />
+        <Route path="/write-review" element={<ReviewPage />} />
         <Route
           path="/business/:id"
           element={<div>Business Detail Page (Coming Soon)</div>}

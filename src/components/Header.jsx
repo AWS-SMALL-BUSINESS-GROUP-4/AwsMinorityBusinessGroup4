@@ -1,8 +1,19 @@
-import React from "react";
+// Header.jsx
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Header.css";
 
 function Header() {
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const handleMouseEnter = () => {
+    setShowDropdown(true);
+  };
+
+  const handleMouseLeave = () => {
+    setShowDropdown(false);
+  };
+
   return (
     <header className="header">
       <div className="header-content">
@@ -11,14 +22,29 @@ function Header() {
         </div>
         <div className="nav-container">
           <nav className="main-nav">
-            <Link to="/my-businesses">My Businesses</Link>
-            <Link to="/write-review">Write a Review</Link>
+            <div className="nav-items">
+              <div
+                className="dropdown-container"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                <span className="dropdown-trigger">My Business</span>
+                {showDropdown && (
+                  <div className="dropdown-menu">
+                    <Link to="/add-business" className="dropdown-item">
+                      Add a Business
+                    </Link>
+                    <Link to="/business-login" className="dropdown-item">
+                      Log into Business
+                    </Link>
+                  </div>
+                )}
+              </div>
+              <Link to="/write-review" className="nav-link">
+                Write a Review
+              </Link>
+            </div>
           </nav>
-          <div className="auth-nav">
-            <Link to="/login" className="login-button">
-              Login
-            </Link>
-          </div>
         </div>
       </div>
     </header>
