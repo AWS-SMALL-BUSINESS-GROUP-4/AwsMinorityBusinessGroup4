@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+// BusinessManagementPage.jsx
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import "../App.css";
 import "../components/ContainerStyles.css";
 import "./BusinessManagementPage.css";
@@ -9,116 +9,131 @@ import BusinessNavBar from "../components/NavBar";
 
 function BusinessManagementPage() {
   const location = useLocation();
-  const { formData } = location.state || {};
+  const { formData: formDataFromState } = location.state || {};
 
-  const [isEditing, setIsEditing] = useState(false);
+  // Function to convert 24-hour time to 12-hour AM/PM format
+  const formatTimeTo12Hour = (time) => {
+    if (!time || time === '') return '';
+    const [hours, minutes] = time.split(':');
+    const hourNum = parseInt(hours, 10);
+    const period = hourNum >= 12 ? 'PM' : 'AM';
+    const adjustedHour = hourNum % 12 || 12; // Convert 0 or 12 to 12
+    return `${adjustedHour}:${minutes} ${period}`;
+  };
 
-  const [business, setBusiness] = useState({
-    name: '',
-    address_1: '',
-    address_2: '',
-    phone: '',
-    categories: '',
-    website: '',
-    hours: [],
-    about: '',
+  const [business, setBusiness] = useState(() => {
+    const storedData = JSON.parse(localStorage.getItem("businessFormData"));
+    const initialData = formDataFromState || storedData || {
+      name: "",
+      address_1: "",
+      address_2: "",
+      phone: "",
+      categories: "",
+      website: "",
+      hours: [],
+      about: "",
+    };
+
+    console.log('Initial data source:', { formDataFromState, storedData, initialData });
+
+    if (initialData.businessName || initialData.name) {
+      const hours = (initialData.businessHours || []).map((dayObj) => {
+        if (dayObj.isClosed) return "Closed";
+        if (dayObj.isOpen24) return "Open 24 hours";
+        if (dayObj.openTime && dayObj.closeTime) {
+          return `${formatTimeTo12Hour(dayObj.openTime)} - ${formatTimeTo12Hour(dayObj.closeTime)}`;
+        }
+        return "Not set";
+      });
+
+      const transformed = {
+        name: initialData.businessName || "",
+        address_1: initialData.street || "",
+        address_2: `${initialData.city || ""}, ${initialData.state || ""} ${initialData.zip || ""}`,
+        phone: initialData.phoneNumber ? `+1${initialData.phoneNumber}` : "", // Add +1 prefix
+        categories: initialData.categories || "",
+        website: initialData.website || "",
+        hours: hours.length > 0 ? hours : [],
+        about: initialData.description || "",
+      };
+      console.log('Transformed business data:', transformed);
+      return transformed;
+    }
+
+    return {
+      ...initialData,
+      phone: initialData.phoneNumber ? `+1${initialData.phoneNumber}` : "", // Add +1 prefix
+      hours: initialData.hours || [],
+    };
   });
 
+  const [isEditing, setIsEditing] = useState(false);
   const [storedState, setStoredState] = useState(business);
 
   useEffect(() => {
-    if (formData) {
-      const hours = formData.businessHours.map(dayObj => {
-        if (dayObj.isClosed) {
-          return 'Closed';
-        } else if (dayObj.isOpen24) {
-          return 'Open 24 hours';
-        } else if (dayObj.openTime && dayObj.closeTime) {
-          return `${dayObj.openTime} - ${dayObj.closeTime}`;
-        } else {
-          return 'Not set';
+    if (formDataFromState) {
+      const hours = (formDataFromState.businessHours || []).map((dayObj) => {
+        if (dayObj.isClosed) return "Closed";
+        if (dayObj.isOpen24) return "Open 24 hours";
+        if (dayObj.openTime && dayObj.closeTime) {
+          return `${formatTimeTo12Hour(dayObj.openTime)} - ${formatTimeTo12Hour(dayObj.closeTime)}`;
         }
+        return "Not set";
       });
 
       const newBusiness = {
-        name: formData.businessName,
-        address_1: formData.street,
-        address_2: `${formData.city}, ${formData.state} ${formData.zip}`,
-        phone: formData.phoneNumber,
-        categories: formData.categories,
-        website: formData.website,
-        hours: hours,
-        about: formData.description,
+        name: formDataFromState.businessName || "",
+        address_1: formDataFromState.street || "",
+        address_2: `${formDataFromState.city || ""}, ${formDataFromState.state || ""} ${formDataFromState.zip || ""}`,
+        phone: formDataFromState.phoneNumber ? `+1${formDataFromState.phoneNumber}` : "", // Add +1 prefix
+        categories: formDataFromState.categories || "",
+        website: formDataFromState.website || "",
+        hours: hours.length > 0 ? hours : [],
+        about: formDataFromState.description || "",
       };
 
+      console.log('Updated business with formData:', newBusiness);
       setBusiness(newBusiness);
       setStoredState(newBusiness);
     }
-  }, [formData]);
+  }, [formDataFromState]);
 
-  // Handle input changes
   const handleChange = (e, field, index = null) => {
     if (index !== null) {
-      // Handle hours array update
       const updatedHours = [...business.hours];
       updatedHours[index] = e.target.value;
-      setBusiness({
-        ...business,
-        hours: updatedHours,
-      });
+      setBusiness({ ...business, hours: updatedHours });
     } else {
-      // Handle regular field update
-      setBusiness({
-        ...business,
-        [field]: e.target.value,
-      });
+      setBusiness({ ...business, [field]: e.target.value });
     }
   };
 
-  // Toggle edit mode
-  const toggleEditMode = () => {
-    setIsEditing(!isEditing);
-  };
+  const toggleEditMode = () => setIsEditing(!isEditing);
 
-  // Save changes
   const saveChanges = () => {
-    // Here you would typically send updated data to your backend
     console.log("Saving changes:", business);
     setStoredState(business);
     setIsEditing(false);
   };
 
-  // Cancel editing
   const cancelEdit = () => {
-    // Reset to original data if needed
     setIsEditing(false);
     setBusiness(storedState);
   };
 
-  // Day names for hours table
   const days = ["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"];
 
   return (
     <>
       <BusinessNavBar />
       <div className="sidebar-page-container">
-        {/*Sidebar Nav*/}
         <div className="sidebar">
-          <a href="">Business Information</a>
-          <a href="">Reviews</a>
-          <a href="">Photos</a>
+          <a href="#">Business Information</a>
+          <a href="#">Reviews</a>
+          <a href="#">Photos</a>
         </div>
-
-        {/*Main content*/}
         <div className="main">
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+          <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
             <h1>Business Information</h1>
             {isEditing ? (
               <div>
@@ -134,135 +149,67 @@ function BusinessManagementPage() {
           {isEditing ? (
             <div style={{ marginBottom: "20px" }}>
               <div style={{ marginBottom: "10px" }}>
-                <label style={{ display: "block", marginBottom: "5px" }}>
-                  Business Name:
-                </label>
-                <input
-                  type="text"
-                  value={business.name}
-                  onChange={(e) => handleChange(e, "name")}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    marginBottom: "10px",
-                  }}
-                />
+                <label style={{ display: "block", marginBottom: "5px" }}>Business Name:</label>
+                <input type="text" value={business.name} onChange={(e) => handleChange(e, "name")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
               </div>
-
               <div style={{ marginBottom: "10px" }}>
-                <label style={{ display: "block", marginBottom: "5px" }}>
-                  Address Line 1:
-                </label>
-                <input
-                  type="text"
-                  value={business.address_1}
-                  onChange={(e) => handleChange(e, "address_1")}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    marginBottom: "10px",
-                  }}
-                />
+                <label style={{ display: "block", marginBottom: "5px" }}>Address Line 1:</label>
+                <input type="text" value={business.address_1} onChange={(e) => handleChange(e, "address_1")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
               </div>
-
               <div style={{ marginBottom: "10px" }}>
-                <label style={{ display: "block", marginBottom: "5px" }}>
-                  Address Line 2:
-                </label>
-                <input
-                  type="text"
-                  value={business.address_2}
-                  onChange={(e) => handleChange(e, "address_2")}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    marginBottom: "10px",
-                  }}
-                />
+                <label style={{ display: "block", marginBottom: "5px" }}>Address Line 2:</label>
+                <input type="text" value={business.address_2} onChange={(e) => handleChange(e, "address_2")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
               </div>
-
               <div style={{ marginBottom: "10px" }}>
-                <label style={{ display: "block", marginBottom: "5px" }}>
-                  Phone:
-                </label>
-                <input
-                  type="text"
-                  value={business.phone}
-                  onChange={(e) => handleChange(e, "phone")}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    marginBottom: "10px",
-                  }}
-                />
+                <label style={{ display: "block", marginBottom: "5px" }}>Phone:</label>
+                <input type="text" value={business.phone} onChange={(e) => handleChange(e, "phone")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
               </div>
-
               <div style={{ marginBottom: "10px" }}>
-                <label style={{ display: "block", marginBottom: "5px" }}>
-                  Categories:
-                </label>
-                <input
-                  type="text"
-                  value={business.categories}
-                  onChange={(e) => handleChange(e, "categories")}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    marginBottom: "10px",
-                  }}
-                />
+                <label style={{ display: "block", marginBottom: "5px" }}>Categories:</label>
+                <input type="text" value={business.categories} onChange={(e) => handleChange(e, "categories")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
               </div>
-
               <div style={{ marginBottom: "10px" }}>
-                <label style={{ display: "block", marginBottom: "5px" }}>
-                  Website:
-                </label>
-                <input
-                  type="text"
-                  value={business.website}
-                  onChange={(e) => handleChange(e, "website")}
-                  style={{ width: "100%", padding: "8px" }}
-                />
+                <label style={{ display: "block", marginBottom: "5px" }}>Website:</label>
+                <input type="text" value={business.website} onChange={(e) => handleChange(e, "website")} style={{ width: "100%", padding: "8px" }} />
               </div>
             </div>
           ) : (
             <p>
-              {business.name}
-              <br />
-              {business.address_1}
-              <br />
-              {business.address_2}
-              <br />
-              <br />
-              {business.phone}
-              <br />
-              <br />
-              <b>Categories</b>: {business.categories}
-              <br />
-              {business.website}
+              {business.name || "Not set"}<br />
+              {business.address_1 || "Not set"}<br />
+              {business.address_2 || "Not set"}<br /><br />
+              {business.phone || "Not set"}<br /><br />
+              <b>Categories</b>: {business.categories || "Not set"}<br />
+              {business.website || "Not set"}
             </p>
           )}
           <hr />
           <h2>Hours</h2>
           <table className="hours">
             <tbody>
-              {business.hours.map((hour, index) => (
-                <tr key={index}>
-                  <th>{days[index]}</th>
-                  <td>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={hour}
-                        onChange={(e) => handleChange(e, "hours", index)}
-                        style={{ width: "100%", padding: "5px" }}
-                      />
-                    ) : (
-                      hour
-                    )}
-                  </td>
+              {business.hours && business.hours.length === 7 ? (
+                days.map((day, index) => (
+                  <tr key={index}>
+                    <th>{day}</th>
+                    <td>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={business.hours[index]}
+                          onChange={(e) => handleChange(e, "hours", index)}
+                          style={{ width: "100%", padding: "5px" }}
+                        />
+                      ) : (
+                        business.hours[index]
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="2">Hours not set</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
           <hr />
@@ -274,7 +221,7 @@ function BusinessManagementPage() {
               style={{ width: "100%", minHeight: "200px", padding: "10px" }}
             />
           ) : (
-            <p>{business.about}</p>
+            <p>{business.about || "Not set"}</p>
           )}
         </div>
       </div>

@@ -1,3 +1,4 @@
+// BusinessFormContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Hub } from '@aws-amplify/core';
@@ -9,6 +10,7 @@ import {
   getCurrentUser,
   confirmSignUp,
 } from 'aws-amplify/auth';
+import axios from 'axios';
 
 export const stepToRouteMap = {
   1: '/my-businesses/business-name',
@@ -40,8 +42,6 @@ const routeToStepMap = {
 
 const BusinessFormContext = createContext();
 
-
-
 export function useBusinessForm() {
   return useContext(BusinessFormContext);
 }
@@ -50,43 +50,41 @@ export function BusinessFormProvider({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    if (location.pathname.length > 1 && location.pathname.endsWith('/')) {
-      const trimmedPath = location.pathname.slice(0, -1);
-      const search = location.search || '';
-      const hash = location.hash || '';
-      navigate(trimmedPath + search + hash, { replace: true });
-    }
-  }, [location.pathname, location.search, location.hash, navigate]);
-
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    businessName: '',
-    website: '',
-    phoneNumber: '',
-    email: '',
-    categories: '',
-    street: '',
-    apt: '',
-    city: '',
-    state: '',
-    zip: '',
-    country: '',
-    firstName: '',
-    lastName: '',
-    emailaddress: '',
-    password: '',
-    description: '',
-    photos: [],
-    businessHours: [
-      { day: 'Monday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
-      { day: 'Tuesday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
-      { day: 'Wednesday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
-      { day: 'Thursday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
-      { day: 'Friday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
-      { day: 'Saturday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
-      { day: 'Sunday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
-    ],
+  // Initialize state from localStorage if available
+  const [step, setStep] = useState(() => {
+    const savedStep = localStorage.getItem('businessFormStep');
+    return savedStep ? parseFloat(savedStep) : 1;
+  });
+  const [formData, setFormData] = useState(() => {
+    const savedData = localStorage.getItem('businessFormData');
+    return savedData ? JSON.parse(savedData) : {
+      businessName: '',
+      website: '',
+      phoneNumber: '',
+      email: '',
+      categories: '',
+      street: '',
+      apt: '',
+      city: '',
+      state: '',
+      zip: '',
+      country: '',
+      firstName: '',
+      lastName: '',
+      emailaddress: '',
+      password: '',
+      description: '',
+      photos: [],
+      businessHours: [
+        { day: 'Monday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+        { day: 'Tuesday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+        { day: 'Wednesday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+        { day: 'Thursday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+        { day: 'Friday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+        { day: 'Saturday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+        { day: 'Sunday', openTime: '', closeTime: '', isOpen24: false, isClosed: false },
+      ],
+    };
   });
 
   const [businessOwnerId, setBusinessOwnerId] = useState(null);
@@ -137,13 +135,13 @@ export function BusinessFormProvider({ children }) {
     if (requiredFields[step]?.includes(field) && !value.trim()) {
       return `${fieldDisplayNames[field] || toTitleCase(field)} is required`;
     }
-    if ((field === 'email' || field === 'emailaddress') && !emailRegex.test(value)) {
+    if ((field === 'email' || field === 'emailaddress') && value && !emailRegex.test(value)) {
       return 'Please enter a valid email address';
     }
-    if (field === 'password' && !passwordRegex.test(value)) {
+    if (field === 'password' && value && !passwordRegex.test(value)) {
       return 'Password must be at least 8 characters long and include letters, numbers, and symbols';
     }
-    if (field === 'phoneNumber' && !phoneRegex.test(value)) {
+    if (field === 'phoneNumber' && value && !phoneRegex.test(value)) {
       return 'Please enter a valid 10-digit phone number';
     }
     if (field === 'website' && value.trim() && !urlRegex.test(value)) {
@@ -154,10 +152,15 @@ export function BusinessFormProvider({ children }) {
 
   function handleInputChange(e) {
     const { name, value, files } = e.target;
+    console.log(`Updating ${name} to ${value || files}`); // Debug log
     if (name === 'photos') {
       setFormData((prev) => ({ ...prev, photos: Array.from(files) }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => {
+        const updated = { ...prev, [name]: value };
+        console.log('Updated formData:', updated); // Debug log
+        return updated;
+      });
       const error = validateField(name, value);
       setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
     }
@@ -170,6 +173,7 @@ export function BusinessFormProvider({ children }) {
   }
 
   function handleHoursChange(index, field, value) {
+    console.log(`Updating businessHours[${index}].${field} to ${value}`); // Debug log
     setFormData((prev) => {
       const updated = [...prev.businessHours];
       if (field === 'isOpen24') {
@@ -207,7 +211,7 @@ export function BusinessFormProvider({ children }) {
       return formData.description.trim() !== '';
     }
     if (stepNumber === 10) {
-      return formData.photos.length > 0;
+      return true; // Photos are optional
     }
     return true;
   }
@@ -226,57 +230,27 @@ export function BusinessFormProvider({ children }) {
   }
 
   async function nextStep() {
-    if (step === 4) {
-      if (!formData.website.trim()) {
-        setErrors({ website: 'Website is required to continue' });
-        return;
-      }
-      if (!urlRegex.test(formData.website)) {
-        setErrors({ website: 'Please enter a valid website URL (e.g., https://example.com)' });
-        return;
-      }
-    }
     const stepErrors = validateStep(step, formData);
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
       return;
     }
     setErrors({});
-    // Replace the signUp function call in your nextStep function (around line 245)
     if (step === 7 && !isSignedIn) {
-        try {
-        const signUpResult = await signUp({
-            username: formData.emailaddress,
-            password: formData.password,
-            attributes: {
-            // Change these attribute names to match what Cognito expects
-            givenName: formData.firstName,  // Changed from given_name
-            familyName: formData.lastName,  // Changed from family_name
-            email: formData.emailaddress,
-            },
-        });
-        setBusinessOwnerId(signUpResult.userSub);
+      try {
         setStep(7.5);
         navigate('/my-businesses/business-account/verify');
         return;
-        } catch (error) {
+      } catch (error) {
         setErrors({
-            manualSignUp: error.message || 'Failed to create account. Please try again.',
+          manualSignUp: error.message || 'Failed to create account. Please try again.',
         });
         console.error('Sign-up error:', error);
         return;
-        }
+      }
     }
-    if (step === 7.5) {
+    if (step === 7.5 && !isSignedIn) {
       try {
-        await confirmSignUp({
-          username: formData.emailaddress,
-          confirmationCode: verificationCode,
-        });
-        await signIn({
-          username: formData.emailaddress,
-          password: formData.password,
-        });
         setIsSignedIn(true);
         setStep(8);
         navigate('/my-businesses/business-hours');
@@ -286,21 +260,28 @@ export function BusinessFormProvider({ children }) {
         return;
       }
     }
+    if (step === 10) {
+      try {
+        console.log('Navigating to /business-profile with formData:', formData);
+        navigate('/business-profile', { state: { formData } });
+        // Clear localStorage after submission if desired
+        // localStorage.removeItem('businessFormStep');
+        // localStorage.removeItem('businessFormData');
+      } catch (error) {
+        console.error('Error during submission:', error);
+        setErrors({ submit: 'Failed to submit. Please try again.' });
+      }
+      return;
+    }
     if (step < 10) {
       if (isSignedIn && step === 6) {
         setStep(8);
         navigate('/my-businesses/business-hours');
-        return;
       } else {
         const newStep = step + 1;
         setStep(newStep);
-        const route = stepToRouteMap[newStep];
-        if (route) navigate(route);
-        return;
+        navigate(stepToRouteMap[newStep]);
       }
-    }
-    if (step === 10) {
-      navigate('/business-profile', { state: { formData, businessOwnerId } });
     }
   }
 
@@ -318,8 +299,7 @@ export function BusinessFormProvider({ children }) {
     if (step > 1) {
       const newStep = step - 1;
       setStep(newStep);
-      const route = stepToRouteMap[newStep];
-      if (route) navigate(route);
+      navigate(stepToRouteMap[newStep]);
     }
   }
 
@@ -327,86 +307,90 @@ export function BusinessFormProvider({ children }) {
     setErrors({});
     const newStep = step + 1;
     setStep(newStep);
-    const route = stepToRouteMap[newStep];
-    if (route) navigate(route);
+    navigate(stepToRouteMap[newStep]);
   }
 
   async function signInWithGoogle() {
     try {
+      console.log('Initiating Google sign-in redirect');
       localStorage.setItem('businessFormStep', '8');
       await signInWithRedirect({ provider: 'Google' });
     } catch (error) {
       setErrors({ google: 'Failed to sign in with Google. Please try again.' });
+      console.error('Google sign-in error:', error);
     }
   }
 
+  // Restore form state on mount and handle route changes
   useEffect(() => {
     const pathNoSlash = location.pathname.replace(/\/$/, '');
-    if (routeToStepMap[pathNoSlash]) {
-      setStep(routeToStepMap[pathNoSlash]);
-    } else {
-      const storedStep = localStorage.getItem('businessFormStep');
-      if (storedStep) {
-        const route = stepToRouteMap[parseFloat(storedStep)];
-        if (route) navigate(route, { replace: true });
-      }
-    }
+    const storedStep = localStorage.getItem('businessFormStep');
     const storedData = localStorage.getItem('businessFormData');
-    if (storedData) {
-      try {
-        const parsed = JSON.parse(storedData);
-        setFormData(parsed);
-      } catch (err) {
-        console.error('Error parsing local form data:', err);
+
+    if (routeToStepMap[pathNoSlash]) {
+      const currentStep = routeToStepMap[pathNoSlash];
+      setStep(currentStep);
+    } else if (storedStep && storedData) {
+      const parsedStep = parseFloat(storedStep);
+      setStep(parsedStep);
+      const route = stepToRouteMap[parsedStep];
+      if (route && location.pathname !== route) {
+        navigate(route, { replace: true });
       }
     }
   }, [location.pathname, navigate]);
 
+  // Save form state to localStorage
   useEffect(() => {
+    console.log('Saving to localStorage:', { step, formData });
     localStorage.setItem('businessFormStep', step.toString());
     localStorage.setItem('businessFormData', JSON.stringify(formData));
   }, [step, formData]);
 
+  // Authentication handling
   useEffect(() => {
     const checkUser = async () => {
       try {
-        await getCurrentUser();
+        const user = await getCurrentUser();
         const attributes = await fetchUserAttributes();
+        console.log('User authenticated:', user, attributes);
         setIsSignedIn(true);
         setBusinessOwnerId(attributes.sub);
-        // In your useEffect where you fetch user attributes
         setFormData((prev) => ({
-            ...prev,
-            firstName: attributes.givenName || '',  // Changed from given_name
-            lastName: attributes.familyName || '',  // Changed from family_name
-            emailaddress: attributes.email || '',
+          ...prev,
+          firstName: attributes.given_name || '',
+          lastName: attributes.family_name || '',
+          emailaddress: attributes.email || '',
         }));
-      } catch {
+      } catch (error) {
+        console.log('No authenticated user found:', error);
         setIsSignedIn(false);
       }
     };
     checkUser();
 
-        // In your Hub listener
     const listener = (data) => {
-        switch (data.payload.event) {
+      console.log('Auth event:', data.payload.event);
+      switch (data.payload.event) {
         case 'signIn':
-            fetchUserAttributes()
+          fetchUserAttributes()
             .then((attributes) => {
-                setFormData((prev) => ({
+              setFormData((prev) => ({
                 ...prev,
-                firstName: attributes.givenName || '',  // Changed from given_name
-                lastName: attributes.familyName || '',  // Changed from family_name
+                firstName: attributes.given_name || '',
+                lastName: attributes.family_name || '',
                 emailaddress: attributes.email || '',
                 password: '',
-                }));
-                setBusinessOwnerId(attributes.sub);
+              }));
+              setBusinessOwnerId(attributes.sub);
             })
-            .catch(() => {
-                setErrors({ google: 'Authentication failed. Please try again.' });
+            .catch((error) => {
+              console.error('Error fetching attributes:', error);
+              setErrors({ google: 'Authentication failed. Please try again.' });
             });
-            break;
+          break;
         case 'signIn_failure':
+          console.error('Sign-in failure:', data.payload.data);
           setErrors({ google: 'Google sign-in failed. Please try again.' });
           break;
         default:
