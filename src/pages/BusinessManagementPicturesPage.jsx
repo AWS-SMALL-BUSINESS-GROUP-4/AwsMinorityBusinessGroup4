@@ -48,7 +48,7 @@ function BusinessManagementPicturesPage() {
                 <div className='main'>
                     <h1>Pictures</h1>
                     <hr/>
-                    <div>
+                    {/*<div>
                         <div className='spread'>
                             <h2>Outside</h2>
                             <input type='file' ref={outsideImgUpload} accept='image/*' className='hidden'/>
@@ -79,12 +79,20 @@ function BusinessManagementPicturesPage() {
                             <button className="btn" onClick={handleOutsideImgUpload}>Upload Image</button>
                         </div>
                     </div>
-                    <hr/>
+                    <hr/>*/}
                     <div>
                         <div className='spread'>
                             <h2>All Pictures</h2>
                             <input type='file' ref={outsideImgUpload} accept='image/*' className='hidden'/>
                             <button className="btn" onClick={handleOutsideImgUpload}>Upload Image</button>
+                        </div>
+                        <div className='spread scroll'>
+                            {images.map((source, index) => (
+                                <div key={index} className="img-with-button"> 
+                                    <img src={source}/>
+                                    <button className="btn" onClick={handleDelete(index)}>Delete</button>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
