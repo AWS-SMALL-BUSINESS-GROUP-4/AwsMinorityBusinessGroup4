@@ -7,16 +7,17 @@ import "./App.css";
 import ReviewPage from "./pages/ReviewPage";
 import BusinessNavBar from "./components/NavBar";
 import BusinessManagementPage from "./pages/BusinessManagementPage";
+import BusinessManagementPicturesPage from "./pages/BusinessManagementPicturesPage";
 import React from "react";
 import BusinessCreationForm from "./pages/BusinessCreationForm";
 import SearchResultPage from "./pages/SearchResultPage";
 
 function App() {
   return (
-    //   <div>
-    //     <ReviewPage/>
-    //   </div>
-    // )
+      <div>
+        <BusinessManagementPicturesPage/>
+      </div>
+    )
 
     /*return (
     <>
@@ -42,32 +43,32 @@ function App() {
       </p>
     </>
   )*/
-    <Router>
-      <Routes>
-        {/* Main Routes */}
-        <Route path="/" element={<HomePage />} />
+  //   <Router>
+  //     <Routes>
+  //       {/* Main Routes */}
+  //       <Route path="/" element={<HomePage />} />
 
-        {/* Authentication Routes */}
-        {/* <Route path="/search" element={<SearchResultPage />} /> */}
+  //       {/* Authentication Routes */}
+  //       {/* <Route path="/search" element={<SearchResultPage />} /> */}
 
-        {/* Business Routes */}
-        <Route path="/search" element={<SearchResultPage />} />
+  //       {/* Business Routes */}
+  //       <Route path="/search" element={<SearchResultPage />} />
 
-        <Route path="/my-businesses" element={<BusinessCreationForm />} />
-        <Route
-          path="/write-review"
-          element={<div>Write Review Page (Coming Soon)</div>}
-        />
-        <Route
-          path="/business/:id"
-          element={<div>Business Detail Page (Coming Soon)</div>}
-        />
+  //       <Route path="/my-businesses" element={<BusinessCreationForm />} />
+  //       <Route
+  //         path="/write-review"
+  //         element={<div>Write Review Page (Coming Soon)</div>}
+  //       />
+  //       <Route
+  //         path="/business/:id"
+  //         element={<div>Business Detail Page (Coming Soon)</div>}
+  //       />
 
-        {/* 404 Route */}
-        <Route path="*" element={<div>404 Page Not Found</div>} />
-      </Routes>
-    </Router>
-  );
+  //       {/* 404 Route */}
+  //       <Route path="*" element={<div>404 Page Not Found</div>} />
+  //     </Routes>
+  //   </Router>
+  // );
   // <div>
   //   <BusinessManagementPage/>
   // </div>
