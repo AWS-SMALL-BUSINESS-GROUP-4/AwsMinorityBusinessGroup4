@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './BusinessCreationForm.css';
 import { generateClient } from 'aws-amplify/data';
+import { uploadData } from 'aws-amplify/storage';
 /**
  * @type {import('aws-amplify/data').Client<import('../amplify/data/resource').Schema>}
  */
@@ -260,8 +261,25 @@ const BusinessCreationForm = () => {
   
       // Step 1: Create a User
       const newUser = await createUser();
+
+      // Step 2: Upload Photos to S3 (if applicable)
+      const photoUrls = [];
+      if (formData.photos.length > 0) {
+        for (const photo of formData.photos) {
+          const fileKey = `businesses/${newUser.id}/photos/${photo.name}`; // Path for business photos
+          await uploadData({
+            path: fileKey,
+            data: photo,
+            options: {
+              bucket: 'awsmbg4-private', // Use the private bucket
+            },
+          });
+          const photoUrl = await client.storage.getUrl(fileKey); // Get the public URL of the uploaded file
+          photoUrls.push(photoUrl);
+        }
+      }
   
-      // Step 2: Create a Business linked to the User
+      // Step 3: Create a Business linked to the User
       const businessData = {
         businessOwnerId: newUser.id, // Link the business to the user
         name: formData.businessName,
