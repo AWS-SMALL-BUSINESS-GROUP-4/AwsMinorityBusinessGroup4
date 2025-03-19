@@ -42,16 +42,19 @@ function BusinessManagementPicturesPage() {
     }
 
     const handleFileUpload = (event) => {
-        setNewImg(event.target.files?.[0]);
+        const file = event.target.files?.[0];
+        if(file) {
+            setNewImg(file);
 
-        uploadData({
-            path: `business-photos/guest/${newImg.name}`,
-            data: file,
-            options: {             
-                // Specify a target bucket using name assigned in Amplify Backend
-                bucket: 'AWSMBG4-private'
-            }
-        });
+            uploadData({
+                path: `business-photos/guest/${file.name}`,
+                data: newImg,
+                options: {             
+                    // Specify a target bucket using name assigned in Amplify Backend
+                    bucket: 'AWSMBG4-private'
+                }
+            });
+        }
     }
 
 
