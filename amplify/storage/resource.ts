@@ -2,10 +2,9 @@ import { defineStorage } from '@aws-amplify/backend';
 
 // Public bucket for publicly accessible files
 export const publicBucket = defineStorage({
-  name: 'awsmbg4-public', // Ensure lowercase and no special characters
+  name: 'awsmbg4-public', 
   isDefault: true,
   access: (allow) => ({
-    // Allow public read access to all files in the bucket
     'public/*': [
       allow.guest.to(['read'])
     ]
@@ -14,23 +13,17 @@ export const publicBucket = defineStorage({
 
 // Private bucket for business and user-specific files
 export const privateBucket = defineStorage({
-  name: 'awsmbg4-private', // Ensure lowercase and no special characters
+  name: 'awsmbg4-private',
   access: (allow) => ({
-    // Allow business owners to manage their files
     'businesses/{entity_id}/*': [
-      allow.entity('identity').to(['read', 'write', 'delete'])
-    ],
-    // Allow guests to read business photos
-    'businesses/{entity_id}/photos/*': [
+      allow.entity('identity').to(['read', 'write', 'delete']),
       allow.guest.to(['read'])
     ],
-    // Allow users to manage their files
+   
     'users/{entity_id}/*': [
-      allow.entity('identity').to(['read', 'write', 'delete'])
-    ],
-    // Allow guests to read user profile photos
-    'users/{entity_id}/photos/*': [
+      allow.entity('identity').to(['read', 'write', 'delete']),
       allow.guest.to(['read'])
-    ]
+    ],
+
   })
 });
