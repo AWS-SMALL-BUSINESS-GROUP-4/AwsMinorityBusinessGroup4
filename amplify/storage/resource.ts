@@ -17,19 +17,19 @@ export const privateBucket = defineStorage({
   name: 'awsmbg4-private', // Ensure lowercase and no special characters
   access: (allow) => ({
     // Allow business owners to manage their files
-    'businesses/{business_id}/*': [
+    'businesses/{entity_id}/*': [
       allow.entity('identity').to(['read', 'write', 'delete'])
     ],
     // Allow guests to read business photos
-    'businesses/{business_id}/photos/*': [
+    'businesses/{entity_id}/photos/*': [
       allow.guest.to(['read'])
     ],
     // Allow users to manage their files
-    'users/{user_id}/*': [
+    'users/{entity_id}/*': [
       allow.entity('identity').to(['read', 'write', 'delete'])
     ],
     // Allow guests to read user profile photos
-    'users/{user_id}/photos/*': [
+    'users/{entity_id}/photos/*': [
       allow.guest.to(['read'])
     ]
   })
