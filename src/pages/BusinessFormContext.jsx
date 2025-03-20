@@ -11,9 +11,10 @@ import {
   confirmSignUp,
   resendSignUpCode,
 } from '@aws-amplify/auth';
-import axios from 'axios';
+import { generateClient } from 'aws-amplify/data';
 
-// Updated routes to match /add-business base path
+const client = generateClient();
+
 export const stepToRouteMap = {
   1: '/add-business/business-name',
   2: '/add-business/business-email',
@@ -153,15 +154,10 @@ export function BusinessFormProvider({ children }) {
 
   function handleInputChange(e) {
     const { name, value, files } = e.target;
-    console.log(`Updating ${name} to ${value || files}`);
     if (name === 'photos') {
       setFormData((prev) => ({ ...prev, photos: Array.from(files) }));
     } else {
-      setFormData((prev) => {
-        const updated = { ...prev, [name]: value };
-        console.log('Updated formData:', updated);
-        return updated;
-      });
+      setFormData((prev) => ({ ...prev, [name]: value }));
       const error = validateField(name, value);
       setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
     }
@@ -174,7 +170,6 @@ export function BusinessFormProvider({ children }) {
   }
 
   function handleHoursChange(index, field, value) {
-    console.log(`Updating businessHours[${index}].${field} to ${value}`);
     setFormData((prev) => {
       const updated = [...prev.businessHours];
       if (field === 'isOpen24') {
@@ -201,6 +196,20 @@ export function BusinessFormProvider({ children }) {
     });
   }
 
+  function validateStep(stepNumber, data) {
+    const stepErrors = {};
+    const fields = requiredFields[stepNumber] || [];
+    fields.forEach((field) => {
+      const err = validateField(field, data[field]);
+      if (err) stepErrors[field] = err;
+    });
+    if (stepNumber === 4 && data.website.trim() && !urlRegex.test(data.website)) {
+      stepErrors.website = 'Please enter a valid website URL (e.g., https://example.com)';
+    }
+    return stepErrors;
+  }
+
+  // Define isStepComplete function
   function isStepComplete(stepNumber) {
     if (stepNumber === 8) {
       return formData.businessHours.every((day) => {
@@ -217,19 +226,6 @@ export function BusinessFormProvider({ children }) {
     return true;
   }
 
-  function validateStep(stepNumber, data) {
-    const stepErrors = {};
-    const fields = requiredFields[stepNumber] || [];
-    fields.forEach((field) => {
-      const err = validateField(field, data[field]);
-      if (err) stepErrors[field] = err;
-    });
-    if (stepNumber === 4 && data.website.trim() && !urlRegex.test(data.website)) {
-      stepErrors.website = 'Please enter a valid website URL (e.g., https://example.com)';
-    }
-    return stepErrors;
-  }
-
   async function nextStep() {
     const stepErrors = validateStep(step, formData);
     if (Object.keys(stepErrors).length > 0) {
@@ -239,14 +235,6 @@ export function BusinessFormProvider({ children }) {
     setErrors({});
     if (step === 7 && !isSignedIn) {
       try {
-        console.log('Attempting sign-up with:', {
-          username: formData.emailaddress,
-          password: formData.password,
-          attributes: {
-            'name.givenName': formData.firstName,
-            'name.familyName': formData.lastName,
-          },
-        });
         const signUpResult = await signUp({
           username: formData.emailaddress,
           password: formData.password,
@@ -255,7 +243,6 @@ export function BusinessFormProvider({ children }) {
             'name.familyName': formData.lastName,
           },
         });
-        console.log('Sign-up result:', signUpResult);
         setStep(7.5);
         navigate('/add-business/business-account/verify');
       } catch (error) {
@@ -268,20 +255,14 @@ export function BusinessFormProvider({ children }) {
     }
     if (step === 7.5 && !isSignedIn) {
       try {
-        console.log('Attempting to confirm sign-up with:', {
-          username: formData.emailaddress,
-          code: verificationCode,
-        });
         await confirmSignUp({
           username: formData.emailaddress,
           confirmationCode: verificationCode,
         });
-        console.log('Sign-up confirmed, attempting sign-in');
         await signIn({
           username: formData.emailaddress,
           password: formData.password,
         });
-        console.log('Sign-in successful');
         setIsSignedIn(true);
         setStep(8);
         navigate('/add-business/business-hours');
@@ -292,12 +273,38 @@ export function BusinessFormProvider({ children }) {
       return;
     }
     if (step === 10) {
+
       try {
-        console.log('Navigating to /business-profile with formData:', formData);
-        navigate('/business-profile', { state: { formData } });
+        const user = await getCurrentUser();
+        console.log('Authenticated user:', user);
+        // Save to DynamoDB
+        const businessData = {
+          businessName: formData.businessName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          website: formData.website || null,
+          categories: formData.categories,
+          address: {
+            street: formData.street,
+            apt: formData.apt || null,
+            city: formData.city,
+            state: formData.state,
+            zip: formData.zip,
+            country: formData.country,
+          },
+          ownerId: businessOwnerId,
+          description: formData.description || null,
+          businessHours: formData.businessHours,
+          // Photos would need to be uploaded separately (e.g., to S3) and referenced here
+        };
+        const response = await client.models.Business.create(businessData);
+        console.log('Business created in DynamoDB:', response);
+        navigate('/business-profile');
       } catch (error) {
-        console.error('Error during submission:', error);
-        setErrors({ submit: 'Failed to submit. Please try again.' });
+        console.error('User not authenticated:', error);
+        setErrors({ submit: 'You must be signed in to save business data.' });
+        console.error('Error saving to DynamoDB:', error);
+        setErrors({ submit: 'Failed to save business data. Please try again.' });
       }
       return;
     }
@@ -340,7 +347,6 @@ export function BusinessFormProvider({ children }) {
 
   async function signInWithGoogle() {
     try {
-      console.log('Initiating Google sign-in redirect');
       localStorage.setItem('businessFormStep', '8');
       await signInWithRedirect({ provider: 'Google' });
     } catch (error) {
@@ -351,9 +357,7 @@ export function BusinessFormProvider({ children }) {
 
   async function resendVerificationCode() {
     try {
-      console.log('Attempting to resend verification code for:', formData.emailaddress);
-      const resendResult = await resendSignUpCode({ username: formData.emailaddress });
-      console.log('Resend result:', resendResult);
+      await resendSignUpCode({ username: formData.emailaddress });
       setErrors((prev) => ({ ...prev, verification: 'Code resent. Check your email.' }));
     } catch (error) {
       console.error('Error resending verification code:', error);
@@ -383,7 +387,6 @@ export function BusinessFormProvider({ children }) {
   }, [location.pathname, navigate]);
 
   useEffect(() => {
-    console.log('Saving to localStorage:', { step, formData });
     localStorage.setItem('businessFormStep', step.toString());
     localStorage.setItem('businessFormData', JSON.stringify(formData));
   }, [step, formData]);
@@ -393,7 +396,6 @@ export function BusinessFormProvider({ children }) {
       try {
         const user = await getCurrentUser();
         const attributes = await fetchUserAttributes();
-        console.log('User authenticated:', user, attributes);
         setIsSignedIn(true);
         setBusinessOwnerId(attributes.sub);
         setFormData((prev) => ({
@@ -410,7 +412,6 @@ export function BusinessFormProvider({ children }) {
     checkUser();
 
     const listener = (data) => {
-      console.log('Auth event:', data.payload.event);
       switch (data.payload.event) {
         case 'signIn':
           fetchUserAttributes()
@@ -430,7 +431,6 @@ export function BusinessFormProvider({ children }) {
             });
           break;
         case 'signIn_failure':
-          console.error('Sign-in failure:', data.payload.data);
           setErrors({ google: 'Google sign-in failed. Please try again.' });
           break;
         default:
@@ -462,7 +462,7 @@ export function BusinessFormProvider({ children }) {
     signInWithGoogle,
     nextStep,
     prevStep,
-    isStepComplete,
+    isStepComplete, // Ensure this is included
     resendVerificationCode,
   };
 

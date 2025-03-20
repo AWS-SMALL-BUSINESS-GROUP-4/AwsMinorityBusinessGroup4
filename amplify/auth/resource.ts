@@ -16,7 +16,7 @@ export const auth = defineAuth({
           familyName: 'family_name' // Maps Google's 'family_name' to Cognito's 'familyName'
         },
       },
-      callbackUrls: ['http://localhost:5173/add-business/business-hours/'], // Update for production
+      callbackUrls: ['http://localhost:5173/add-business/business-hours'], // Update for production
       logoutUrls: ['http://localhost:5173/'], // Update for production
     },
   },
