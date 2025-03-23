@@ -12,6 +12,7 @@ import {
   resendSignUpCode,
 } from '@aws-amplify/auth';
 import { generateClient } from 'aws-amplify/data';
+import axios from 'axios';
 
 const client = generateClient();
 
@@ -209,7 +210,6 @@ export function BusinessFormProvider({ children }) {
     return stepErrors;
   }
 
-  // Define isStepComplete function
   function isStepComplete(stepNumber) {
     if (stepNumber === 8) {
       return formData.businessHours.every((day) => {
@@ -226,6 +226,33 @@ export function BusinessFormProvider({ children }) {
     return true;
   }
 
+  // Geocoding function using Google Maps API
+  async function geocodeAddress(address) {
+    const apiKey = import.meta.env.VITE_PLACES_API_KEY;
+    if (!apiKey) {
+      console.error('Google Places API key is missing');
+      return null;
+    }
+
+    const fullAddress = `${address.streetAddress}, ${address.city}, ${address.state} ${address.zipcode}, ${address.country}`;
+    try {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${apiKey}`
+      );
+      const { results, status } = response.data;
+      if (status === 'OK' && results.length > 0) {
+        const { lat, lng } = results[0].geometry.location;
+        return { lattitude: lat, longitude: lng };
+      } else {
+        console.error('Geocoding failed:', status);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error during geocoding:', error);
+      return null;
+    }
+  }
+
   async function nextStep() {
     const stepErrors = validateStep(step, formData);
     if (Object.keys(stepErrors).length > 0) {
@@ -233,14 +260,15 @@ export function BusinessFormProvider({ children }) {
       return;
     }
     setErrors({});
+
     if (step === 7 && !isSignedIn) {
       try {
         const signUpResult = await signUp({
           username: formData.emailaddress,
           password: formData.password,
           attributes: {
-            'name.givenName': formData.firstName,
-            'name.familyName': formData.lastName,
+            'given_name': formData.firstName,
+            'family_name': formData.lastName,
           },
         });
         setStep(7.5);
@@ -273,38 +301,80 @@ export function BusinessFormProvider({ children }) {
       return;
     }
     if (step === 10) {
-
       try {
         const user = await getCurrentUser();
         console.log('Authenticated user:', user);
-        // Save to DynamoDB
+        const attributes = await fetchUserAttributes();
+        console.log('User attributes:', attributes);
+
+        // Ensure description is provided
+        if (!formData.description || formData.description.trim() === '') {
+          setErrors({ description: 'Business description is required.' });
+          return;
+        }
+
+        // Geocode the address
+        const address = {
+          streetAddress: formData.street,
+          city: formData.city,
+          state: formData.state,
+          zipcode: formData.zip,
+          country: formData.country,
+        };
+        const location = await geocodeAddress(address);
+
+        // Create or update User record
+        const userData = {
+          id: attributes.sub, // Use sub as the identifier
+          name: {
+            firstName: attributes.given_name || formData.firstName,
+            lastName: attributes.family_name || formData.lastName,
+          },
+          email: attributes.email || formData.emailaddress,
+          joinedAt: Date.now(),
+          lastLogin: Date.now(),
+        };
+        const userResponse = await client.models.User.create(userData, {
+          condition: { id: { ne: attributes.sub } }, // Create only if it doesn’t exist
+        });
+        console.log('User creation response:', userResponse);
+
         const businessData = {
-          businessName: formData.businessName,
+          businessOwnerId: attributes.sub, // Links to User.id
+          // businessOwner is handled by the relationship, not set here
+          name: formData.businessName,
           email: formData.email,
           phoneNumber: formData.phoneNumber,
-          website: formData.website || null,
-          categories: formData.categories,
-          address: {
-            street: formData.street,
-            apt: formData.apt || null,
-            city: formData.city,
-            state: formData.state,
-            zip: formData.zip,
-            country: formData.country,
-          },
-          ownerId: businessOwnerId,
-          description: formData.description || null,
-          businessHours: formData.businessHours,
-          // Photos would need to be uploaded separately (e.g., to S3) and referenced here
+          website: formData.website || '',
+          category: formData.categories, // Assuming singular; adjust if array
+          streetAddress: formData.street,
+          aptSuiteOther: formData.apt || '',
+          city: formData.city,
+          state: formData.state,
+          zipcode: formData.zip,
+          country: formData.country,
+          location: location || { lattitude: 0, longitude: 0 }, // Fallback if geocoding fails
+          businessHours: JSON.stringify(formData.businessHours),
+          description: formData.description,
+          photos: [], // Placeholder for S3 URLs
         };
+
+        console.log('Attempting to create business with data:', businessData);
         const response = await client.models.Business.create(businessData);
-        console.log('Business created in DynamoDB:', response);
-        navigate('/business-profile');
+        console.log('Create response:', response);
+
+        if (response.errors) {
+          throw new Error(response.errors[0].message);
+        }
+
+        console.log('Business created successfully:', response.data);
+
+        localStorage.removeItem('businessFormStep');
+        localStorage.removeItem('businessFormData');
+        navigate('/business-profile', { state: { formData } });
       } catch (error) {
-        console.error('User not authenticated:', error);
-        setErrors({ submit: 'You must be signed in to save business data.' });
-        console.error('Error saving to DynamoDB:', error);
-        setErrors({ submit: 'Failed to save business data. Please try again.' });
+        console.error('Error in nextStep:', error);
+        setErrors({ submit: `Failed to save business data: ${error.message}` });
       }
       return;
     }
@@ -400,8 +470,8 @@ export function BusinessFormProvider({ children }) {
         setBusinessOwnerId(attributes.sub);
         setFormData((prev) => ({
           ...prev,
-          firstName: attributes['name.givenName'] || '',
-          lastName: attributes['name.familyName'] || '',
+          firstName: attributes.given_name || '',
+          lastName: attributes.family_name || '',
           emailaddress: attributes.email || '',
         }));
       } catch (error) {
@@ -418,12 +488,13 @@ export function BusinessFormProvider({ children }) {
             .then((attributes) => {
               setFormData((prev) => ({
                 ...prev,
-                firstName: attributes['name.givenName'] || '',
-                lastName: attributes['name.familyName'] || '',
+                firstName: attributes.given_name || '',
+                lastName: attributes.family_name || '',
                 emailaddress: attributes.email || '',
                 password: '',
               }));
               setBusinessOwnerId(attributes.sub);
+              setIsSignedIn(true);
             })
             .catch((error) => {
               console.error('Error fetching attributes:', error);
@@ -431,6 +502,7 @@ export function BusinessFormProvider({ children }) {
             });
           break;
         case 'signIn_failure':
+          console.error('Sign-in failure:', data.payload.data);
           setErrors({ google: 'Google sign-in failed. Please try again.' });
           break;
         default:
@@ -462,7 +534,7 @@ export function BusinessFormProvider({ children }) {
     signInWithGoogle,
     nextStep,
     prevStep,
-    isStepComplete, // Ensure this is included
+    isStepComplete,
     resendVerificationCode,
   };
 
