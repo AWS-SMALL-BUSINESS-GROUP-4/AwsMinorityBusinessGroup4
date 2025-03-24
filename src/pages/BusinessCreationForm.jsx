@@ -258,6 +258,12 @@ const BusinessCreationForm = () => {
 
   const handleSubmit = async () => {
     try {
+      // Validate website before proceeding
+      if (formData.website.trim() && !urlRegex.test(formData.website)) {
+        alert('Please enter a valid website URL (e.g., https://example.com)');
+        return;
+      }
+
       console.log('Form data:', formData); // Log the form data
   
       // Step 1: Create a User
@@ -286,7 +292,7 @@ const BusinessCreationForm = () => {
         name: formData.businessName,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
-        website: formData.website,
+        website: formData.website.trim() || null,
         category: formData.categories,
         streetAddress: formData.street,
         aptSuiteOther: formData.apt,
