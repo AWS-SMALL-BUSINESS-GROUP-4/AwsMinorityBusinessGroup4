@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import './BusinessCreationForm.css';
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
 import { generateClient } from 'aws-amplify/data';
 import { uploadData } from 'aws-amplify/storage';
 /**
@@ -929,4 +931,14 @@ const BusinessCreationForm = () => {
   );
 };
 
-export default BusinessCreationForm;
+const AuthenticatedBusinessForm = () => {
+  return (
+    <Authenticator>
+      {({ signOut }) => (
+        <BusinessCreationForm />
+      )}
+    </Authenticator>
+  );
+};
+
+export default AuthenticatedBusinessForm;
