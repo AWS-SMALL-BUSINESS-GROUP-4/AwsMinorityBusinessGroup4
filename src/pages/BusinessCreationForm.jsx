@@ -241,7 +241,6 @@ const BusinessCreationForm = () => {
           lastName: formData.lastName,
         },
         email: formData.emailaddress,
-        password: formData.password, // Note: Passwords should be hashed
       });
   
       if (errors) {
@@ -268,16 +267,16 @@ const BusinessCreationForm = () => {
       const photoUrls = [];
       if (formData.photos.length > 0) {
         for (const photo of formData.photos) {
-          const fileKey = `businesses/${newUser.id}/photos/${photo.name}`; // Path for business photos
-          await uploadData({
+          const fileKey = `businesses/${newUser.id}/photos/${Date.now()}-${photo.name}`; // Path for business photos
+          const result = await uploadData({
             path: fileKey,
             data: photo,
             options: {
               bucket: 'awsmbg4-private', // Use the private bucket
             },
           });
-          const photoUrl = await client.storage.getUrl(fileKey); // Get the public URL of the uploaded file
-          photoUrls.push(photoUrl);
+          console.log('Photo upload result:', result);
+          photoUrls.push(fileKey);
         }
       }
   
@@ -301,7 +300,7 @@ const BusinessCreationForm = () => {
         },
         businessHours: formData.businessHours,
         description: formData.description,
-        photos: formData.photos.map((photo) => URL.createObjectURL(photo)), // Convert files to URLs
+        photos: photoUrls, // Use the S3 keys instead of object URLs
       };
   
       console.log('Business data to be saved:', businessData); // Log the data being sent
@@ -316,16 +315,6 @@ const BusinessCreationForm = () => {
       }
   
       console.log('New business created:', newBusiness); // Log the response
-  
-      // Handle file uploads (if applicable)
-      if (formData.photos.length > 0) {
-        for (const photo of formData.photos) {
-          const fileKey = `business-photos/${newBusiness.id}/${photo.name}`;
-          await client.storage.uploadFile(fileKey, photo);
-        }
-      }
-  
-      // Success message
       alert('Business created successfully!');
 
       // Reset the form or navigate to another page
