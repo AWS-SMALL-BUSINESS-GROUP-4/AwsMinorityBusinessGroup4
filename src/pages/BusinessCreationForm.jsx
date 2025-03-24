@@ -264,6 +264,15 @@ const BusinessCreationForm = () => {
         return;
       }
 
+      // Format businessHours data
+      const formattedBusinessHours = formData.businessHours.map(hour => ({
+        day: hour.day,
+        openTime: hour.openTime || null,
+        closeTime: hour.closeTime || null,
+        isOpen24: hour.isOpen24 || false,
+        isClosed: hour.isClosed || false
+      }));
+
       console.log('Form data:', formData); // Log the form data
   
       // Step 1: Create a User
@@ -287,7 +296,7 @@ const BusinessCreationForm = () => {
       }
   
       // Step 3: Create a Business linked to the User
-      const businessData = {
+      const { errors, data: newBusiness } = await client.models.Business.create({
         businessOwnerId: newUser.id, // Link the business to the user
         name: formData.businessName,
         email: formData.email,
@@ -304,21 +313,29 @@ const BusinessCreationForm = () => {
           lattitude: 0, // Replace with actual latitude
           longitude: 0, // Replace with actual longitude
         },
-        businessHours: formData.businessHours,
         description: formData.description,
         photos: photoUrls, // Use the S3 keys instead of object URLs
-      };
-  
-      console.log('Business data to be saved:', businessData); // Log the data being sent
-  
-      // Create the business in the backend
-      const { errors, data: newBusiness } = await client.models.Business.create(businessData);
-  
+      });
+
       if (errors) {
         console.error('Error creating business:', errors);
         alert('Failed to create business. Please try again.');
         return;
       }
+
+      // Step 4: Create Business Hours
+      const businessHoursPromises = formData.businessHours.map(hour => 
+        client.models.BusinessHours.create({
+          businessId: newBusiness.id,
+          day: hour.day,
+          openTime: hour.openTime || null,
+          closeTime: hour.closeTime || null,
+          isOpen24: hour.isOpen24 || false,
+          isClosed: hour.isClosed || false
+        })
+      );
+      
+      await Promise.all(businessHoursPromises);
   
       console.log('New business created:', newBusiness); // Log the response
       alert('Business created successfully!');
