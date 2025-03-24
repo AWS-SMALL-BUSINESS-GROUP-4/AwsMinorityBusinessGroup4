@@ -16,12 +16,12 @@ export const privateBucket = defineStorage({
   name: 'awsmbg4-private',
   access: (allow) => ({
     'businesses/{entity_id}/*': [
-      allow.entity('identity').to(['read', 'write', 'delete']),
+      allow.authenticated.to(['read', 'write', 'delete']),
       allow.guest.to(['read'])
     ],
    
     'users/{entity_id}/*': [
-      allow.entity('identity').to(['read', 'write', 'delete']),
+      allow.authenticated.to(['read', 'write', 'delete']),
       allow.guest.to(['read'])
     ],
 
