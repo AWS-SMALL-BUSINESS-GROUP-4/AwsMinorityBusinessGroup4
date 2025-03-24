@@ -288,10 +288,14 @@ const BusinessCreationForm = () => {
             data: photo,
             options: {
               bucket: 'awsmbg4-private', // Use the private bucket
+              contentType: photo.type,
             },
           });
+          
+          // Get the public URL of the uploaded photo
+          const photoUrl = await client.storage.getUrl(fileKey);
           console.log('Photo upload result:', result);
-          photoUrls.push(fileKey);
+          photoUrls.push(photoUrl);
         }
       }
   
