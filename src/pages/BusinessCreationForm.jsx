@@ -3,7 +3,7 @@ import './BusinessCreationForm.css';
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import { generateClient } from 'aws-amplify/data';
-import { uploadData } from 'aws-amplify/storage';
+import { uploadData, getUrl } from 'aws-amplify/storage';
 /**
  * @type {import('aws-amplify/data').Client<import('../amplify/data/resource').Schema>}
  */
@@ -291,11 +291,17 @@ const BusinessCreationForm = () => {
               contentType: photo.type,
             },
           });
-          
-          // Get the public URL of the uploaded photo
-          const photoUrl = await client.storage.getUrl(fileKey);
+
+          // Use getUrl from aws-amplify/storage
+          const photoUrl = await getUrl({
+            path: fileKey,
+            options: {
+              bucket: 'awsmbg4-private',
+            },
+          });
+
           console.log('Photo upload result:', result);
-          photoUrls.push(photoUrl);
+          photoUrls.push(photoUrl.url);
         }
       }
   
