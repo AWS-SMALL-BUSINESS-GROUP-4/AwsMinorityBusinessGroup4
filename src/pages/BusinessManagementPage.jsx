@@ -1,14 +1,39 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import '../App.css'
 import '../components/ContainerStyles.css'
 import './BusinessManagementPage.css'
 import '../components/TextStyles.css'
 import BusinessNavBar from '../components/BusinessNavBar'
 import BusinessManagementSidebar from '../components/BusinessManagementSideBar';
+import { generateClient } from "aws-amplify/data"
 
-function BusinessManagementPage() {
+function BusinessManagementPage({id}) {
+  const client = generateClient();
+
   // State to track if edit mode is active
   const [isEditing, setIsEditing] = useState(false);
+
+  const [notbusiness, setnotBusiness] = useState();
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchBusiness() {
+      try {
+        // get a specific item
+        const { data: fb, errors } = await client.models.Business.get({
+          id: id,
+        });
+      } catch(e) {
+        console.log(e);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBusiness();
+  }, [id]);
+
 
   const [business, setBusiness] = useState({
     name: "Negril",
