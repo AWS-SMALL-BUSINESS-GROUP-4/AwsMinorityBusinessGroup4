@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage";
 import ReviewPage from "./pages/ReviewPage";
 import BusinessNavBar from "./components/NavBar";
 import BusinessManagementPage from "./pages/BusinessManagementPage";
+import BusinessManagementPicturesPage from "./pages/BusinessManagementPicturesPage";
 import SearchResultPage from "./pages/SearchResultPage";
 import BusinessProfilePage from "./pages/BusinessProfilePage";
 import React from "react";
@@ -21,8 +22,8 @@ function App() {
         <Route path="/" element={<HomePage />} />
         {/* <Route path="/business-login" element={<SearchResultPage />} /> */}
 
-        {/* Business Routes */}
-        <Route path="/search" element={<SearchResultPage />} />
+  //       {/* Business Routes */}
+  //       <Route path="/search" element={<SearchResultPage />} />
 
         {/* Our new multi-step forms, handle /my-businesses/stepX */}
 
