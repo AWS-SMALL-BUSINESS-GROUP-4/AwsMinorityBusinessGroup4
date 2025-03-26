@@ -11,9 +11,11 @@ import {
   confirmSignUp,
   resendSignUpCode,
 } from '@aws-amplify/auth';
+import { generateClient } from 'aws-amplify/data';
 import axios from 'axios';
 
-// Updated routes to match /add-business base path
+const client = generateClient();
+
 export const stepToRouteMap = {
   1: '/add-business/business-name',
   2: '/add-business/business-email',
@@ -153,15 +155,10 @@ export function BusinessFormProvider({ children }) {
 
   function handleInputChange(e) {
     const { name, value, files } = e.target;
-    console.log(`Updating ${name} to ${value || files}`);
     if (name === 'photos') {
       setFormData((prev) => ({ ...prev, photos: Array.from(files) }));
     } else {
-      setFormData((prev) => {
-        const updated = { ...prev, [name]: value };
-        console.log('Updated formData:', updated);
-        return updated;
-      });
+      setFormData((prev) => ({ ...prev, [name]: value }));
       const error = validateField(name, value);
       setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
     }
@@ -174,7 +171,6 @@ export function BusinessFormProvider({ children }) {
   }
 
   function handleHoursChange(index, field, value) {
-    console.log(`Updating businessHours[${index}].${field} to ${value}`);
     setFormData((prev) => {
       const updated = [...prev.businessHours];
       if (field === 'isOpen24') {
@@ -201,6 +197,19 @@ export function BusinessFormProvider({ children }) {
     });
   }
 
+  function validateStep(stepNumber, data) {
+    const stepErrors = {};
+    const fields = requiredFields[stepNumber] || [];
+    fields.forEach((field) => {
+      const err = validateField(field, data[field]);
+      if (err) stepErrors[field] = err;
+    });
+    if (stepNumber === 4 && data.website.trim() && !urlRegex.test(data.website)) {
+      stepErrors.website = 'Please enter a valid website URL (e.g., https://example.com)';
+    }
+    return stepErrors;
+  }
+
   function isStepComplete(stepNumber) {
     if (stepNumber === 8) {
       return formData.businessHours.every((day) => {
@@ -217,17 +226,31 @@ export function BusinessFormProvider({ children }) {
     return true;
   }
 
-  function validateStep(stepNumber, data) {
-    const stepErrors = {};
-    const fields = requiredFields[stepNumber] || [];
-    fields.forEach((field) => {
-      const err = validateField(field, data[field]);
-      if (err) stepErrors[field] = err;
-    });
-    if (stepNumber === 4 && data.website.trim() && !urlRegex.test(data.website)) {
-      stepErrors.website = 'Please enter a valid website URL (e.g., https://example.com)';
+  // Geocoding function using Google Maps API
+  async function geocodeAddress(address) {
+    const apiKey = import.meta.env.VITE_PLACES_API_KEY;
+    if (!apiKey) {
+      console.error('Google Places API key is missing');
+      return null;
     }
-    return stepErrors;
+
+    const fullAddress = `${address.streetAddress}, ${address.city}, ${address.state} ${address.zipcode}, ${address.country}`;
+    try {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(fullAddress)}&key=${apiKey}`
+      );
+      const { results, status } = response.data;
+      if (status === 'OK' && results.length > 0) {
+        const { lat, lng } = results[0].geometry.location;
+        return { lattitude: lat, longitude: lng };
+      } else {
+        console.error('Geocoding failed:', status);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error during geocoding:', error);
+      return null;
+    }
   }
 
   async function nextStep() {
@@ -237,25 +260,17 @@ export function BusinessFormProvider({ children }) {
       return;
     }
     setErrors({});
+
     if (step === 7 && !isSignedIn) {
       try {
-        console.log('Attempting sign-up with:', {
-          username: formData.emailaddress,
-          password: formData.password,
-          attributes: {
-            'name.givenName': formData.firstName,
-            'name.familyName': formData.lastName,
-          },
-        });
         const signUpResult = await signUp({
           username: formData.emailaddress,
           password: formData.password,
           attributes: {
-            'name.givenName': formData.firstName,
-            'name.familyName': formData.lastName,
+            'given_name': formData.firstName,
+            'family_name': formData.lastName,
           },
         });
-        console.log('Sign-up result:', signUpResult);
         setStep(7.5);
         navigate('/add-business/business-account/verify');
       } catch (error) {
@@ -268,20 +283,14 @@ export function BusinessFormProvider({ children }) {
     }
     if (step === 7.5 && !isSignedIn) {
       try {
-        console.log('Attempting to confirm sign-up with:', {
-          username: formData.emailaddress,
-          code: verificationCode,
-        });
         await confirmSignUp({
           username: formData.emailaddress,
           confirmationCode: verificationCode,
         });
-        console.log('Sign-up confirmed, attempting sign-in');
         await signIn({
           username: formData.emailaddress,
           password: formData.password,
         });
-        console.log('Sign-in successful');
         setIsSignedIn(true);
         setStep(8);
         navigate('/add-business/business-hours');
@@ -293,11 +302,79 @@ export function BusinessFormProvider({ children }) {
     }
     if (step === 10) {
       try {
-        console.log('Navigating to /business-profile with formData:', formData);
+        const user = await getCurrentUser();
+        console.log('Authenticated user:', user);
+        const attributes = await fetchUserAttributes();
+        console.log('User attributes:', attributes);
+
+        // Ensure description is provided
+        if (!formData.description || formData.description.trim() === '') {
+          setErrors({ description: 'Business description is required.' });
+          return;
+        }
+
+        // Geocode the address
+        const address = {
+          streetAddress: formData.street,
+          city: formData.city,
+          state: formData.state,
+          zipcode: formData.zip,
+          country: formData.country,
+        };
+        const location = await geocodeAddress(address);
+
+        // Create or update User record
+        const userData = {
+          id: attributes.sub, // Use sub as the identifier
+          name: {
+            firstName: attributes.given_name || formData.firstName,
+            lastName: attributes.family_name || formData.lastName,
+          },
+          email: attributes.email || formData.emailaddress,
+          joinedAt: Date.now(),
+          lastLogin: Date.now(),
+        };
+        const userResponse = await client.models.User.create(userData, {
+          condition: { id: { ne: attributes.sub } }, // Create only if it doesn’t exist
+        });
+        console.log('User creation response:', userResponse);
+
+        const businessData = {
+          businessOwnerId: attributes.sub, // Links to User.id
+          // businessOwner is handled by the relationship, not set here
+          name: formData.businessName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          website: formData.website || '',
+          category: formData.categories, // Assuming singular; adjust if array
+          streetAddress: formData.street,
+          aptSuiteOther: formData.apt || '',
+          city: formData.city,
+          state: formData.state,
+          zipcode: formData.zip,
+          country: formData.country,
+          location: location || { lattitude: 0, longitude: 0 }, // Fallback if geocoding fails
+          businessHours: JSON.stringify(formData.businessHours),
+          description: formData.description,
+          photos: [], // Placeholder for S3 URLs
+        };
+
+        console.log('Attempting to create business with data:', businessData);
+        const response = await client.models.Business.create(businessData);
+        console.log('Create response:', response);
+
+        if (response.errors) {
+          throw new Error(response.errors[0].message);
+        }
+
+        console.log('Business created successfully:', response.data);
+
+        localStorage.removeItem('businessFormStep');
+        localStorage.removeItem('businessFormData');
         navigate('/business-profile', { state: { formData } });
       } catch (error) {
-        console.error('Error during submission:', error);
-        setErrors({ submit: 'Failed to submit. Please try again.' });
+        console.error('Error in nextStep:', error);
+        setErrors({ submit: `Failed to save business data: ${error.message}` });
       }
       return;
     }
@@ -340,7 +417,6 @@ export function BusinessFormProvider({ children }) {
 
   async function signInWithGoogle() {
     try {
-      console.log('Initiating Google sign-in redirect');
       localStorage.setItem('businessFormStep', '8');
       await signInWithRedirect({ provider: 'Google' });
     } catch (error) {
@@ -351,9 +427,7 @@ export function BusinessFormProvider({ children }) {
 
   async function resendVerificationCode() {
     try {
-      console.log('Attempting to resend verification code for:', formData.emailaddress);
-      const resendResult = await resendSignUpCode({ username: formData.emailaddress });
-      console.log('Resend result:', resendResult);
+      await resendSignUpCode({ username: formData.emailaddress });
       setErrors((prev) => ({ ...prev, verification: 'Code resent. Check your email.' }));
     } catch (error) {
       console.error('Error resending verification code:', error);
@@ -383,7 +457,6 @@ export function BusinessFormProvider({ children }) {
   }, [location.pathname, navigate]);
 
   useEffect(() => {
-    console.log('Saving to localStorage:', { step, formData });
     localStorage.setItem('businessFormStep', step.toString());
     localStorage.setItem('businessFormData', JSON.stringify(formData));
   }, [step, formData]);
@@ -393,13 +466,12 @@ export function BusinessFormProvider({ children }) {
       try {
         const user = await getCurrentUser();
         const attributes = await fetchUserAttributes();
-        console.log('User authenticated:', user, attributes);
         setIsSignedIn(true);
         setBusinessOwnerId(attributes.sub);
         setFormData((prev) => ({
           ...prev,
-          firstName: attributes['name.givenName'] || '',
-          lastName: attributes['name.familyName'] || '',
+          firstName: attributes.given_name || '',
+          lastName: attributes.family_name || '',
           emailaddress: attributes.email || '',
         }));
       } catch (error) {
@@ -410,19 +482,19 @@ export function BusinessFormProvider({ children }) {
     checkUser();
 
     const listener = (data) => {
-      console.log('Auth event:', data.payload.event);
       switch (data.payload.event) {
         case 'signIn':
           fetchUserAttributes()
             .then((attributes) => {
               setFormData((prev) => ({
                 ...prev,
-                firstName: attributes['name.givenName'] || '',
-                lastName: attributes['name.familyName'] || '',
+                firstName: attributes.given_name || '',
+                lastName: attributes.family_name || '',
                 emailaddress: attributes.email || '',
                 password: '',
               }));
               setBusinessOwnerId(attributes.sub);
+              setIsSignedIn(true);
             })
             .catch((error) => {
               console.error('Error fetching attributes:', error);
