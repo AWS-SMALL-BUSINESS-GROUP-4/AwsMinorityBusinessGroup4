@@ -12,6 +12,7 @@ import {
   resendSignUpCode,
 } from '@aws-amplify/auth';
 import { generateClient } from 'aws-amplify/data';
+import { uploadData, getUrl, remove } from '@aws-amplify/storage';
 import axios from 'axios';
 
 const client = generateClient();
@@ -153,14 +154,68 @@ export function BusinessFormProvider({ children }) {
     return '';
   }
 
-  function handleInputChange(e) {
+  async function uploadPhotosToS3(files) {
+    const uploadedUrls = [];
+    try {
+      for (const file of files) {
+        const fileName = `business-photos/${Date.now()}-${file.name}`;
+        const uploadTask = await uploadData({
+          path: fileName,
+          data: file,
+          options: { contentType: file.type },
+        }).result;
+        const urlResult = await getUrl({ path: fileName });
+        uploadedUrls.push(urlResult.url.toString().split('?')[0]);
+      }
+      return uploadedUrls;
+    } catch (error) {
+      console.error('Error uploading photos to S3:', error);
+      throw error;
+    }
+  }
+
+  async function removePhotoFromS3(url) {
+    try {
+      const key = url.split('.com/')[1];
+      await remove({ path: key });
+    } catch (error) {
+      console.error('Error removing photo from S3:', error);
+      throw error;
+    }
+  }
+
+  async function handleInputChange(e) {
     const { name, value, files } = e.target;
-    if (name === 'photos') {
-      setFormData((prev) => ({ ...prev, photos: Array.from(files) }));
+    if (name === 'photos' && files.length > 0) {
+      try {
+        const urls = await uploadPhotosToS3(Array.from(files));
+        setFormData((prev) => ({ ...prev, photos: [...prev.photos, ...urls] }));
+      } catch (error) {
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          photos: 'Failed to upload photos. Please try again.',
+        }));
+      }
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
       const error = validateField(name, value);
       setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+    }
+  }
+
+  async function handleRemovePhoto(index) {
+    const urlToRemove = formData.photos[index];
+    try {
+      await removePhotoFromS3(urlToRemove);
+      setFormData((prev) => ({
+        ...prev,
+        photos: prev.photos.filter((_, i) => i !== index),
+      }));
+    } catch (error) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        photos: 'Failed to remove photo. Please try again.',
+      }));
     }
   }
 
@@ -226,7 +281,6 @@ export function BusinessFormProvider({ children }) {
     return true;
   }
 
-  // Geocoding function using Google Maps API
   async function geocodeAddress(address) {
     const apiKey = import.meta.env.VITE_PLACES_API_KEY;
     if (!apiKey) {
@@ -250,6 +304,28 @@ export function BusinessFormProvider({ children }) {
     } catch (error) {
       console.error('Error during geocoding:', error);
       return null;
+    }
+  }
+
+  async function createBusinessHours(businessId) {
+    try {
+      for (const hours of formData.businessHours) {
+        const hoursData = {
+          businessId,
+          day: hours.day,
+          openTime: hours.openTime || '',
+          closeTime: hours.closeTime || '',
+          isOpen24: hours.isOpen24,
+          isClosed: hours.isClosed,
+        };
+        const response = await client.models.BusinessHours.create(hoursData);
+        if (response.errors) {
+          throw new Error(response.errors[0].message);
+        }
+      }
+    } catch (error) {
+      console.error('Error creating business hours:', error);
+      throw error;
     }
   }
 
@@ -303,17 +379,13 @@ export function BusinessFormProvider({ children }) {
     if (step === 10) {
       try {
         const user = await getCurrentUser();
-        console.log('Authenticated user:', user);
         const attributes = await fetchUserAttributes();
-        console.log('User attributes:', attributes);
 
-        // Ensure description is provided
         if (!formData.description || formData.description.trim() === '') {
           setErrors({ description: 'Business description is required.' });
           return;
         }
 
-        // Geocode the address
         const address = {
           streetAddress: formData.street,
           city: formData.city,
@@ -323,9 +395,8 @@ export function BusinessFormProvider({ children }) {
         };
         const location = await geocodeAddress(address);
 
-        // Create or update User record
         const userData = {
-          id: attributes.sub, // Use sub as the identifier
+          id: attributes.sub,
           name: {
             firstName: attributes.given_name || formData.firstName,
             lastName: attributes.family_name || formData.lastName,
@@ -335,39 +406,34 @@ export function BusinessFormProvider({ children }) {
           lastLogin: Date.now(),
         };
         const userResponse = await client.models.User.create(userData, {
-          condition: { id: { ne: attributes.sub } }, // Create only if it doesn’t exist
+          condition: { id: { ne: attributes.sub } },
         });
-        console.log('User creation response:', userResponse);
 
         const businessData = {
-          businessOwnerId: attributes.sub, // Links to User.id
-          // businessOwner is handled by the relationship, not set here
+          businessOwnerId: attributes.sub,
           name: formData.businessName,
           email: formData.email,
           phoneNumber: formData.phoneNumber,
           website: formData.website || '',
-          category: formData.categories, // Assuming singular; adjust if array
+          category: formData.categories,
           streetAddress: formData.street,
           aptSuiteOther: formData.apt || '',
           city: formData.city,
           state: formData.state,
           zipcode: formData.zip,
           country: formData.country,
-          location: location || { lattitude: 0, longitude: 0 }, // Fallback if geocoding fails
-          businessHours: JSON.stringify(formData.businessHours),
+          location: location || { lattitude: 0, longitude: 0 },
           description: formData.description,
-          photos: [], // Placeholder for S3 URLs
+          photos: formData.photos,
         };
 
-        console.log('Attempting to create business with data:', businessData);
-        const response = await client.models.Business.create(businessData);
-        console.log('Create response:', response);
-
-        if (response.errors) {
-          throw new Error(response.errors[0].message);
+        const businessResponse = await client.models.Business.create(businessData);
+        if (businessResponse.errors) {
+          throw new Error(businessResponse.errors[0].message);
         }
 
-        console.log('Business created successfully:', response.data);
+        const businessId = businessResponse.data.id;
+        await createBusinessHours(businessId);
 
         localStorage.removeItem('businessFormStep');
         localStorage.removeItem('businessFormData');
@@ -528,6 +594,7 @@ export function BusinessFormProvider({ children }) {
     errors,
     setErrors,
     handleInputChange,
+    handleRemovePhoto,
     handleBlur,
     handleHoursChange,
     skipWebsite,

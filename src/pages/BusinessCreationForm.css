@@ -474,4 +474,36 @@
     background: #eee;
   }
   
+
+  .photo-preview {
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+  }
+  
+  .photo-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    object-fit: cover;
+  }
+  
+  .remove-photo-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+  }
+  
+  .remove-photo-btn:hover {
+    background: rgba(255, 0, 0, 1);
+  }
   
