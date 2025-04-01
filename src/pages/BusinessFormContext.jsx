@@ -13,6 +13,7 @@ import {
 } from '@aws-amplify/auth';
 import { generateClient } from 'aws-amplify/data';
 import axios from 'axios';
+import { element } from 'prop-types';
 
 const client = generateClient();
 
@@ -345,7 +346,7 @@ export function BusinessFormProvider({ children }) {
           name: formData.businessName,
           email: formData.email,
           phoneNumber: formData.phoneNumber,
-          website: formData.website || '',
+          website: formData.website || null,
           category: formData.categories, // Assuming singular; adjust if array
           streetAddress: formData.street,
           aptSuiteOther: formData.apt || '',
@@ -363,15 +364,29 @@ export function BusinessFormProvider({ children }) {
         const response = await client.models.Business.create(businessData);
         console.log('Create response:', response);
 
+        var hoursResponses = [];
+
+        formData.businessHours.forEach(async hours => {
+          const hour_response = await client.models.BusinessHours.create({businessId: response.data.id, ...hours});
+          hoursResponses.push(hour_response);
+          console.log(`Returned hour_response: `, hour_response);
+        });
+
         if (response.errors) {
           throw new Error(response.errors[0].message);
         }
+
+        hoursResponses.forEach(element => {
+          if(element.errors) {
+            throw new Error(element.errors[9].messagee);
+          }
+        });
 
         console.log('Business created successfully:', response.data);
 
         localStorage.removeItem('businessFormStep');
         localStorage.removeItem('businessFormData');
-        navigate('/business-profile', { state: { formData } });
+        navigate(`/business-profile/${response.data.id}`);
       } catch (error) {
         console.error('Error in nextStep:', error);
         setErrors({ submit: `Failed to save business data: ${error.message}` });
