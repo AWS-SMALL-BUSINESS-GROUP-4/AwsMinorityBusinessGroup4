@@ -1,32 +1,30 @@
+// src/pages/HomePage.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaSearch,
   FaUtensils,
-  FaMugHot,
-  FaCut,
-  FaGlassMartiniAlt,
-  FaTruck,
+  FaHome,
+  FaCar,
   FaShoppingBag,
-  FaCalendarAlt,
+  FaCut,
+  FaGlassMartini,
   FaEllipsisH,
+  FaTshirt,
+  FaWrench,
+  FaDumbbell,
+  FaSpa,
 } from "react-icons/fa";
-
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-
 import "./HomePage.css";
 
 function HomePage() {
-  const navigate = useNavigate();
-
   return (
     <div className="home-page">
       <Header />
       <main>
-        {/* Hero Search Section */}
         <HeroSearch />
-        {/* Category Navigation Section */}
         <CategoryNav />
       </main>
       <Footer />
@@ -34,9 +32,6 @@ function HomePage() {
   );
 }
 
-// =============================================
-// Hero Search Component
-// =============================================
 function HeroSearch() {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
@@ -71,32 +66,41 @@ function HeroSearch() {
   );
 }
 
-// =============================================
-// Category Navigation Component
-// =============================================
 function CategoryNav() {
   const navigate = useNavigate();
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
 
-  // Category definitions
-  const categories = [
+  const mainCategories = [
     { id: "restaurants", icon: <FaUtensils />, name: "Restaurants" },
-    { id: "coffee", icon: <FaMugHot />, name: "Coffee & Tea" },
-    { id: "hairdressers", icon: <FaCut />, name: "Hairdressers" },
-    { id: "bars", icon: <FaGlassMartiniAlt />, name: "Bars" },
-    { id: "delivery", icon: <FaTruck />, name: "Delivery" },
-    { id: "takeout", icon: <FaShoppingBag />, name: "Takeout" },
-    { id: "reservations", icon: <FaCalendarAlt />, name: "Reservations" },
+    { id: "home_services", icon: <FaHome />, name: "Home Services" },
+    { id: "auto_services", icon: <FaCar />, name: "Auto Services" },
+    { id: "shopping", icon: <FaShoppingBag />, name: "Shopping" },
+    { id: "beauty", icon: <FaCut />, name: "Beauty & Spa" },
+    { id: "nightlife", icon: <FaGlassMartini />, name: "Nightlife" },
     { id: "more", icon: <FaEllipsisH />, name: "More" },
   ];
 
+  const moreCategories = [
+    { id: "dry_cleaning", icon: <FaTshirt />, name: "Dry Cleaning" },
+    { id: "repair", icon: <FaWrench />, name: "Phone Repair" },
+    { id: "fitness", icon: <FaDumbbell />, name: "Gyms" },
+    { id: "massage", icon: <FaSpa />, name: "Massage" },
+    // Add more categories as needed
+  ];
+
   const handleCategoryClick = (categoryId) => {
-    navigate(`/search?category=${categoryId}`);
+    if (categoryId === "more") {
+      setShowMoreMenu(!showMoreMenu);
+    } else {
+      navigate(`/search?category=${categoryId}`);
+      setShowMoreMenu(false);
+    }
   };
 
   return (
     <section className="category-nav">
       <div className="category-container">
-        {categories.map((category) => (
+        {mainCategories.map((category) => (
           <div
             key={category.id}
             className="category-item"
@@ -107,6 +111,21 @@ function CategoryNav() {
           </div>
         ))}
       </div>
+
+      {showMoreMenu && (
+        <div className="more-categories-dropdown">
+          {moreCategories.map((category) => (
+            <div
+              key={category.id}
+              className="more-category-item"
+              onClick={() => handleCategoryClick(category.id)}
+            >
+              <div className="more-category-icon">{category.icon}</div>
+              <span>{category.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

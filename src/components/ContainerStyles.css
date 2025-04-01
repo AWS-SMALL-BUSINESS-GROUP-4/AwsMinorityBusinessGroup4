@@ -11,6 +11,10 @@
     gap: 1em;
 }
 
+.scroll {
+    overflow: auto;
+}
+
 .container-spread {
     background-color: #FFFFFF;
     display: flex;

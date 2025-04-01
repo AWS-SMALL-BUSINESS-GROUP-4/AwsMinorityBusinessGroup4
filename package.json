@@ -10,17 +10,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-amplify/auth": "^6.11.4",
+    "@aws-amplify/core": "^6.10.4",
     "@emotion/react": "^11.14.0",
     "@mui/icons-material": "^6.4.4",
     "@mui/material": "^6.4.4",
-    "aws-amplify": "^6.12.2",
+    "aws-amplify": "^6.13.4",
+    "axios": "^1.8.3",
     "lucide-react": "^0.475.0",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-time-picker": "^7.0.0",
+    "react-icons": "^5.4.0",
     "react-router-dom": "^6.x",
-    "react-icons": "^5.4.0"
+    "react-time-picker": "^7.0.0"
   },
   "devDependencies": {
     "@aws-amplify/backend": "^1.14.0",
@@ -32,7 +35,7 @@
     "aws-cdk": "^2.177.0",
     "aws-cdk-lib": "^2.177.0",
     "constructs": "^10.4.2",
-    "esbuild": "^0.24.2",
+    "esbuild": "^0.25.0",
     "eslint": "^9.17.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",

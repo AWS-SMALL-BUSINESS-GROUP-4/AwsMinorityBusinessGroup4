@@ -18,7 +18,7 @@ export const Business = a.model({
     lattitude: a.float(),
     longitude: a.float()
 }),
-  businessHours: a.json(), 
+  businessHours: a.hasMany('BusinessHours', 'businessId'),
   description: a.string().required(),
   photos: a.url().array(),
   averageRating: a.float(),
@@ -28,3 +28,17 @@ export const Business = a.model({
     allow.guest().to(['read']), 
     allow.groups(['Admin']).to(['read', 'update', 'delete'])
 ])
+
+export const BusinessHours = a.model({
+  businessId: a.id(),
+  business: a.belongsTo('Business', 'businessId'),
+  day: a.string().required(),
+  openTime: a.string(),
+  closeTime: a.string(),
+  isOpen24: a.boolean().required(),
+  isClosed: a.boolean().required()
+}).authorization((allow) => [
+    allow.owner(), 
+    allow.guest().to(['read']), 
+    allow.groups(['Admin']).to(['read', 'update', 'delete'])
+]);

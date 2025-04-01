@@ -16,3 +16,7 @@
 .text-drop-shadow {
     text-shadow: 0px 4px 4px black;
 }
+
+.blue-text {
+    color: #1399FF;
+}
