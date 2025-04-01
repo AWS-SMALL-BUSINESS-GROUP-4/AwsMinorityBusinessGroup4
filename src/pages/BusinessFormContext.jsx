@@ -339,43 +339,71 @@ export function BusinessFormProvider({ children }) {
 
     if (step === 7 && !isSignedIn) {
       try {
+        console.log('Attempting sign-up with:', {
+          email: formData.emailaddress,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+        });
         const signUpResult = await signUp({
           username: formData.emailaddress,
           password: formData.password,
-          attributes: {
-            'given_name': formData.firstName,
-            'family_name': formData.lastName,
+          options: {
+            userAttributes: {
+              given_name: formData.firstName,
+              family_name: formData.lastName,
+            },
           },
         });
+        console.log('Sign-up successful:', signUpResult);
         setStep(7.5);
         navigate('/add-business/business-account/verify');
       } catch (error) {
         console.error('Sign-up failed:', error);
-        setErrors({
-          manualSignUp: error.message || 'Failed to create account. Please try again.',
-        });
+        let errorMessage = 'Failed to create account. Please try again.';
+        if (error.name === 'UsernameExistsException') {
+          errorMessage = 'An account with this email already exists.';
+        } else if (error.name === 'InvalidParameterException') {
+          errorMessage = 'Invalid input provided. Please check your details.';
+        }
+        setErrors({ manualSignUp: errorMessage });
       }
       return;
     }
+
     if (step === 7.5 && !isSignedIn) {
       try {
-        await confirmSignUp({
+        console.log('Attempting to confirm sign-up with code:', verificationCode);
+        const confirmResult = await confirmSignUp({
           username: formData.emailaddress,
           confirmationCode: verificationCode,
         });
-        await signIn({
+        console.log('Confirm sign-up successful:', confirmResult);
+
+        console.log('Attempting sign-in with:', {
+          username: formData.emailaddress,
+        });
+        const signInResult = await signIn({
           username: formData.emailaddress,
           password: formData.password,
         });
+        console.log('Sign-in successful:', signInResult);
+
         setIsSignedIn(true);
         setStep(8);
         navigate('/add-business/business-hours');
       } catch (error) {
         console.error('Verification or sign-in failed:', error);
-        setErrors({ verification: error.message || 'Invalid code. Please try again.' });
+        let errorMessage = 'Invalid code or sign-in failed. Please try again.';
+        if (error.name === 'CodeMismatchException') {
+          errorMessage = 'Invalid verification code. Please check and try again.';
+        } else if (error.name === 'NotAuthorizedException') {
+          errorMessage = 'Incorrect email or password.';
+        }
+        setErrors({ verification: errorMessage });
       }
       return;
     }
+
     if (step === 10) {
       try {
         const user = await getCurrentUser();
@@ -444,6 +472,7 @@ export function BusinessFormProvider({ children }) {
       }
       return;
     }
+
     if (step < 10) {
       if (isSignedIn && step === 6) {
         setStep(8);
@@ -493,6 +522,7 @@ export function BusinessFormProvider({ children }) {
 
   async function resendVerificationCode() {
     try {
+      console.log('Resending verification code to:', formData.emailaddress);
       await resendSignUpCode({ username: formData.emailaddress });
       setErrors((prev) => ({ ...prev, verification: 'Code resent. Check your email.' }));
     } catch (error) {
