@@ -1,3 +1,4 @@
+// BusinessAccount.jsx
 import React from 'react';
 import { useBusinessForm } from './BusinessFormContext';
 import './BusinessCreationForm.css';
@@ -15,6 +16,7 @@ export default function BusinessAccount() {
     verificationCode,
     setVerificationCode,
     signInWithGoogle,
+    resendVerificationCode,
   } = useBusinessForm();
 
   // If step === 7.5, show the "Verify Your Email" portion
@@ -55,9 +57,12 @@ export default function BusinessAccount() {
               {errors.verification && (
                 <span id="verification-error" className="error">{errors.verification}</span>
               )}
-              <div className="button-group">
-                <button className="continue-button" onClick={nextStep}>
+              <div className="verify-group">
+                <button className="verify-button" onClick={nextStep}>
                   Verify and Continue
+                </button>
+                <button className="resend-button" onClick={resendVerificationCode}>
+                  Resend Code
                 </button>
               </div>
             </div>

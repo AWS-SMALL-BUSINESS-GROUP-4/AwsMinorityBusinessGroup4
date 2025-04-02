@@ -10,9 +10,10 @@ export default function BusinessPhotos() {
     setStep,
     formData,
     handleInputChange,
+    handleRemovePhoto,
     isStepComplete,
     nextStep,
-    prevStep
+    prevStep,
   } = useBusinessForm();
   const navigate = useNavigate();
 
@@ -103,12 +104,15 @@ export default function BusinessPhotos() {
 
                 {formData.photos.length > 0 && (
                   <div className="uploaded-photos">
-                    {formData.photos.map((photo, index) => (
+                    {formData.photos.map((url, index) => (
                       <div key={index} className="photo-preview">
-                        <img
-                          src={URL.createObjectURL(photo)}
-                          alt={`Uploaded photo ${index + 1}`}
-                        />
+                        <img src={url} alt={`Uploaded photo ${index + 1}`} />
+                        <button
+                          className="remove-photo-btn"
+                          onClick={() => handleRemovePhoto(index)}
+                        >
+                          ✕
+                        </button>
                       </div>
                     ))}
                   </div>
