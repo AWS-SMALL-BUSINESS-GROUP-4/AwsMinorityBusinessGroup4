@@ -10,7 +10,7 @@ import {
   getCurrentUser,
   confirmSignUp,
   resendSignUpCode,
-} from '@aws-amplify/auth';
+} from 'aws-amplify/auth';
 import { generateClient } from 'aws-amplify/data';
 import { uploadData, getUrl, remove } from '@aws-amplify/storage';
 import axios from 'axios';
