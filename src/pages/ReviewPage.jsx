@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import NavBar from '../components/NavBar.jsx'
 import './ReviewPage.css'
+import { AuthContext } from "../AuthContext"
+import {handleLogin, handleLogout } from "../LoginFunctions";
+
 
 function ReviewPage() {
+  const [user, setUser] = useState(null);
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
+  const [customState, setCustomState] = useState(null);
+  
+  const { isAuthenticated, loading } = useContext(AuthContext);
+  
   
   // Sample recent reviews data
   const recentReviews = [
@@ -58,6 +66,7 @@ function ReviewPage() {
     return stars;
   };
 
+
   // Handle file upload
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -78,6 +87,18 @@ function ReviewPage() {
       console.log("No file selected");
     }
   };
+
+  if(loading)
+      return (<p>Loading...</p>)
+
+  if(isAuthenticated === false) {
+    return(
+      <>
+        <h1>Please log in to write a review!</h1>
+        <button className='post-review-button' onClick={handleLogin}>Login</button>
+      </>
+    )
+  }
 
   return (
     <div className="business-management-container">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import '../App.css'
 import '../components/ContainerStyles.css'
 import './BusinessManagementPage.css'
@@ -7,23 +8,36 @@ import BusinessNavBar from '../components/BusinessNavBar'
 import BusinessManagementSidebar from '../components/BusinessManagementSideBar';
 import { generateClient } from "aws-amplify/data"
 
-function BusinessManagementPage({id}) {
+function BusinessManagementPage() {
   const client = generateClient();
+  const { id } = useParams()
 
   // State to track if edit mode is active
   const [isEditing, setIsEditing] = useState(false);
 
-  const [notbusiness, setnotBusiness] = useState();
+  const [business, setBusiness] = useState();
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchBusiness() {
       try {
+        console.log("This is running");
+        console.log("This is the id I received: ", id);
         // get a specific item
-        const { data: fb, errors } = await client.models.Business.get({
-          id: id,
-        });
+        const response = await client.models.Business.get(
+          { id: id },
+          { selectionSet: ["id", "name", "phoneNumber", "streetAddress", "city", "state", "country", "zipcode", "category", "website", "description", "businessHours.*"] }
+        );
+        if(response.errors) {
+          console.log("Haha stupid, ", response.errors[0].message);
+        }
+        console.log("This is the business I got: ", response.data);
+
+        console.log("Sanity check for business hours: ", response.data.businessHours);
+
+
+        setBusiness(response.data);
       } catch(e) {
         console.log(e);
       } finally {
@@ -35,7 +49,7 @@ function BusinessManagementPage({id}) {
   }, [id]);
 
 
-  const [business, setBusiness] = useState({
+  const [notbusiness, setnotBusiness] = useState({
     name: "Negril",
     address_1: "2301 Georgia Ave. NW",
     address_2: "Washington, DC 20001",
@@ -58,33 +72,33 @@ function BusinessManagementPage({id}) {
 
   const [storedState, setStoredState] = useState(business);
 
-  useEffect(() => {
-    if (formDataFromState) {
-      const hours = (formDataFromState.businessHours || []).map((dayObj) => {
-        if (dayObj.isClosed) return "Closed";
-        if (dayObj.isOpen24) return "Open 24 hours";
-        if (dayObj.openTime && dayObj.closeTime) {
-          return `${formatTimeTo12Hour(dayObj.openTime)} - ${formatTimeTo12Hour(dayObj.closeTime)}`;
-        }
-        return "Not set";
-      });
+  // useEffect(() => {
+  //   if (formDataFromState) {
+  //     const hours = (formDataFromState.businessHours || []).map((dayObj) => {
+  //       if (dayObj.isClosed) return "Closed";
+  //       if (dayObj.isOpen24) return "Open 24 hours";
+  //       if (dayObj.openTime && dayObj.closeTime) {
+  //         return `${formatTimeTo12Hour(dayObj.openTime)} - ${formatTimeTo12Hour(dayObj.closeTime)}`;
+  //       }
+  //       return "Not set";
+  //     });
 
-      const newBusiness = {
-        name: formDataFromState.businessName || "",
-        address_1: formDataFromState.street || "",
-        address_2: `${formDataFromState.city || ""}, ${formDataFromState.state || ""} ${formDataFromState.zip || ""}`,
-        phone: formDataFromState.phoneNumber ? `+1${formDataFromState.phoneNumber}` : "", // Add +1 prefix
-        categories: formDataFromState.categories || "",
-        website: formDataFromState.website || "",
-        hours: hours.length > 0 ? hours : [],
-        about: formDataFromState.description || "",
-      };
+  //     const newBusiness = {
+  //       name: formDataFromState.businessName || "",
+  //       address_1: formDataFromState.street || "",
+  //       address_2: `${formDataFromState.city || ""}, ${formDataFromState.state || ""} ${formDataFromState.zip || ""}`,
+  //       phone: formDataFromState.phoneNumber ? `+1${formDataFromState.phoneNumber}` : "", // Add +1 prefix
+  //       categories: formDataFromState.categories || "",
+  //       website: formDataFromState.website || "",
+  //       hours: hours.length > 0 ? hours : [],
+  //       about: formDataFromState.description || "",
+  //     };
 
-      console.log('Updated business with formData:', newBusiness);
-      setBusiness(newBusiness);
-      setStoredState(newBusiness);
-    }
-  }, [formDataFromState]);
+  //     console.log('Updated business with formData:', newBusiness);
+  //     setBusiness(newBusiness);
+  //     setStoredState(newBusiness);
+  //   }
+  // }, [formDataFromState]);
 
   const handleChange = (e, field, index = null) => {
     if (index !== null) {
@@ -115,6 +129,10 @@ function BusinessManagementPage({id}) {
     hours = hours % 12 || 12; // Convert 0 to 12 for midnight
     return `${hours}:${minutes.toString().padStart(2, "0")} ${period}`;
 }
+
+  if(loading) {
+    return(<p>Loading...</p>);
+  }
 
   return (
     <>
@@ -152,19 +170,19 @@ function BusinessManagementPage({id}) {
               </div>
               <div style={{ marginBottom: "10px" }}>
                 <label style={{ display: "block", marginBottom: "5px" }}>Address Line 1:</label>
-                <input type="text" value={business.address_1} onChange={(e) => handleChange(e, "address_1")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
+                <input type="text" value={business.streetAddress} onChange={(e) => handleChange(e, "address_1")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
               </div>
               <div style={{ marginBottom: "10px" }}>
                 <label style={{ display: "block", marginBottom: "5px" }}>Address Line 2:</label>
-                <input type="text" value={business.address_2} onChange={(e) => handleChange(e, "address_2")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
+                <input type="text" value={business.city + ", " + business.state + ", " + business.country + " " + business.zipcode} onChange={(e) => handleChange(e, "address_2")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
               </div>
               <div style={{ marginBottom: "10px" }}>
                 <label style={{ display: "block", marginBottom: "5px" }}>Phone:</label>
-                <input type="text" value={business.phone} onChange={(e) => handleChange(e, "phone")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
+                <input type="text" value={business.phoneNumber} onChange={(e) => handleChange(e, "phone")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
               </div>
               <div style={{ marginBottom: "10px" }}>
                 <label style={{ display: "block", marginBottom: "5px" }}>Categories:</label>
-                <input type="text" value={business.categories} onChange={(e) => handleChange(e, "categories")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
+                <input type="text" value={business.category} onChange={(e) => handleChange(e, "categories")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
               </div>
               <div style={{ marginBottom: "10px" }}>
                 <label style={{ display: "block", marginBottom: "5px" }}>Website:</label>
@@ -174,10 +192,10 @@ function BusinessManagementPage({id}) {
           ) : (
             <p>
               {business.name || "Not set"}<br />
-              {business.address_1 || "Not set"}<br />
-              {business.address_2 || "Not set"}<br /><br />
-              {business.phone || "Not set"}<br /><br />
-              <b>Categories</b>: {business.categories || "Not set"}<br />
+              {business.streetAddress || "Not set"}<br />
+              {business.city + ", " + business.state + ", " + business.country + " " + business.zipcode || "Not set"}<br /><br />
+              {business.phoneNumber || "Not set"}<br /><br />
+              <b>Categories</b>: {business.category || "Not set"}<br />
               {business.website || "Not set"}
             </p>
           )}
@@ -185,7 +203,7 @@ function BusinessManagementPage({id}) {
           <h2 className='blue-text'>Hours</h2>
           <table className="hours">
             <tbody>
-              {business.hours.map((hour, index) => (
+              {business.businessHours.map((hour, index) => (
                 <tr key={index}>
                   <th>{hour.day}</th>
                   <td className="spread">
@@ -215,12 +233,12 @@ function BusinessManagementPage({id}) {
           <h2 className='blue-text'>About</h2>
           {isEditing ? (
             <textarea
-              value={business.about}
+              value={business.description}
               onChange={(e) => handleChange(e, "about")}
               style={{ width: "100%", minHeight: "200px", padding: "10px" }}
             />
           ) : (
-            <p>{business.about || "Not set"}</p>
+            <p>{business.description || "Not set"}</p>
           )}
         </div>
       </div>
