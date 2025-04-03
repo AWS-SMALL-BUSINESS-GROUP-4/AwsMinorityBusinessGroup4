@@ -16,8 +16,17 @@ export const auth = defineAuth({
           familyName: 'family_name' // Maps Google's 'family_name' to Cognito's 'familyName'
         },
       },
-      callbackUrls: ['http://localhost:5173/add-business/business-hours', 'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/add-business/business-hours', 'https://main.d2p4upoo7iyfsw.amplifyapp.com/add-business/business-hours'], // Update for production
-      logoutUrls: ['http://localhost:5173/', 'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/', 'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/'],
+      callbackUrls: [
+        'http://localhost:5173/write-review',
+        'http://localhost:5173/add-business/business-hours', 
+        'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/add-business/business-hours', 
+        'https://main.d2p4upoo7iyfsw.amplifyapp.com/add-business/business-hours',
+      ], // Update for production
+      logoutUrls: [
+        'http://localhost:5173/', 
+        'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/', 
+        'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/',
+      ],
     },
   },
   userAttributes: {
