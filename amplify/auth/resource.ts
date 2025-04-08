@@ -11,13 +11,31 @@ export const auth = defineAuth({
         clientSecret: secret('GOOGLE_CLIENT_SECRET'),
         scopes: ['profile', 'email', 'openid'],
         attributeMapping: {
-          email: 'email',          // Maps Google's 'email' to Cognito's 'email'
-          givenName: 'given_name', // Maps Google's 'given_name' to Cognito's 'givenName'
-          familyName: 'family_name' // Maps Google's 'family_name' to Cognito's 'familyName'
+          email: 'email',
+          givenName: 'given_name',
+          familyName: 'family_name',
         },
       },
-      callbackUrls: ['http://localhost:5173/add-business/business-hours', 'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/add-business/business-hours'], // Update for production
-      logoutUrls: ['http://localhost:5173/', 'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/'], // Update for production
+      facebook: {
+        clientId: secret('FACEBOOK_CLIENT_ID'),
+        clientSecret: secret('FACEBOOK_CLIENT_SECRET'),
+        scopes: ['public_profile', 'email'], // Updated to Facebook-specific scopes
+        attributeMapping: {
+          email: 'email',
+          givenName: 'first_name', // Matches Facebook's API response
+          familyName: 'last_name', // Matches Facebook's API response
+        },
+      },
+      callbackUrls: [
+        'http://localhost:5173/', // Added homepage for general login/signup
+        'http://localhost:5173/add-business/business-hours',
+        'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/',
+        'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/add-business/business-hours',
+      ],
+      logoutUrls: [
+        'http://localhost:5173/',
+        'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/',
+      ],
     },
   },
   userAttributes: {

@@ -1,0 +1,261 @@
+/* Page Layout */
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('../../../public/images/userloginbackground.png');
+  background-size: cover;
+  filter: blur(5px);
+  z-index: -1;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.logo .explore {
+  color: #ffffff;
+}
+
+.logo .local {
+  color: #F4A261; /* Orange */
+}
+
+nav a {
+  margin-left: 20px;
+  color: #CCCCCC;
+  text-decoration: none;
+}
+
+/* Slogan */
+.slogan {
+  text-align: center;
+  margin-bottom: 70px;
+}
+
+.slogan h1 {
+  color: white;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+/* White Container */
+.white-container {
+  display: flex;
+  justify-content: space-between;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  min-height: 725px;
+}
+
+.form-section {
+  width: 100%;
+  max-width: 400px; /* Constrain width to prevent stretching */
+  margin: 0 auto;
+}
+
+
+.form-section h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 10px;
+}
+
+.form-section p {
+  font-size: 16px;
+  color: #666666;
+  margin-bottom: 20px;
+}
+
+/* Divider */
+.divider {
+  width: 1px;
+  background-color: #CCCCCC;
+  margin: 0 20px;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #333333;
+  font-size: 16px;
+}
+
+.input-group {
+  position: relative;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px 10px 10px 40px; /* Adjusted padding for icon */
+  border: 1px solid #CCCCCC;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.input-group .icon {
+  position: absolute;
+  left: 10px; /* Moved to left for consistency */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666666;
+}
+
+.input-group .toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #666666;
+}
+
+.forgot-password {
+  display: block;
+  text-align: right;
+  color: #F4A261;
+  text-decoration: none;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #F4A261;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.or-text {
+  text-align: center;
+  margin: 10px 0;
+  color: #666666;
+  font-size: 14px;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.social-button {
+  width: 48%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.social-button.google {
+  background-color: #DB4437;
+  color: white;
+}
+
+.social-button.facebook {
+  background-color: #4267B2;
+  color: white;
+}
+
+/* Checkbox */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.checkbox-group input {
+  margin-right: 5px; /* Reduced from 10px to bring terms closer */
+}
+
+.checkbox-group label {
+  color: #333333;
+  font-size: 14px;
+}
+
+/* Footer */
+footer {
+  background-color: #2A2A2A;
+  color: white;
+  padding: 20px;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-content .logo {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.footer-content nav a {
+  margin-left: 20px;
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.social-icons {
+  display: flex;
+  gap: 10px;
+}
+
+.social-icons svg {
+  font-size: 24px;
+  color: #F4A261;
+}
+
+.copyright {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.error {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+}

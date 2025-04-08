@@ -513,7 +513,10 @@ export function BusinessFormProvider({ children }) {
   async function signInWithGoogle() {
     try {
       localStorage.setItem('businessFormStep', '8');
-      await signInWithRedirect({ provider: 'Google' });
+      await signInWithRedirect({
+        provider: 'Google',
+        customState: JSON.stringify({ redirectTo: '/add-business/business-hours' }),
+      });
     } catch (error) {
       console.error('Google sign-in error:', error);
       setErrors({ google: 'Failed to sign in with Google. Please try again.' });
@@ -591,6 +594,14 @@ export function BusinessFormProvider({ children }) {
               }));
               setBusinessOwnerId(attributes.sub);
               setIsSignedIn(true);
+
+              // Handle customState redirect
+              const customState = data.payload.data?.customState
+                ? JSON.parse(data.payload.data.customState)
+                : { redirectTo: '/add-business/business-hours' }; // Default for this pipeline
+              const redirectTo = customState.redirectTo || '/add-business/business-hours';
+              console.log('User signed in, redirecting to:', redirectTo);
+              navigate(redirectTo);
             })
             .catch((error) => {
               console.error('Error fetching attributes:', error);
@@ -608,7 +619,7 @@ export function BusinessFormProvider({ children }) {
 
     const unsub = Hub.listen('auth', listener);
     return () => unsub();
-  }, []);
+  }, [navigate]);
 
   const value = {
     step,
