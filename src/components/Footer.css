@@ -1,11 +1,12 @@
+/* src/components/Footer.css */
 /* Footer Styles */
 .footer {
-  background-color: #e0e0e0;
-  padding: 2rem 1rem;
+  background-color: #333; /* Dark background */
+  padding: 1.5rem 1rem;
   text-align: center;
-  color: #666;
+  color: white; /* White text for contrast */
   font-size: 0.9rem;
-  margin-top: auto; /* This pushes the footer to the bottom */
+  margin-top: auto; /* Pushes the footer to the bottom */
   width: 100%;
 }
 
@@ -13,5 +14,69 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem; /* Space between logo, links, and copyright */
+}
+
+/* Footer Logo Styling */
+.footer-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.footer-logo-icon {
+  color: white; /* White location pin */
+  font-size: 1.2rem;
+  margin-right: 0.5rem;
+}
+
+.footer-logo-explore {
+  color: white; /* White for "Explore" */
+  font-size: 1.2rem;
+  font-weight: bold;
+  font-family: "Inter", sans-serif;
+}
+
+.footer-logo-local {
+  color: #ff9800; /* Orange for "Local" */
+  font-size: 1.2rem;
+  font-weight: bold;
+  font-family: "Inter", sans-serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Same shadow as header for consistency */
+}
+
+/* Footer Links */
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem; /* Space between links */
+  flex-wrap: wrap; /* Allows links to wrap on smaller screens */
+}
+
+.footer-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+/* Copyright Text */
+.footer-content p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #ccc; /* Lighter gray for the copyright text */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .footer-links {
+    gap: 1rem; /* Reduce gap on smaller screens */
+    flex-direction: column; /* Stack links vertically on mobile */
+  }
 }
