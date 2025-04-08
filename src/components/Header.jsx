@@ -1,6 +1,7 @@
-// Header.jsx
+// src/components/Header.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { FaMapMarkerAlt } from "react-icons/fa";
 import "./Header.css";
 
 function Header() {
@@ -18,7 +19,11 @@ function Header() {
     <header className="header">
       <div className="header-content">
         <div className="logo">
-          <Link to="/">Logo</Link>
+          <Link to="/" className="logo-link">
+            <FaMapMarkerAlt className="logo-icon" />
+            <span className="logo-explore">Explore</span>
+            <span className="logo-local">Local</span>
+          </Link>
         </div>
         <div className="nav-container">
           <nav className="main-nav">

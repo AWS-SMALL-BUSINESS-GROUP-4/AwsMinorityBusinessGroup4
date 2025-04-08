@@ -1,43 +1,64 @@
-/* Header.css */
+/* src/components/Header.css */
 .header {
   width: 100%;
-  background: #fc941d;
-  /* overflow: hidden; */
+  background: #ff9800; /* Orange background for the header */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  position: relative; /* Ensure absolute positioning is relative to the header */
 }
 
 .header-content {
-  width: 100%;
-  margin: 0;
-  padding: 0;
   display: flex;
-  justify-content: space-between;
-}
-
-/* .header-content {
-  display: flex;
-  justify-content: space-between;
+  justify-content: flex-end; /* Align navigation to the right */
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
-} */
+  padding: 1rem;
+  position: relative; /* For absolute positioning of the logo */
+  min-height: 60px; /* Ensure enough height for the logo */
+}
 
 /* Logo styling */
 .logo {
-  float: left;
+  display: flex;
+  align-items: center;
+  position: absolute; /* Position the logo absolutely */
+  left: 1rem; /* 1rem from the left edge of the header */
+  top: 50%; /* Center vertically */
+  transform: translateY(-50%); /* Adjust for vertical centering */
 }
 
-.logo a {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
+.logo-link {
+  display: flex;
+  align-items: center;
   text-decoration: none;
+}
+
+.logo-icon {
+  color: white; /* White location pin */
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+}
+
+.logo-explore {
+  color: white; /* White for "Explore" */
+  font-size: 1.5rem;
+  font-weight: bold;
   font-family: "Inter", sans-serif;
+}
+
+.logo-local {
+  color: #ff9800; /* Orange for "Local" */
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: "Inter", sans-serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle shadow to make it stand out */
 }
 
 /* Navigation container */
 .nav-container {
-  float: right;
   display: flex;
   align-items: center;
 }
@@ -52,16 +73,20 @@
 .nav-items {
   display: flex;
   align-items: center;
+  gap: 1rem; /* Space between nav items */
 }
 
 .nav-link {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
+  color: white; /* White for better contrast against orange */
   text-decoration: none;
-  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  padding: 0.5rem 1rem;
   font-family: "Inter", sans-serif;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+.nav-link:hover {
+  opacity: 0.8; /* Subtle opacity change on hover */
 }
 
 /* Dropdown styling */
@@ -71,46 +96,43 @@
 }
 
 .dropdown-trigger {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
+  color: white; /* White for better contrast */
+  padding: 0.5rem 1rem;
   text-decoration: none;
   cursor: pointer;
-  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   font-family: "Inter", sans-serif;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+.dropdown-trigger:hover {
+  opacity: 0.8; /* Subtle opacity change on hover */
 }
 
 .dropdown-menu {
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: #fc941d;
-  min-width: 180px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  background-color: white; /* White background for dropdown */
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-  display: block;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .dropdown-item {
   display: block;
-  color: white;
-  padding: 14px 16px;
+  color: #333;
+  padding: 0.75rem 1rem;
   text-decoration: none;
-  text-align: left;
-  cursor: pointer;
   font-family: "Inter", sans-serif;
-  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  font-weight: 500;
+  transition: background-color 0.2s ease;
 }
 
-/* Hover effects - removed blue background */
 .dropdown-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.nav-link:hover,
-.dropdown-trigger:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #f5f5f5; /* Light gray on hover */
 }
 
 /* Responsive Design */
@@ -118,6 +140,8 @@
   .header-content {
     flex-direction: column;
     align-items: center;
+    gap: 1rem;
+    justify-content: center; /* Center content on mobile */
   }
 
   .nav-container {
@@ -127,10 +151,29 @@
   .nav-items {
     flex-direction: column;
     width: 100%;
+    gap: 0.5rem;
+  }
+
+  .nav-link,
+  .dropdown-trigger {
+    padding: 0.75rem;
+    text-align: center;
+    width: 100%;
   }
 
   .dropdown-menu {
-    position: relative;
+    position: static; /* Makes dropdown part of the flow on mobile */
     width: 100%;
+    box-shadow: none; /* Remove shadow for a cleaner look */
+    border-radius: 0;
+  }
+
+  .dropdown-item {
+    text-align: center;
+  }
+
+  .logo {
+    position: static; /* Reset absolute positioning on mobile */
+    transform: none; /* Reset transform */
   }
 }
