@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import NavBar from '../components/NavBar.jsx'
 import './ReviewPage.css'
 import { AuthContext } from "../AuthContext"
-import {handleLogin, handleLogout } from "../LoginFunctions";
+import { Login } from "../LoginFunctions";
 
 
 function ReviewPage() {
@@ -95,7 +95,7 @@ function ReviewPage() {
     return(
       <>
         <h1>Please log in to write a review!</h1>
-        <button className='post-review-button' onClick={handleLogin}>Login</button>
+        <button className='post-review-button' onClick={Login}>Login</button>
       </>
     )
   }

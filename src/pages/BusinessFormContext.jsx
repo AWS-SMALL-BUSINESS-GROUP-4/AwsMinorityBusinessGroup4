@@ -15,6 +15,7 @@ import { generateClient } from 'aws-amplify/data';
 import { uploadData, getUrl, remove } from '@aws-amplify/storage';
 import axios from 'axios';
 import { element } from 'prop-types';
+import { Login } from '../LoginFunctions';
 
 const client = generateClient();
 
@@ -530,7 +531,8 @@ export function BusinessFormProvider({ children }) {
   async function signInWithGoogle() {
     try {
       localStorage.setItem('businessFormStep', '8');
-      await signInWithRedirect({ provider: 'Google' });
+      //await signInWithRedirect({ provider: 'Google' });
+      Login('/add-business/business-hours');
     } catch (error) {
       console.error('Google sign-in error:', error);
       setErrors({ google: 'Failed to sign in with Google. Please try again.' });
