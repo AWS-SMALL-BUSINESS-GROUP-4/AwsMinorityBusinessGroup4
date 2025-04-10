@@ -52,6 +52,7 @@ function App() {
         <Route path="/business-profile/:id" element={<BusinessManagementPage />} />
         <Route path="/add-business/*" element={<BusinessFormRoutes />} />
         <Route path="/write-review" element={<ReviewPage />} />
+        <Route path="/write-review/:id" element={<ReviewPage />} />
         <Route path="/business/:id" element={<BusinessProfilePage />} />
         <Route path="/business-profile/:id/photos" element={<BusinessManagementPicturesPage/>}/>
         <Route path="/callback" element={<AuthCallback/>} />

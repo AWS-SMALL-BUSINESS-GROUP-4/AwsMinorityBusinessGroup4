@@ -3,15 +3,19 @@ import NavBar from '../components/NavBar.jsx'
 import './ReviewPage.css'
 import { AuthContext } from "../AuthContext"
 import { Login } from "../LoginFunctions";
+import { generateClient } from 'aws-amplify/api';
+import { useParams } from 'react-router-dom';
 
 
 function ReviewPage() {
-  const [user, setUser] = useState(null);
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
-  const [customState, setCustomState] = useState(null);
+  const [file, setFile] = useState(null);
   
-  const { isAuthenticated, loading } = useContext(AuthContext);
+  const { isAuthenticated, loading, userId } = useContext(AuthContext);
+
+  const client = generateClient();
+  const businessId = useParams();
   
   
   // Sample recent reviews data
@@ -40,9 +44,18 @@ function ReviewPage() {
     setReviewText(e.target.value);
   };
 
-  const handlePostReview = () => {
+  const handlePostReview = async () => {
     // Logic to post the review
-    console.log('Posting review:', { rating, reviewText });
+    const timestamp =  Math.floor(Date.now() / 1000);
+    console.log('Posting review:', { rating, reviewText, timestamp });
+    const response = await client.models.Review.create({
+      businessId: businessId,
+      userId: userId,
+      rating: rating,
+      content: reviewText,
+      reviewDate: timestamp
+    });
+    console.log("Review upload response: ", response);
     handleUpload();
     // Reset form after submission
     setRating(0);
