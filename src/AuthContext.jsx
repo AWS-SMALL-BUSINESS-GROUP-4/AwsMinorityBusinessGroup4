@@ -7,26 +7,30 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null); // Initialize as null for loading state
+  const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true); // Add loading state
 
   // Load initial 
 
   useEffect(() => {
-    const unsubscribe = Hub.listen('auth', ({ payload }) => {
+    const unsubscribe = Hub.listen('auth', async ({ payload }) => {
       switch (payload.event) {
         case 'signedIn':
           console.log('user have been signedIn successfully.');
           setIsAuthenticated(true);
+          setUserId((await getCurrentUser()).userId);
           setLoading(false);
           break;
         case 'signedOut':
           console.log('user have been signedOut successfully.');
-          setIsAuthenticated(true);
+          setIsAuthenticated(false);
           setLoading(false);
           break;
         case 'signInWithRedirect':
           console.log('signInWithRedirect API has successfully been resolved.');
           setIsAuthenticated(true);
+          setUserId((await getCurrentUser()).userId);
+          setUserId(response.userId);
           setLoading(false);
           break;
         case 'signInWithRedirect_failure':
@@ -49,6 +53,8 @@ export const AuthProvider = ({ children }) => {
       const session = await fetchAuthSession();
       console.log("This is session:", session);
       setIsAuthenticated(session.tokens != null);
+      if(isAuthenticated)
+          setUserId((await getCurrentUser()).userId);
       setLoading(false);
     }
 
@@ -59,6 +65,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     setIsAuthenticated,
     loading, // Expose loading state
+    userId,
   };
 
   console.log
