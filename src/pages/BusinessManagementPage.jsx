@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import '../App.css'
 import '../components/ContainerStyles.css'
 import './BusinessManagementPage.css'
 import '../components/TextStyles.css'
 import BusinessNavBar from '../components/BusinessNavBar'
 import BusinessManagementSidebar from '../components/BusinessManagementSideBar';
-import { generateClient } from "aws-amplify/data"
+import { generateClient } from 'aws-amplify/data';
 
 function BusinessManagementPage() {
   const client = generateClient();
@@ -19,6 +19,9 @@ function BusinessManagementPage() {
 
   const [loading, setLoading] = useState(true);
 
+  const [storedState, setStoredState] = useState(business);
+
+  // Fetch business data from backend
   useEffect(() => {
     async function fetchBusiness() {
       try {
@@ -70,7 +73,6 @@ function BusinessManagementPage() {
                 Today, Earl’s sister, Marguerite, his two sons, and his extended family manage the four Negril Eats locations. Like their father before them, Earl’s sons subscribe to the Jamaican national motto, “Out of Many, One People.” For the Chinns, traditionally prepared, tasty to-go meals unite their customers as blue-collar laborers, lawyers, retail salespeople, clerks, and other DC professionals line up together to pick up their jerk chicken, oxtail, or escoveitch fish.`,
   });
 
-  const [storedState, setStoredState] = useState(business);
 
   // useEffect(() => {
   //   if (formDataFromState) {
@@ -103,7 +105,10 @@ function BusinessManagementPage() {
   const handleChange = (e, field, index = null) => {
     if (index !== null) {
       const updatedHours = [...business.hours];
-      updatedHours[index] = e.target.value;
+      updatedHours[index] = {
+        ...updatedHours[index],
+        [e.target.name]: e.target.value, // Assumes inputs have name="openTime" or "closeTime"
+      };
       setBusiness({ ...business, hours: updatedHours });
     } else {
       setBusiness({ ...business, [field]: e.target.value });
@@ -113,9 +118,10 @@ function BusinessManagementPage() {
   const toggleEditMode = () => setIsEditing(!isEditing);
 
   const saveChanges = () => {
-    console.log("Saving changes:", business);
+    console.log('Saving changes:', business);
     setStoredState(business);
     setIsEditing(false);
+    // TODO: Add logic to save changes to backend if needed
   };
 
   const cancelEdit = () => {
@@ -124,11 +130,14 @@ function BusinessManagementPage() {
   };
 
   function convertTo12Hour(time) {
-    let [hours, minutes] = time.split(":").map(Number);
-    let period = hours >= 12 ? "PM" : "AM";
+    if (!time) return 'Not set';
+    let [hours, minutes] = time.split(':').map(Number);
+    let period = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12 || 12; // Convert 0 to 12 for midnight
-    return `${hours}:${minutes.toString().padStart(2, "0")} ${period}`;
-}
+    return `${hours}:${minutes.toString().padStart(2, '0')} ${period}`;
+  }
+
+  if (loading) return <div>Loading...</div>;
 
   if(loading) {
     return(<p>Loading...</p>);
@@ -138,35 +147,44 @@ function BusinessManagementPage() {
     <>
       <BusinessNavBar />
       <div className="sidebar-page-container">
-        <BusinessManagementSidebar/>
-
-        {/*Main content*/}
+        <BusinessManagementSidebar />
         <div className="main">
           <div
             style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}
           >
-            <h1 className='blue-text'>Business Information</h1>
+            <h1 className="blue-text">Business Information</h1>
             {isEditing ? (
               <div>
-                <button className="btn" onClick={saveChanges}>Save</button>
-                <button className="btn" onClick={cancelEdit}>Cancel</button>
+                <button className="btn" onClick={saveChanges}>
+                  Save
+                </button>
+                <button className="btn" onClick={cancelEdit}>
+                  Cancel
+                </button>
               </div>
             ) : (
-              <button className="btn" onClick={toggleEditMode}>Edit</button>
+              <button className="btn" onClick={toggleEditMode}>
+                Edit
+              </button>
             )}
           </div>
           <hr />
-          <h2 className='blue-text'>Basic Information</h2>
+          <h2 className="blue-text">Basic Information</h2>
           {isEditing ? (
-            <div style={{ marginBottom: "20px" }}>
-              <div style={{ marginBottom: "10px" }}>
-                <label style={{ display: "block", marginBottom: "5px" }}>Business Name:</label>
-                <input type="text" value={business.name} onChange={(e) => handleChange(e, "name")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', marginBottom: '5px' }}>Business Name:</label>
+                <input
+                  type="text"
+                  value={business.name}
+                  onChange={(e) => handleChange(e, 'name')}
+                  style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+                />
               </div>
               <div style={{ marginBottom: "10px" }}>
                 <label style={{ display: "block", marginBottom: "5px" }}>Address Line 1:</label>
@@ -184,9 +202,14 @@ function BusinessManagementPage() {
                 <label style={{ display: "block", marginBottom: "5px" }}>Categories:</label>
                 <input type="text" value={business.category} onChange={(e) => handleChange(e, "categories")} style={{ width: "100%", padding: "8px", marginBottom: "10px" }} />
               </div>
-              <div style={{ marginBottom: "10px" }}>
-                <label style={{ display: "block", marginBottom: "5px" }}>Website:</label>
-                <input type="text" value={business.website} onChange={(e) => handleChange(e, "website")} style={{ width: "100%", padding: "8px" }} />
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ display: 'block', marginBottom: '5px' }}>Website:</label>
+                <input
+                  type="text"
+                  value={business.website}
+                  onChange={(e) => handleChange(e, 'website')}
+                  style={{ width: '100%', padding: '8px' }}
+                />
               </div>
             </div>
           ) : (
@@ -200,7 +223,7 @@ function BusinessManagementPage() {
             </p>
           )}
           <hr />
-          <h2 className='blue-text'>Hours</h2>
+          <h2 className="blue-text">Hours</h2>
           <table className="hours">
             <tbody>
               {business.businessHours.map((hour, index) => (
@@ -211,18 +234,28 @@ function BusinessManagementPage() {
                       <>
                         <input
                           type="time"
+                          name="openTime"
                           value={hour.openTime}
-                          onChange={(e) => handleChange(e, "hours", index)}
-                          style={{ width: "100%", padding: "5px" }}
-                        /> - <input
+                          onChange={(e) => handleChange(e, 'hours', index)}
+                          style={{ width: '100%', padding: '5px' }}
+                        />{' '}
+                        -{' '}
+                        <input
                           type="time"
+                          name="closeTime"
                           value={hour.closeTime}
-                          onChange={(e) => handleChange(e, "hours", index)}
-                          style={{ width: "100%", padding: "5px" }}
+                          onChange={(e) => handleChange(e, 'hours', index)}
+                          style={{ width: '100%', padding: '5px' }}
                         />
                       </>
                     ) : (
-                      <p>{convertTo12Hour(hour.openTime)} - {convertTo12Hour(hour.closeTime)}</p>
+                      <p>
+                        {hour.isClosed
+                          ? 'Closed'
+                          : hour.isOpen24
+                          ? 'Open 24 hours'
+                          : `${convertTo12Hour(hour.openTime)} - ${convertTo12Hour(hour.closeTime)}`}
+                      </p>
                     )}
                   </td>
                 </tr>
@@ -230,7 +263,7 @@ function BusinessManagementPage() {
             </tbody>
           </table>
           <hr />
-          <h2 className='blue-text'>About</h2>
+          <h2 className="blue-text">About</h2>
           {isEditing ? (
             <textarea
               value={business.description}

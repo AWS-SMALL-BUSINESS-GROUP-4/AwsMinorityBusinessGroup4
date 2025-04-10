@@ -5,11 +5,11 @@ import { defineStorage } from '@aws-amplify/backend';
     access: (allow) => ({
       'business-photos/*': [
         //allow.entity('identity').to(['read', 'write', 'delete']),
-        allow.guest.to(['read', 'write', 'delete']), // Update once auth is fully figured out
+        allow.authenticated.to(['read', 'write', 'delete']), // Update once auth is fully figured out
       ],
       'review-photos/*': [
         //allow.entity('identity').to(['read', 'write', 'delete']),
-        allow.guest.to(['read', 'write', 'delete']), // Update once auth is fully figured out
+        allow.authenticated.to(['read', 'write', 'delete']), // Update once auth is fully figured out
       ],
     })
   })

@@ -1,14 +1,20 @@
-import { signInWithRedirect, signOut } from "@aws-amplify/auth";
 
-export async function handleLogin() {
+import { signInWithRedirect, signOut } from 'aws-amplify/auth';
+
+export async function signIn(customState) {
     const response = await signInWithRedirect({
-        provider: "Google",
-        customState: "write-reivew",
+        provider: 'Google',
+        customState: customState
     });
-    console.log("Logged in successfully!, ", response);
+    console.log("Result of signIn: ", response);
 }
 
-export async function handleLogout() {
-    const response = await signOut();
-    console.log("Signed out successfully!", response);
+export async function signOut(customState) {
+    const response = await signOut({
+        global: false,
+        oauth: {
+            redirect: customState
+        }
+    });
+    console.log("Result of signOut: ", response);
 }
