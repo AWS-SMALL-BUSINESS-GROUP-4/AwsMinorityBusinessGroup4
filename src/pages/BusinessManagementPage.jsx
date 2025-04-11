@@ -21,22 +21,37 @@ function BusinessManagementPage() {
 
   const [storedState, setStoredState] = useState(business);
 
+  function sortBusinessHoursByDay(businessHours) {
+    const dayOrder = {
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5,
+      Saturday: 6,
+      Sunday: 7
+    };
+  
+    return businessHours.sort((a, b) => {
+      return dayOrder[a.day] - dayOrder[b.day];
+    });
+  }
+
   // Fetch business data from backend
   useEffect(() => {
     async function fetchBusiness() {
       try {
-        console.log("This is running");
-        console.log("This is the id I received: ", id);
         // get a specific item
         const response = await client.models.Business.get(
           { id: id },
           { selectionSet: ["id", "name", "phoneNumber", "streetAddress", "city", "state", "country", "zipcode", "category", "website", "description", "businessHours.*"] }
         );
         if(response.errors) {
-          console.log("Haha stupid, ", response.errors[0].message);
+          console.error("Error retrieving Business Data: ", response.errors);
         }
         console.log("This is the business I got: ", response.data);
 
+        sortBusinessHoursByDay(response.data.businessHours);
         console.log("Sanity check for business hours: ", response.data.businessHours);
 
 
@@ -147,7 +162,7 @@ function BusinessManagementPage() {
     <>
       <BusinessNavBar />
       <div className="sidebar-page-container">
-        <BusinessManagementSidebar />
+        <BusinessManagementSidebar id={id}/>
         <div className="main">
           <div
             style={{

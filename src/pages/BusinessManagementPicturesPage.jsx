@@ -8,10 +8,12 @@ import './BusinessManagementPicturePage.css'
 import '../components/TextStyles.css'
 import BusinessNavBar from '../components/BusinessNavBar'
 import BusinessManagementSidebar from '../components/BusinessManagementSideBar';
+import { useParams } from 'react-router-dom';
 
 function BusinessManagementPicturesPage() {
 
     const outsideImgUpload = useRef(null);
+    const id = useParams().id;
 
     const [images, setImages] = useState([
         'https://media.cnn.com/api/v1/images/stellar/prod/gettyimages-1273516682.jpg?c=original',
@@ -62,7 +64,7 @@ function BusinessManagementPicturesPage() {
         <>
             <BusinessNavBar/>
             <div className='sidebar-page-container'>
-                <BusinessManagementSidebar/>
+                <BusinessManagementSidebar id={id}/>
                 {/*Main*/}
                 <div className='main'>
                     <h1>Pictures</h1>
