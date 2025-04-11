@@ -5,6 +5,7 @@ import { AuthContext } from "../AuthContext"
 import { Login } from "../LoginFunctions";
 import { generateClient } from 'aws-amplify/api';
 import { useParams } from 'react-router-dom';
+import { getCurrentUser } from '@aws-amplify/auth';
 
 
 function ReviewPage() {
@@ -15,10 +16,10 @@ function ReviewPage() {
   const [reviewText, setReviewText] = useState('');
   const [file, setFile] = useState(null);
   
-  const { isAuthenticated, userId } = useContext(AuthContext);
+  const { isAuthenticated, userId, setUserId, authLoading } = useContext(AuthContext);
 
   const client = generateClient();
-  const businessId = useParams().id;
+  const businessId = useParams().id ?? null;
 
   useEffect(() => {
     async function fetchBusiness() {
@@ -44,6 +45,19 @@ function ReviewPage() {
     fetchBusiness();
 
   }, [businessId, client, isAuthenticated])
+
+  useEffect(() => {
+    async function fetchUserId() {
+      try {
+        const response = await getCurrentUser();
+        setUserId(response.userId);
+      } catch(error) {
+        setUserId(null);
+      }
+    }
+
+    fetchUserId();
+  }, [client]);
   
   
   // Sample recent reviews data
@@ -134,7 +148,7 @@ function ReviewPage() {
     Login();
   }
 
-  if(loading)
+  if(loading || authLoading)
       return (<p>Loading...</p>)
 
   if(isAuthenticated === false) {

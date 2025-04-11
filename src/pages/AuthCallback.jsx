@@ -10,8 +10,8 @@ export default function AuthCallback() {
             try {   
                 await getCurrentUser();
                 const redirectPath = localStorage.getItem('postLoginRedirect') || '/';
-                //localStorage.removeItem('postLoginRedirect');
-                navigate(redirectPath);
+                await navigate(redirectPath);
+                localStorage.removeItem('postLoginRedirect');
             } catch(error) {
                 console.error('Authentication error:', error);
                 navigate('/');
