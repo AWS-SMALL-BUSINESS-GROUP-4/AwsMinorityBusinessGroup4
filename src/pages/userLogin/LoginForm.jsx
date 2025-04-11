@@ -21,7 +21,6 @@ function LoginForm() {
     if (name === 'email' && !emailRegex.test(value)) {
       return 'Please enter a valid email address';
     }
-    // No complexity check for password on login
     return '';
   };
 
@@ -60,9 +59,13 @@ function LoginForm() {
 
     try {
       console.log('Attempting manual login with:', { email: formData.email });
-      await signIn({ username: formData.email, password: formData.password });
-      console.log('Manual login initiated successfully');
-      // Navigation handled by Hub listener in userLogin.jsx
+      const signInResult = await signIn({ username: formData.email, password: formData.password });
+      console.log('Sign-in result:', signInResult);
+      if (signInResult.isSignedIn) {
+        console.log('Sign-in successful');
+      } else {
+        console.log('Sign-in incomplete, next step:', signInResult.nextStep);
+      }
     } catch (error) {
       console.error('Manual login error:', error);
       let errorMessage = 'Failed to log in. Please try again.';

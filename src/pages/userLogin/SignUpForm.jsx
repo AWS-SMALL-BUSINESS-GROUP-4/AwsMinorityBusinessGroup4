@@ -59,7 +59,7 @@ function SignUpForm() {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    setErrors({});
+    setErrors({}); // Fixed: Pass an empty object to clear errors
     setIsSigningUp(true);
 
     const validationErrors = validateForm();
@@ -83,12 +83,13 @@ function SignUpForm() {
           userAttributes: {
             given_name: formData.firstName,
             family_name: formData.lastName,
+            email: formData.email, // Ensure email is set in Cognito
           },
         },
       });
       console.log('Manual sign-up successful:', signUpResult);
       setIsVerifying(true);
-      setVerificationCode(''); // Reset to ensure it’s empty
+      setVerificationCode('');
     } catch (error) {
       console.error('Manual sign-up error:', error);
       let errorMessage = 'Failed to create account. Please try again.';
@@ -119,11 +120,16 @@ function SignUpForm() {
       console.log('Confirm sign-up successful:', confirmResult);
 
       console.log('Attempting sign-in after verification with:', { email: formData.email });
-      await signIn({
+      const signInResult = await signIn({
         username: formData.email,
         password: formData.password,
       });
-      console.log('Sign-in initiated successfully');
+      console.log('Sign-in result:', signInResult);
+      if (signInResult.isSignedIn) {
+        console.log('Sign-in successful');
+      } else {
+        console.log('Sign-in incomplete, next step:', signInResult.nextStep);
+      }
     } catch (error) {
       console.error('Verification or sign-in error:', error);
       let errorMessage = 'Invalid code or sign-in failed. Please try again.';
