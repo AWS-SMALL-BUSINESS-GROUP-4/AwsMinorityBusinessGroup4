@@ -15,6 +15,7 @@ function SignUpForm() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{}|;:,.<>?]).{8,}$/;
@@ -57,11 +58,13 @@ function SignUpForm() {
   const handleSignUp = async (e) => {
     e.preventDefault();
     setErrors({});
+    setIsLoading(true);
 
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       console.error('Sign-up validation errors:', validationErrors);
+      setIsLoading(false);
       return;
     }
 
@@ -100,17 +103,21 @@ function SignUpForm() {
           errorMessage = error.message || errorMessage;
       }
       setErrors({ manualSignUp: errorMessage });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleConfirmSignUp = async (e) => {
     e.preventDefault();
     setErrors({});
+    setIsLoading(true);
 
     if (!verificationCode.trim()) {
       const errorMessage = 'Verification code is required';
       setErrors({ verification: errorMessage });
       console.error('Verification error:', errorMessage);
+      setIsLoading(false);
       return;
     }
 
@@ -137,20 +144,25 @@ function SignUpForm() {
           errorMessage = 'Invalid verification code.';
           break;
         case 'NotAuthorizedException':
-          errorMessage = 'Sign-in failed after verification.';
+          errorMessage = 'Sign-in failed after verification. Please try logging in manually.';
           break;
         case 'ExpiredCodeException':
           errorMessage = 'Verification code has expired. Please request a new one.';
+          break;
+        case 'LimitExceededException':
+          errorMessage = 'Attempt limit exceeded. Please try again later.';
           break;
         default:
           errorMessage = error.message || errorMessage;
       }
       setErrors({ verification: errorMessage });
+      setIsLoading(false);
     }
   };
 
   const handleResendCode = async () => {
     setErrors({});
+    setIsLoading(true);
     try {
       console.log('Resending verification code to:', formData.email);
       await resendSignUpCode({ username: formData.email });
@@ -159,7 +171,16 @@ function SignUpForm() {
     } catch (error) {
       console.error('Resend code error:', error);
       let errorMessage = error.message || 'Failed to resend code.';
+      switch (error.name) {
+        case 'LimitExceededException':
+          errorMessage = 'Resend limit exceeded. Please try again later.';
+          break;
+        default:
+          errorMessage = error.message || errorMessage;
+      }
       setErrors({ verification: errorMessage });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -176,12 +197,20 @@ function SignUpForm() {
               id="verification-code"
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value)}
+              disabled={isLoading}
             />
             {errors.verification && <span className="error">{errors.verification}</span>}
           </div>
-          <button type="submit" className="submit-button">Verify</button>
-          <button type="button" className="resend-button" onClick={handleResendCode}>
-            Resend Code
+          <button type="submit" className="submit-button" disabled={isLoading}>
+            {isLoading ? 'Verifying...' : 'Verify'}
+          </button>
+          <button
+            type="button"
+            className="resend-button"
+            onClick={handleResendCode}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Resending...' : 'Resend Code'}
           </button>
         </form>
       </div>
@@ -203,6 +232,7 @@ function SignUpForm() {
             value={formData.firstName}
             onChange={handleInputChange}
             onBlur={handleBlur}
+            disabled={isLoading}
           />
           {errors.firstName && <span className="error">{errors.firstName}</span>}
         </div>
@@ -217,6 +247,7 @@ function SignUpForm() {
             value={formData.lastName}
             onChange={handleInputChange}
             onBlur={handleBlur}
+            disabled={isLoading}
           />
           {errors.lastName && <span className="error">{errors.lastName}</span>}
         </div>
@@ -231,6 +262,7 @@ function SignUpForm() {
             value={formData.email}
             onChange={handleInputChange}
             onBlur={handleBlur}
+            disabled={isLoading}
           />
           {errors.email && <span className="error">{errors.email}</span>}
         </div>
@@ -243,6 +275,7 @@ function SignUpForm() {
             value={formData.password}
             onChange={handleInputChange}
             onBlur={handleBlur}
+            disabled={isLoading}
           />
           {errors.password && <span className="error">{errors.password}</span>}
         </div>
@@ -255,14 +288,17 @@ function SignUpForm() {
             value={formData.confirmPassword}
             onChange={handleInputChange}
             onBlur={handleBlur}
+            disabled={isLoading}
           />
           {errors.confirmPassword && <span className="error">{errors.confirmPassword}</span>}
         </div>
         <div className="checkbox-group">
-          <input type="checkbox" id="terms" required />
+          <input type="checkbox" id="terms" required disabled={isLoading} />
           <label htmlFor="terms">I agree to the Terms of Service and Privacy Policy</label>
         </div>
-        <button type="submit" className="submit-button">Sign Up</button>
+        <button type="submit" className="submit-button" disabled={isLoading}>
+          {isLoading ? 'Signing Up...' : 'Sign Up'}
+        </button>
       </form>
       {errors.manualSignUp && <span className="error">{errors.manualSignUp}</span>}
     </div>
