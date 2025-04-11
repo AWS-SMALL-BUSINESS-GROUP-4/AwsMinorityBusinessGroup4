@@ -11,5 +11,6 @@ export const Review = a.model({
 }).authorization((allow) => [
     allow.owner(), 
     allow.guest().to(['read']),
+    allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['read', 'update', 'delete'])
 ])

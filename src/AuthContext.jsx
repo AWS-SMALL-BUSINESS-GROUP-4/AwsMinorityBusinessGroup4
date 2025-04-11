@@ -7,7 +7,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null); // Initialize as null for loading state
-  const [userId, setUserId] = useState(null);
+  const [userId, setUserId] = useState("");
   const [loading, setLoading] = useState(true); // Add loading state
 
   // Load initial 
@@ -18,7 +18,8 @@ export const AuthProvider = ({ children }) => {
         case 'signedIn':
           console.log('user have been signedIn successfully.');
           setIsAuthenticated(true);
-          setUserId((await getCurrentUser()).userId);
+          const response = await getCurrentUser();
+          setUserId(response.userId);
           setLoading(false);
           break;
         case 'signedOut':
@@ -28,10 +29,6 @@ export const AuthProvider = ({ children }) => {
           break;
         case 'signInWithRedirect':
           console.log('signInWithRedirect API has successfully been resolved.');
-          setIsAuthenticated(true);
-          setUserId((await getCurrentUser()).userId);
-          setUserId(response.userId);
-          setLoading(false);
           break;
         case 'signInWithRedirect_failure':
           console.log('failure while trying to resolve signInWithRedirect API.');
@@ -45,17 +42,21 @@ export const AuthProvider = ({ children }) => {
       }
     });
 
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return unsubscribe; // Cleanup subscription on unmount
   }, []);
 
   useEffect(()=> {
     async function checkAuth() {
-      const session = await fetchAuthSession();
-      console.log("This is session:", session);
-      setIsAuthenticated(session.tokens != null);
-      if(isAuthenticated)
-          setUserId((await getCurrentUser()).userId);
-      setLoading(false);
+      try {
+        const session = await fetchAuthSession();
+        console.log("This is session:", session);
+        setIsAuthenticated(session.tokens != null);
+        if(isAuthenticated)
+            setUserId((await getCurrentUser()).userId);
+        setLoading(false);
+      } catch(error) {
+        console.error("Error in checkAuth in AuthContext.jsx: ", error);
+      }
     }
 
     checkAuth();

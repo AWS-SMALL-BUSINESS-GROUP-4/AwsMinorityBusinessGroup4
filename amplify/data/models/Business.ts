@@ -26,6 +26,7 @@ export const Business = a.model({
 }).authorization((allow) => [
     allow.owner(), 
     allow.guest().to(['read']), 
+    allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['read', 'update', 'delete'])
 ])
 
@@ -40,5 +41,6 @@ export const BusinessHours = a.model({
 }).authorization((allow) => [
     allow.owner(), 
     allow.guest().to(['read']), 
+    allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['read', 'update', 'delete'])
 ]);

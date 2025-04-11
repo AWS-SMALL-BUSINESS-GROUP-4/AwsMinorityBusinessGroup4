@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import NavBar from '../components/NavBar.jsx'
 import './ReviewPage.css'
 import { AuthContext } from "../AuthContext"
@@ -9,13 +9,41 @@ import { useParams } from 'react-router-dom';
 
 function ReviewPage() {
   const [rating, setRating] = useState(0);
+  const [validBusiness, setValidBusiness] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [businessName, setBusinessName] = useState('Negril - DC');
   const [reviewText, setReviewText] = useState('');
   const [file, setFile] = useState(null);
   
-  const { isAuthenticated, loading, userId } = useContext(AuthContext);
+  const { isAuthenticated, userId } = useContext(AuthContext);
 
   const client = generateClient();
-  const businessId = useParams();
+  const businessId = useParams().id;
+
+  useEffect(() => {
+    async function fetchBusiness() {
+      if(businessId == null || businessId === '' || !isAuthenticated) {
+        setValidBusiness(false);
+        setLoading(false);
+        return;
+      }
+      const response = await client.models.Business.get(
+        {id: businessId},
+        {
+          selectionset: ['name',]
+        }
+      );
+  
+  
+      setValidBusiness(response.data != null);
+      if(validBusiness)
+        setBusinessName(response.data.name);
+      setLoading(false);
+    }
+
+    fetchBusiness();
+
+  }, [businessId, client, isAuthenticated])
   
   
   // Sample recent reviews data
@@ -47,7 +75,7 @@ function ReviewPage() {
   const handlePostReview = async () => {
     // Logic to post the review
     const timestamp =  Math.floor(Date.now() / 1000);
-    console.log('Posting review:', { rating, reviewText, timestamp });
+    console.log('Posting review:', { businessId, userId, rating, reviewText, timestamp });
     const response = await client.models.Review.create({
       businessId: businessId,
       userId: userId,
@@ -101,6 +129,11 @@ function ReviewPage() {
     }
   };
 
+  const handleLogin = () => {
+    setLoading(true);
+    Login();
+  }
+
   if(loading)
       return (<p>Loading...</p>)
 
@@ -108,10 +141,13 @@ function ReviewPage() {
     return(
       <>
         <h1>Please log in to write a review!</h1>
-        <button className='post-review-button' onClick={Login}>Login</button>
+        <button className='post-review-button' onClick={handleLogin}>Login</button>
       </>
     )
   }
+
+  // if(!validBusiness)
+  //   return<p>Error - Invalid Business</p>
 
   return (
     <div className="business-management-container">
@@ -121,7 +157,7 @@ function ReviewPage() {
       {/* Main Content */}
       <main className="main-content">
         <div className="review-form-container">
-          <h2 className="business-name">Negril - DC</h2>
+          <h2 className="business-name">{businessName}</h2>
           <div className="review-form">
             <div className="rating-section">
               <span>Please leave a rating: </span>

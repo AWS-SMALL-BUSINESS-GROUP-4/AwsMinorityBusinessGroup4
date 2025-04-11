@@ -6,11 +6,8 @@ import { AuthContext } from "../AuthContext"
 import {Login, Logout } from "../LoginFunctions";
 
 function NavBar() {
-    const { isAuthenticated, loading } = useContext(AuthContext);
+    const { isAuthenticated } = useContext(AuthContext);
 
-    console.log("Nav bar auth: ", isAuthenticated);
-    // if(loading)
-    //     return <p>Loading...</p>
     return (
         <ul className='nav orange-background'>
             <li className='nav' style={{float: "left"}}><a href='/'>Logo</a></li>
