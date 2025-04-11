@@ -16,6 +16,7 @@ function SignUpForm() {
   const [verificationCode, setVerificationCode] = useState('');
   const [errors, setErrors] = useState({});
   const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -87,21 +88,12 @@ function SignUpForm() {
       });
       console.log('Manual sign-up successful:', signUpResult);
       setIsVerifying(true);
+      setVerificationCode(''); // Reset to ensure it’s empty
     } catch (error) {
       console.error('Manual sign-up error:', error);
       let errorMessage = 'Failed to create account. Please try again.';
-      switch (error.name) {
-        case 'UsernameExistsException':
-          errorMessage = 'An account with this email already exists.';
-          break;
-        case 'InvalidParameterException':
-          errorMessage = 'Invalid input provided. Please check your details.';
-          break;
-        case 'InvalidPasswordException':
-          errorMessage = 'Password does not meet requirements.';
-          break;
-        default:
-          errorMessage = error.message || errorMessage;
+      if (error.name === 'UsernameExistsException') {
+        errorMessage = 'An account with this email already exists.';
       }
       setErrors({ manualSignUp: errorMessage });
     } finally {
@@ -111,17 +103,13 @@ function SignUpForm() {
 
   const handleConfirmSignUp = async (e) => {
     e.preventDefault();
-    setErrors({});
-    setIsVerifying(true);
-
+    console.log('handleConfirmSignUp called with code:', verificationCode);
     if (!verificationCode.trim()) {
-      const errorMessage = 'Verification code is required';
-      setErrors({ verification: errorMessage });
-      console.error('Verification error:', errorMessage);
-      setIsVerifying(false);
+      console.log('Verification code is empty');
+      setErrors({ verification: 'Verification code is required' });
       return;
     }
-
+    setIsConfirming(true);
     try {
       console.log('Attempting to confirm sign-up with code:', verificationCode);
       const confirmResult = await confirmSignUp({
@@ -136,29 +124,17 @@ function SignUpForm() {
         password: formData.password,
       });
       console.log('Sign-in initiated successfully');
-      // Navigation handled by Hub listener in userLogin.jsx
     } catch (error) {
       console.error('Verification or sign-in error:', error);
       let errorMessage = 'Invalid code or sign-in failed. Please try again.';
-      switch (error.name) {
-        case 'CodeMismatchException':
-          errorMessage = 'Invalid verification code.';
-          break;
-        case 'NotAuthorizedException':
-          errorMessage = 'Sign-in failed after verification. Please try logging in manually.';
-          break;
-        case 'ExpiredCodeException':
-          errorMessage = 'Verification code has expired. Please request a new one.';
-          break;
-        case 'LimitExceededException':
-          errorMessage = 'Attempt limit exceeded. Please try again later.';
-          break;
-        default:
-          errorMessage = error.message || errorMessage;
+      if (error.name === 'CodeMismatchException') {
+        errorMessage = 'Invalid verification code.';
+      } else if (error.name === 'ExpiredCodeException') {
+        errorMessage = 'Verification code has expired. Please request a new one.';
       }
       setErrors({ verification: errorMessage });
     } finally {
-      setIsVerifying(false);
+      setIsConfirming(false);
     }
   };
 
@@ -173,12 +149,8 @@ function SignUpForm() {
     } catch (error) {
       console.error('Resend code error:', error);
       let errorMessage = 'Failed to resend code.';
-      switch (error.name) {
-        case 'LimitExceededException':
-          errorMessage = 'Resend limit exceeded. Please try again later.';
-          break;
-        default:
-          errorMessage = error.message || errorMessage;
+      if (error.name === 'LimitExceededException') {
+        errorMessage = 'Resend limit exceeded. Please try again later.';
       }
       setErrors({ verification: errorMessage });
     } finally {
@@ -187,6 +159,7 @@ function SignUpForm() {
   };
 
   if (isVerifying) {
+    console.log('Rendering verification form with code:', verificationCode);
     return (
       <div className="form-section signup">
         <h2>Verify Your Email</h2>
@@ -199,18 +172,18 @@ function SignUpForm() {
               id="verification-code"
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value)}
-              disabled={isVerifying || isResending}
+              disabled={isConfirming || isResending}
             />
             {errors.verification && <span className="error">{errors.verification}</span>}
           </div>
-          <button type="submit" className="submit-button" disabled={isVerifying || isResending}>
-            {isVerifying ? 'Verifying...' : 'Verify'}
+          <button type="submit" className="submit-button" disabled={isConfirming || isResending}>
+            {isConfirming ? 'Verifying...' : 'Verify'}
           </button>
           <button
             type="button"
             className="resend-button"
             onClick={handleResendCode}
-            disabled={isVerifying || isResending}
+            disabled={isConfirming || isResending}
           >
             {isResending ? 'Resending...' : 'Resend Code'}
           </button>
