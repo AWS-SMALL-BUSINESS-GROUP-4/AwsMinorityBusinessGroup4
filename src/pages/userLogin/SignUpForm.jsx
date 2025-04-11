@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { signUp, confirmSignUp, signIn, signInWithRedirect } from 'aws-amplify/auth';
+import { signUp, confirmSignUp, signIn, resendSignUpCode } from 'aws-amplify/auth';
 import Input from './Input';
 import PasswordInput from './PasswordInput';
-import { FaUser, FaEnvelope, FaGoogle, FaFacebook } from 'react-icons/fa';
+import { FaUser, FaEnvelope } from 'react-icons/fa';
 
 function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -16,33 +16,62 @@ function SignUpForm() {
   const [verificationCode, setVerificationCode] = useState('');
   const [errors, setErrors] = useState({});
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{}|;:,.<>?]).{8,}$/;
+
+  const validateField = (name, value) => {
+    if (name === 'firstName' && !value.trim()) return 'First Name is required';
+    if (name === 'lastName' && !value.trim()) return 'Last Name is required';
+    if (name === 'email' && !value.trim()) return 'Email Address is required';
+    if (name === 'email' && value && !emailRegex.test(value)) return 'Please enter a valid email address';
+    if (name === 'password' && !value) return 'Password is required';
+    if (name === 'password' && value && !passwordRegex.test(value))
+      return 'Password must be at least 8 characters long and include letters, numbers, and symbols';
+    if (name === 'confirmPassword' && value !== formData.password) return 'Passwords do not match';
+    return '';
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
-  const validateSignUp = () => {
-    const errors = {};
-    if (!formData.firstName.trim()) errors.firstName = 'First Name is required';
-    if (!formData.lastName.trim()) errors.lastName = 'Last Name is required';
-    if (!formData.email.trim()) errors.email = 'Email Address is required';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.email = 'Please enter a valid email address';
-    if (!formData.password) errors.password = 'Password is required';
-    else if (!/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{}|;:,.<>?]).{8,}$/.test(formData.password))
-      errors.password = 'Password must be at least 8 characters long and include letters, numbers, and symbols';
-    if (formData.password !== formData.confirmPassword) errors.confirmPassword = 'Passwords do not match';
-    return errors;
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    newErrors.firstName = validateField('firstName', formData.firstName);
+    newErrors.lastName = validateField('lastName', formData.lastName);
+    newErrors.email = validateField('email', formData.email);
+    newErrors.password = validateField('password', formData.password);
+    newErrors.confirmPassword = validateField('confirmPassword', formData.confirmPassword);
+    return Object.fromEntries(Object.entries(newErrors).filter(([_, v]) => v));
   };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    const validationErrors = validateSignUp();
+    setErrors({});
+
+    const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
+      console.error('Sign-up validation errors:', validationErrors);
       return;
     }
+
     try {
-      await signUp({
+      console.log('Attempting manual sign-up with:', {
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      });
+      const signUpResult = await signUp({
         username: formData.email,
         password: formData.password,
         options: {
@@ -52,52 +81,85 @@ function SignUpForm() {
           },
         },
       });
+      console.log('Manual sign-up successful:', signUpResult);
       setIsVerifying(true);
     } catch (error) {
+      console.error('Manual sign-up error:', error);
       let errorMessage = 'Failed to create account. Please try again.';
-      if (error.name === 'UsernameExistsException') errorMessage = 'An account with this email already exists.';
+      switch (error.name) {
+        case 'UsernameExistsException':
+          errorMessage = 'An account with this email already exists.';
+          break;
+        case 'InvalidParameterException':
+          errorMessage = 'Invalid input provided. Please check your details.';
+          break;
+        case 'InvalidPasswordException':
+          errorMessage = 'Password does not meet requirements.';
+          break;
+        default:
+          errorMessage = error.message || errorMessage;
+      }
       setErrors({ manualSignUp: errorMessage });
     }
   };
 
   const handleConfirmSignUp = async (e) => {
     e.preventDefault();
+    setErrors({});
+
+    if (!verificationCode.trim()) {
+      const errorMessage = 'Verification code is required';
+      setErrors({ verification: errorMessage });
+      console.error('Verification error:', errorMessage);
+      return;
+    }
+
     try {
-      await confirmSignUp({
+      console.log('Attempting to confirm sign-up with code:', verificationCode);
+      const confirmResult = await confirmSignUp({
         username: formData.email,
         confirmationCode: verificationCode,
       });
+      console.log('Confirm sign-up successful:', confirmResult);
+
+      console.log('Attempting sign-in after verification with:', { email: formData.email });
       await signIn({
         username: formData.email,
         password: formData.password,
       });
-      // Hub listener in UserLogin.jsx will redirect to homepage
+      console.log('Sign-in initiated successfully');
+      // Hub listener in UserLogin.jsx handles redirect and user record creation
     } catch (error) {
+      console.error('Verification or sign-in error:', error);
       let errorMessage = 'Invalid code or sign-in failed. Please try again.';
-      if (error.name === 'CodeMismatchException') errorMessage = 'Invalid verification code.';
+      switch (error.name) {
+        case 'CodeMismatchException':
+          errorMessage = 'Invalid verification code.';
+          break;
+        case 'NotAuthorizedException':
+          errorMessage = 'Sign-in failed after verification.';
+          break;
+        case 'ExpiredCodeException':
+          errorMessage = 'Verification code has expired. Please request a new one.';
+          break;
+        default:
+          errorMessage = error.message || errorMessage;
+      }
       setErrors({ verification: errorMessage });
     }
   };
 
-  const signInWithGoogle = async () => {
+  const handleResendCode = async () => {
+    setErrors({});
     try {
-      await signInWithRedirect({
-        provider: 'Google',
-        customState: JSON.stringify({ redirectTo: '/' }),
-      });
+      console.log('Resending verification code to:', formData.email);
+      await resendSignUpCode({ username: formData.email });
+      console.log('Verification code resent successfully');
+      setErrors({ verification: 'Code resent. Check your email.' });
     } catch (error) {
-      setErrors({ google: 'Failed to sign in with Google.' });
-    }
-  };
-
-  const signInWithFacebook = async () => {
-    try {
-      await signInWithRedirect({
-        provider: 'Facebook',
-        customState: JSON.stringify({ redirectTo: '/' }),
-      });
-    } catch (error) {
-      setErrors({ facebook: 'Failed to sign in with Facebook.' });
+      console.error('Resend code error:', error);
+      let errorMessage = error.message || 'Failed to resend code.';
+      setErrors({ verification: errorMessage });
     }
   };
 
@@ -105,6 +167,7 @@ function SignUpForm() {
     return (
       <div className="form-section signup">
         <h2>Verify Your Email</h2>
+        <p>A code has been sent to {formData.email}</p>
         <form onSubmit={handleConfirmSignUp}>
           <div className="form-group">
             <label htmlFor="verification-code">Verification Code</label>
@@ -114,9 +177,12 @@ function SignUpForm() {
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value)}
             />
+            {errors.verification && <span className="error">{errors.verification}</span>}
           </div>
-          {errors.verification && <span className="error">{errors.verification}</span>}
           <button type="submit" className="submit-button">Verify</button>
+          <button type="button" className="resend-button" onClick={handleResendCode}>
+            Resend Code
+          </button>
         </form>
       </div>
     );
@@ -124,7 +190,7 @@ function SignUpForm() {
 
   return (
     <div className="form-section signup">
-      <h2 channel="auth">Join the Community!</h2>
+      <h2>Join the Community!</h2>
       <form onSubmit={handleSignUp}>
         <div className="form-group">
           <label htmlFor="signup-firstname">First Name</label>
@@ -136,6 +202,7 @@ function SignUpForm() {
             name="firstName"
             value={formData.firstName}
             onChange={handleInputChange}
+            onBlur={handleBlur}
           />
           {errors.firstName && <span className="error">{errors.firstName}</span>}
         </div>
@@ -149,6 +216,7 @@ function SignUpForm() {
             name="lastName"
             value={formData.lastName}
             onChange={handleInputChange}
+            onBlur={handleBlur}
           />
           {errors.lastName && <span className="error">{errors.lastName}</span>}
         </div>
@@ -162,6 +230,7 @@ function SignUpForm() {
             name="email"
             value={formData.email}
             onChange={handleInputChange}
+            onBlur={handleBlur}
           />
           {errors.email && <span className="error">{errors.email}</span>}
         </div>
@@ -173,6 +242,7 @@ function SignUpForm() {
             name="password"
             value={formData.password}
             onChange={handleInputChange}
+            onBlur={handleBlur}
           />
           {errors.password && <span className="error">{errors.password}</span>}
         </div>
@@ -184,6 +254,7 @@ function SignUpForm() {
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleInputChange}
+            onBlur={handleBlur}
           />
           {errors.confirmPassword && <span className="error">{errors.confirmPassword}</span>}
         </div>
@@ -194,17 +265,6 @@ function SignUpForm() {
         <button type="submit" className="submit-button">Sign Up</button>
       </form>
       {errors.manualSignUp && <span className="error">{errors.manualSignUp}</span>}
-      <p className="or-text">Or sign up with:</p>
-      <div className="social-buttons">
-        <button className="social-button google" onClick={signInWithGoogle}>
-          <FaGoogle /> Google
-        </button>
-        <button className="social-button facebook" onClick={signInWithFacebook}>
-          <FaFacebook /> Facebook
-        </button>
-      </div>
-      {errors.google && <span className="error">{errors.google}</span>}
-      {errors.facebook && <span className="error">{errors.facebook}</span>}
     </div>
   );
 }

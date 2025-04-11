@@ -18,9 +18,11 @@ function UserLogin() {
     const listener = async (data) => {
       if (data.payload.event === 'signIn') {
         try {
+          console.log('Auth event: signIn detected');
           const user = await getCurrentUser();
           const attributes = await fetchUserAttributes();
           const userId = attributes.sub;
+          console.log('Authenticated user:', { userId, email: attributes.email });
 
           // Check if User record exists; create it if not
           const userRecord = await client.models.User.get({ id: userId });
@@ -28,32 +30,45 @@ function UserLogin() {
             const userData = {
               id: userId,
               name: {
-                firstName: attributes.given_name,
-                lastName: attributes.family_name,
+                firstName: attributes.given_name || '',
+                lastName: attributes.family_name || '',
               },
               email: attributes.email,
               joinedAt: Date.now(),
               lastLogin: Date.now(),
             };
-            await client.models.User.create(userData);
+            console.log('Creating new user record:', userData);
+            const createResponse = await client.models.User.create(userData);
+            if (createResponse.errors) {
+              throw new Error(createResponse.errors[0].message);
+            }
+            console.log('User record created successfully');
+          } else {
+            console.log('User record exists, updating lastLogin');
+            await client.models.User.update({
+              id: userId,
+              lastLogin: Date.now(),
+            });
           }
 
-          // Check for customState to determine redirect
-          const customState = data.payload.data?.customState
-            ? JSON.parse(data.payload.data.customState)
-            : { redirectTo: '/' }; // Default to homepage
-          const redirectTo = customState.redirectTo || '/';
-          console.log('User signed in and record handled, redirecting to:', redirectTo);
-          navigate(redirectTo);
+          // Redirect to homepage
+          console.log('Redirecting to homepage');
+          navigate('/');
         } catch (error) {
           console.error('Error handling sign-in:', error);
-          navigate('/'); // Fallback to homepage on error
+          navigate('/'); // Fallback to homepage
         }
+      } else if (data.payload.event === 'signIn_failure') {
+        console.error('Sign-in failure:', data.payload.data);
       }
     };
 
+    console.log('Setting up auth listener');
     const unsub = Hub.listen('auth', listener);
-    return () => unsub();
+    return () => {
+      console.log('Cleaning up auth listener');
+      unsub();
+    };
   }, [navigate]);
 
   return (

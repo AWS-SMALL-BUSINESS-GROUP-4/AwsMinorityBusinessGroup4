@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { signIn, signInWithRedirect } from 'aws-amplify/auth';
+import { signIn } from 'aws-amplify/auth';
 import Input from './Input';
 import PasswordInput from './PasswordInput';
-import { FaEnvelope, FaGoogle, FaFacebook } from 'react-icons/fa';
+import { FaEnvelope } from 'react-icons/fa';
 
 function LoginForm() {
   const [formData, setFormData] = useState({
@@ -11,47 +11,75 @@ function LoginForm() {
   });
   const [errors, setErrors] = useState({});
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{}|;:,.<>?]).{8,}$/;
+
+  const validateField = (name, value) => {
+    if (!value.trim()) {
+      return `${name === 'email' ? 'Email Address' : 'Password'} is required`;
+    }
+    if (name === 'email' && !emailRegex.test(value)) {
+      return 'Please enter a valid email address';
+    }
+    if (name === 'password' && !passwordRegex.test(value)) {
+      return 'Password must be at least 8 characters long and include letters, numbers, and symbols';
+    }
+    return '';
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    newErrors.email = validateField('email', formData.email);
+    newErrors.password = validateField('password', formData.password);
+    return Object.fromEntries(Object.entries(newErrors).filter(([_, v]) => v));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { email, password } = formData;
-    if (!email || !password) {
-      setErrors({ login: 'Email and password are required' });
+    setErrors({});
+
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      console.error('Login validation errors:', validationErrors);
       return;
     }
+
     try {
-      await signIn({ username: email, password });
-      // Hub listener in UserLogin.jsx will redirect to homepage
+      console.log('Attempting manual login with:', { email: formData.email });
+      await signIn({ username: formData.email, password: formData.password });
+      console.log('Manual login initiated successfully');
+      // Hub listener in UserLogin.jsx handles redirect and user record creation
     } catch (error) {
+      console.error('Manual login error:', error);
       let errorMessage = 'Failed to log in. Please try again.';
-      if (error.name === 'NotAuthorizedException') errorMessage = 'Incorrect email or password.';
+      switch (error.name) {
+        case 'NotAuthorizedException':
+          errorMessage = 'Incorrect email or password.';
+          break;
+        case 'UserNotConfirmedException':
+          errorMessage = 'Please verify your email before logging in.';
+          break;
+        case 'InvalidParameterException':
+          errorMessage = 'Invalid input provided.';
+          break;
+        default:
+          errorMessage = error.message || errorMessage;
+      }
       setErrors({ login: errorMessage });
-    }
-  };
-
-  const signInWithGoogle = async () => {
-    try {
-      await signInWithRedirect({
-        provider: 'Google',
-        customState: JSON.stringify({ redirectTo: '/' }), // Indicate homepage redirect
-      });
-    } catch (error) {
-      setErrors({ google: 'Failed to sign in with Google.' });
-    }
-  };
-
-  const signInWithFacebook = async () => {
-    try {
-      await signInWithRedirect({
-        provider: 'Facebook',
-        customState: JSON.stringify({ redirectTo: '/' }),
-      });
-    } catch (error) {
-      setErrors({ facebook: 'Failed to sign in with Facebook.' });
     }
   };
 
@@ -70,7 +98,9 @@ function LoginForm() {
             name="email"
             value={formData.email}
             onChange={handleInputChange}
+            onBlur={handleBlur}
           />
+          {errors.email && <span className="error">{errors.email}</span>}
         </div>
         <div className="form-group">
           <label htmlFor="login-password">Password</label>
@@ -80,23 +110,14 @@ function LoginForm() {
             name="password"
             value={formData.password}
             onChange={handleInputChange}
+            onBlur={handleBlur}
           />
+          {errors.password && <span className="error">{errors.password}</span>}
         </div>
         <a href="#" className="forgot-password">Forgot Password?</a>
         <button type="submit" className="submit-button">Log In</button>
       </form>
       {errors.login && <span className="error">{errors.login}</span>}
-      <p className="or-text">Or log in with:</p>
-      <div className="social-buttons">
-        <button className="social-button google" onClick={signInWithGoogle}>
-          <FaGoogle /> Google
-        </button>
-        <button className="social-button facebook" onClick={signInWithFacebook}>
-          <FaFacebook /> Facebook
-        </button>
-      </div>
-      {errors.google && <span className="error">{errors.google}</span>}
-      {errors.facebook && <span className="error">{errors.facebook}</span>}
     </div>
   );
 }
