@@ -10,9 +10,9 @@ function LoginForm() {
     password: '',
   });
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{}|;:,.<>?]).{8,}$/;
 
   const validateField = (name, value) => {
     if (!value.trim()) {
@@ -21,9 +21,7 @@ function LoginForm() {
     if (name === 'email' && !emailRegex.test(value)) {
       return 'Please enter a valid email address';
     }
-    if (name === 'password' && !passwordRegex.test(value)) {
-      return 'Password must be at least 8 characters long and include letters, numbers, and symbols';
-    }
+    // No complexity check for password on login
     return '';
   };
 
@@ -50,11 +48,13 @@ function LoginForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
+    setIsLoading(true);
 
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       console.error('Login validation errors:', validationErrors);
+      setIsLoading(false);
       return;
     }
 
@@ -62,7 +62,7 @@ function LoginForm() {
       console.log('Attempting manual login with:', { email: formData.email });
       await signIn({ username: formData.email, password: formData.password });
       console.log('Manual login initiated successfully');
-      // Hub listener in UserLogin.jsx handles redirect and user record creation
+      // Navigation handled by Hub listener in userLogin.jsx
     } catch (error) {
       console.error('Manual login error:', error);
       let errorMessage = 'Failed to log in. Please try again.';
@@ -80,6 +80,8 @@ function LoginForm() {
           errorMessage = error.message || errorMessage;
       }
       setErrors({ login: errorMessage });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -99,6 +101,7 @@ function LoginForm() {
             value={formData.email}
             onChange={handleInputChange}
             onBlur={handleBlur}
+            disabled={isLoading}
           />
           {errors.email && <span className="error">{errors.email}</span>}
         </div>
@@ -111,11 +114,14 @@ function LoginForm() {
             value={formData.password}
             onChange={handleInputChange}
             onBlur={handleBlur}
+            disabled={isLoading}
           />
           {errors.password && <span className="error">{errors.password}</span>}
         </div>
         <a href="#" className="forgot-password">Forgot Password?</a>
-        <button type="submit" className="submit-button">Log In</button>
+        <button type="submit" className="submit-button" disabled={isLoading}>
+          {isLoading ? 'Logging In...' : 'Log In'}
+        </button>
       </form>
       {errors.login && <span className="error">{errors.login}</span>}
     </div>

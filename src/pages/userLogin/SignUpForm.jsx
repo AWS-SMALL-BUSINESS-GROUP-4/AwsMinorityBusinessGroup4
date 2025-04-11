@@ -15,7 +15,8 @@ function SignUpForm() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\[\]{}|;:,.<>?]).{8,}$/;
@@ -58,13 +59,13 @@ function SignUpForm() {
   const handleSignUp = async (e) => {
     e.preventDefault();
     setErrors({});
-    setIsLoading(true);
+    setIsSigningUp(true);
 
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       console.error('Sign-up validation errors:', validationErrors);
-      setIsLoading(false);
+      setIsSigningUp(false);
       return;
     }
 
@@ -104,20 +105,20 @@ function SignUpForm() {
       }
       setErrors({ manualSignUp: errorMessage });
     } finally {
-      setIsLoading(false);
+      setIsSigningUp(false);
     }
   };
 
   const handleConfirmSignUp = async (e) => {
     e.preventDefault();
     setErrors({});
-    setIsLoading(true);
+    setIsVerifying(true);
 
     if (!verificationCode.trim()) {
       const errorMessage = 'Verification code is required';
       setErrors({ verification: errorMessage });
       console.error('Verification error:', errorMessage);
-      setIsLoading(false);
+      setIsVerifying(false);
       return;
     }
 
@@ -135,7 +136,7 @@ function SignUpForm() {
         password: formData.password,
       });
       console.log('Sign-in initiated successfully');
-      // Hub listener in UserLogin.jsx handles redirect and user record creation
+      // Navigation handled by Hub listener in userLogin.jsx
     } catch (error) {
       console.error('Verification or sign-in error:', error);
       let errorMessage = 'Invalid code or sign-in failed. Please try again.';
@@ -156,13 +157,14 @@ function SignUpForm() {
           errorMessage = error.message || errorMessage;
       }
       setErrors({ verification: errorMessage });
-      setIsLoading(false);
+    } finally {
+      setIsVerifying(false);
     }
   };
 
   const handleResendCode = async () => {
     setErrors({});
-    setIsLoading(true);
+    setIsResending(true);
     try {
       console.log('Resending verification code to:', formData.email);
       await resendSignUpCode({ username: formData.email });
@@ -170,7 +172,7 @@ function SignUpForm() {
       setErrors({ verification: 'Code resent. Check your email.' });
     } catch (error) {
       console.error('Resend code error:', error);
-      let errorMessage = error.message || 'Failed to resend code.';
+      let errorMessage = 'Failed to resend code.';
       switch (error.name) {
         case 'LimitExceededException':
           errorMessage = 'Resend limit exceeded. Please try again later.';
@@ -180,7 +182,7 @@ function SignUpForm() {
       }
       setErrors({ verification: errorMessage });
     } finally {
-      setIsLoading(false);
+      setIsResending(false);
     }
   };
 
@@ -197,20 +199,20 @@ function SignUpForm() {
               id="verification-code"
               value={verificationCode}
               onChange={(e) => setVerificationCode(e.target.value)}
-              disabled={isLoading}
+              disabled={isVerifying || isResending}
             />
             {errors.verification && <span className="error">{errors.verification}</span>}
           </div>
-          <button type="submit" className="submit-button" disabled={isLoading}>
-            {isLoading ? 'Verifying...' : 'Verify'}
+          <button type="submit" className="submit-button" disabled={isVerifying || isResending}>
+            {isVerifying ? 'Verifying...' : 'Verify'}
           </button>
           <button
             type="button"
             className="resend-button"
             onClick={handleResendCode}
-            disabled={isLoading}
+            disabled={isVerifying || isResending}
           >
-            {isLoading ? 'Resending...' : 'Resend Code'}
+            {isResending ? 'Resending...' : 'Resend Code'}
           </button>
         </form>
       </div>
@@ -232,7 +234,7 @@ function SignUpForm() {
             value={formData.firstName}
             onChange={handleInputChange}
             onBlur={handleBlur}
-            disabled={isLoading}
+            disabled={isSigningUp}
           />
           {errors.firstName && <span className="error">{errors.firstName}</span>}
         </div>
@@ -247,7 +249,7 @@ function SignUpForm() {
             value={formData.lastName}
             onChange={handleInputChange}
             onBlur={handleBlur}
-            disabled={isLoading}
+            disabled={isSigningUp}
           />
           {errors.lastName && <span className="error">{errors.lastName}</span>}
         </div>
@@ -262,7 +264,7 @@ function SignUpForm() {
             value={formData.email}
             onChange={handleInputChange}
             onBlur={handleBlur}
-            disabled={isLoading}
+            disabled={isSigningUp}
           />
           {errors.email && <span className="error">{errors.email}</span>}
         </div>
@@ -275,7 +277,7 @@ function SignUpForm() {
             value={formData.password}
             onChange={handleInputChange}
             onBlur={handleBlur}
-            disabled={isLoading}
+            disabled={isSigningUp}
           />
           {errors.password && <span className="error">{errors.password}</span>}
         </div>
@@ -288,16 +290,16 @@ function SignUpForm() {
             value={formData.confirmPassword}
             onChange={handleInputChange}
             onBlur={handleBlur}
-            disabled={isLoading}
+            disabled={isSigningUp}
           />
           {errors.confirmPassword && <span className="error">{errors.confirmPassword}</span>}
         </div>
         <div className="checkbox-group">
-          <input type="checkbox" id="terms" required disabled={isLoading} />
+          <input type="checkbox" id="terms" required disabled={isSigningUp} />
           <label htmlFor="terms">I agree to the Terms of Service and Privacy Policy</label>
         </div>
-        <button type="submit" className="submit-button" disabled={isLoading}>
-          {isLoading ? 'Signing Up...' : 'Sign Up'}
+        <button type="submit" className="submit-button" disabled={isSigningUp}>
+          {isSigningUp ? 'Signing Up...' : 'Sign Up'}
         </button>
       </form>
       {errors.manualSignUp && <span className="error">{errors.manualSignUp}</span>}

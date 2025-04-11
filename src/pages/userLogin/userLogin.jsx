@@ -16,15 +16,17 @@ function UserLogin() {
 
   useEffect(() => {
     const listener = async (data) => {
+      console.log('Auth event:', data.payload.event);
       if (data.payload.event === 'signIn') {
         try {
           console.log('Auth event: signIn detected');
           const user = await getCurrentUser();
+          console.log('Got current user:', user);
           const attributes = await fetchUserAttributes();
+          console.log('Got user attributes:', attributes);
           const userId = attributes.sub;
           console.log('Authenticated user:', { userId, email: attributes.email });
 
-          // Check if User record exists; create it if not
           const userRecord = await client.models.User.get({ id: userId });
           if (!userRecord.data) {
             const userData = {
@@ -51,12 +53,11 @@ function UserLogin() {
             });
           }
 
-          // Redirect to homepage
           console.log('Redirecting to homepage');
           navigate('/');
         } catch (error) {
-          console.error('Error handling sign-in:', error);
-          navigate('/'); // Fallback to homepage
+          console.error('Error in Hub listener:', error);
+          navigate('/'); // Fallback navigation
         }
       } else if (data.payload.event === 'signIn_failure') {
         console.error('Sign-in failure:', data.payload.data);
