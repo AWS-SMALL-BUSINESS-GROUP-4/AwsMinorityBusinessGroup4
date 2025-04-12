@@ -17,14 +17,14 @@ function UserLogin() {
   useEffect(() => {
     const listener = async (data) => {
       console.log('Hub event:', data.payload.event);
-      if (data.payload.event === 'signIn') {
+      if (data.payload.event === 'signedIn') {
         try {
           console.log('Auth event: signIn detected');
           const user = await getCurrentUser();
           console.log('Got current user:', user);
           const attributes = await fetchUserAttributes();
           console.log('Got user attributes:', attributes);
-          const userId = user.userId; // Use userId from getCurrentUser
+          const userId = attributes.sub; // Use userId from getCurrentUser
           console.log('Authenticated user:', { userId, email: attributes.email });
 
           const userRecord = await client.models.User.get({ id: userId });

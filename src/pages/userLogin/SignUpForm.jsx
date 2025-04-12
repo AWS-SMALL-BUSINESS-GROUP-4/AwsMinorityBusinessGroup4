@@ -132,30 +132,6 @@ function SignUpForm() {
       console.log('Sign-in result:', signInResult);
       if (signInResult.isSignedIn) {
         console.log('Sign-in successful');
-        const userRecord = await client.models.User.get({ id: userId });
-        console.log('User record query response:', userRecord);
-
-        if (!userRecord.data) {
-          const userData = {
-            id: userId,
-            name: {
-              firstName: attributes.given_name || '',
-              lastName: attributes.family_name || '',
-            },
-            email: attributes.email,
-            joinedAt: Date.now(),
-            lastLogin: Date.now(),
-            // profilePic, reviews, and businesses are optional or managed by relationships
-          };
-          console.log('Creating new user record:', userData);
-          const createResponse = await client.models.User.create(userData);
-          console.log('Create response:', createResponse);
-          if (createResponse.errors) {
-            throw new Error(createResponse.errors[0].message);
-          }
-          console.log('User record created successfully');
-        }
-        navigate('/');
       } else {
         console.log('Sign-in incomplete, next step:', signInResult.nextStep);
         
