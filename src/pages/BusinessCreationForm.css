@@ -88,7 +88,7 @@
 }
 
 .form-step h1 {
-  font-size: 32px;
+  font-size: 24px;
   font-weight: bold;
   margin-bottom: 16px;
   color: #333;
@@ -104,7 +104,7 @@
 .search-container {
   position: relative;
   width: 100%;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
 }
 
 input {
@@ -547,40 +547,125 @@ input[type="email"] {
   border-color: #FC941D;
 }
 
-/* ======= Revamped UI Styles ======= */
 .revamped-header {
-  background-color: transparent; /* Light gray background */
-  height: auto; /* Adjust height for content */
+  background-color: rgba(255, 255, 255, 0.1); /* Slight transparency for the blur effect */
+  backdrop-filter: blur(10px); /* Blur effect for the background */
+  -webkit-backdrop-filter: blur(10px); /* For Safari compatibility */
+  height: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
 }
 
-.revamped-logo {
-  color: #F7931E; /* Orange logo color */
+.nav-content {
+  width: 100%;
+  margin: 0 auto;
+  padding: 15px 24px; /* Adjusted padding for a tighter look */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-icon {
+  margin-right: 3px;
+  color: white;
+}
+
+.logo-text.revamped-logo {
   font-weight: bold;
   font-size: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.logo-explore {
+  color: white;
+}
+
+.logo-local {
+  color: #F7931E;
+}
+
+.header-nav {
+  display: flex;
+  gap: 20px; /* Adjusted gap to match target UI */
+  align-items: center;
+}
+
+.header-nav a {
+  color: white;
+  font-weight: 500; /* Slightly bolder to match target UI */
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.header-nav a:hover {
+  color: #F7931E; /* Hover effect to match the orange theme */
 }
 
 .revamped-hero-section {
-  background-color: #4A4A4A; /* Placeholder for background image */
-  padding: 50px 0;
+  background-color: #4A4A4A; /* Placeholder; replace with background-image when provided */
+  padding: 100px 0 50px 0; /* Increased top padding for more space below header */
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
   flex: 1;
 }
 
+.revamped-hero-content {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.revamped-hero-heading {
+  font-size: 36px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.revamped-hero-subheading {
+  font-size: 18px;
+  color: white;
+  opacity: 0.8;
+}
+
 .revamped-grey-container {
-  background-color: white; /* White card background */
-  border-radius: 10px; /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Drop shadow */
-  width: 400px; /* Smaller width for centered card */
-  min-height: auto; /* Adjust height for content */
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  width: 400px;
+  min-height: auto;
   height: auto;
+  position: relative;
+  padding: 40px;
 }
 
 .revamped-progress-indicator {
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.revamped-step-wrapper {
+  display: flex;
+  align-items: center;
+  
 }
 
 .revamped-step {
@@ -592,8 +677,9 @@ input[type="email"] {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 10px;
+  margin: 0 5px;
   cursor: not-allowed;
+  font-size: 14px;
 }
 
 .revamped-step.active {
@@ -603,10 +689,17 @@ input[type="email"] {
 .revamped-step.completed {
   background-color: #F7931E;
   cursor: pointer;
+  
+}
+
+.revamped-step-connector {
+  width: 20px;
+  height: 2px;
+  background-color: #ccc;
 }
 
 .revamped-form-step h1 {
-  font-size: 24px; /* Slightly smaller than existing */
+  font-size: 24px;
   text-align: center;
 }
 
@@ -615,11 +708,12 @@ input[type="email"] {
 }
 
 .revamped-continue-button {
-  width: 100%; /* Full width for prominence */
+  width: 100%;
+  border-radius: 5px;
 }
 
 .revamped-footer {
-  background-color: #2C3E50; /* Dark navy background */
+  background-color: #2C3E50;
   color: white;
   padding: 20px;
   text-align: center;
@@ -634,9 +728,10 @@ input[type="email"] {
 }
 
 .revamped-footer-logo {
-  color: #F7931E;
   font-size: 18px;
   font-weight: bold;
+  display: flex;
+  align-items: center;
 }
 
 .revamped-footer-links a {
@@ -648,12 +743,13 @@ input[type="email"] {
 
 .revamped-social-icons {
   display: flex;
+  align-items: center;
 }
 
 .revamped-social-icons a {
   color: white;
   margin: 0 10px;
-  font-size: 20px;
+  font-size: 16px;
   text-decoration: none;
 }
 

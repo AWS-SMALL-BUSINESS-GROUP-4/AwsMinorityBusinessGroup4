@@ -1,6 +1,7 @@
 import React from 'react';
 import { useBusinessForm } from './BusinessFormContext';
-import { FaFacebookF, FaTwitter } from 'react-icons/fa';
+import { FaFacebookF, FaTwitter, FaMapMarkerAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 import './BusinessCreationForm.css';
 
 export default function BusinessName() {
@@ -15,7 +16,7 @@ export default function BusinessName() {
     isSignedIn,
   } = useBusinessForm();
 
-  const totalSteps = isSignedIn ? 9 : 10; // 9 if signed in (skips 7 & 7.5), 10 if not
+  const totalSteps = isSignedIn ? 9 : 10;
 
   const handleStepClick = (stepNumber) => {
     if (stepNumber <= step) {
@@ -28,7 +29,15 @@ export default function BusinessName() {
       <header className="header revamped-header">
         <div className="nav-content">
           <div className="header-left">
-            <span className="logo-text revamped-logo">ExploreLocal</span>
+            <Link to="/" className="logo-link">
+              <span className="logo-icon">
+                <FaMapMarkerAlt/>
+              </span>
+              <span className="logo-text revamped-logo">
+                <span className="logo-explore">Explore</span>
+                <span className="logo-local">Local</span>
+              </span>
+            </Link>
           </div>
           <nav className="header-nav">
             <a href="#">Home</a>
@@ -38,7 +47,15 @@ export default function BusinessName() {
         </div>
       </header>
       <div className="revamped-hero-section">
-        <div className="grey-container">
+        <div className="revamped-hero-content">
+          <h1 className="revamped-hero-heading">
+            Get Your Business Listed Today
+          </h1>
+          <p className="revamped-hero-subheading">
+            Join thousands of local businesses on ExploreLocal!
+          </p>
+        </div>
+        <div className="grey-container revamped-grey-container">
           {step > 1 && (
             <button className="back-button" onClick={prevStep}>
               ←
@@ -49,14 +66,16 @@ export default function BusinessName() {
               const stepNumber = i + 1;
               const adjustedStep = isSignedIn && stepNumber >= 7 ? stepNumber + 1 : stepNumber;
               return (
-                <div
-                  key={i}
-                  className={`revamped-step ${step === adjustedStep ? 'active' : ''} ${
-                    step > adjustedStep ? 'completed' : ''
-                  }`}
-                  onClick={() => handleStepClick(adjustedStep)}
-                >
-                  {stepNumber}
+                <div key={i} className="revamped-step-wrapper">
+                  <div
+                    className={`revamped-step ${step === adjustedStep ? 'active' : ''} ${
+                      step > adjustedStep ? 'completed' : ''
+                    }`}
+                    onClick={() => handleStepClick(adjustedStep)}
+                  >
+                    {stepNumber}
+                  </div>
+                  {i < totalSteps - 1 && <div className="revamped-step-connector"></div>}
                 </div>
               );
             })}
@@ -107,7 +126,10 @@ export default function BusinessName() {
       </div>
       <footer className="revamped-footer">
         <div className="revamped-footer-content">
-          <div className="revamped-footer-logo">ExploreLocal</div>
+          <div className="revamped-footer-logo">
+            <span className="logo-explore">Explore</span>
+            <span className="logo-local">Local</span>
+          </div>
           <div className="revamped-footer-links">
             <a href="#">About Us</a>
             <a href="#">Contact</a>
