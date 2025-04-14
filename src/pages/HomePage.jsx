@@ -1,6 +1,6 @@
 // src/pages/HomePage.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   FaSearch,
   FaUtensils,
@@ -186,7 +186,9 @@ function AddYourBusiness() {
     <section className="add-your-business">
       <h2>Own a Business? Get Listed Today!</h2>
       <p>Reach more customers and grow your business with us.</p>
-      <button className="add-business-btn">Add Your Business</button>
+      <Link to="/add-business">
+        <button className="add-business-btn">Add Your Business</button>
+      </Link>
     </section>
   );
 }
