@@ -20,7 +20,7 @@ export const Business = a.model({
 }),
   businessHours: a.hasMany('BusinessHours', 'businessId'),
   description: a.string().required(),
-  photos: a.url().array(),
+  photos: a.string().array(),
   averageRating: a.float(),
   reviews: a.hasMany('Review', 'businessId')
 }).authorization((allow) => [
