@@ -13,6 +13,7 @@ import '../AmplifyClient'; // Import to configure Amplify
 
 // The multi-step routes
 import BusinessFormRoutes from "./pages/BusinessFormRoutes";
+import UserLogin from "./pages/userLogin/userLogin"; // Add this import
 
 function App() {
   return (
@@ -20,13 +21,12 @@ function App() {
       <Routes>
         {/* Main Routes */}
         <Route path="/" element={<HomePage />} />
-        {/* <Route path="/business-login" element={<SearchResultPage />} /> */}
+        <Route path="/login" element={<UserLogin />} /> Add this route
 
-  //       {/* Business Routes */}
-  //       <Route path="/search" element={<SearchResultPage />} />
+        {/* Business Routes */}
+        <Route path="/search" element={<SearchResultPage />} />
 
         {/* Our new multi-step forms, handle /my-businesses/stepX */}
-
         <Route path="/business-profile" element={<BusinessManagementPage />} />
         <Route path="/add-business/*" element={<BusinessFormRoutes />} />
         <Route path="/write-review" element={<ReviewPage />} />
