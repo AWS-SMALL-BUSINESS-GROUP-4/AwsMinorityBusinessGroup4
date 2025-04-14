@@ -3,7 +3,6 @@ import '../pages/BusinessManagementPage.css'
 
 function BusinessManagementSidebar({id}) {
     const navigate = useNavigate();
-    console.log("Photos page href: ", "/business-profile/"+id+"/photos");
     const handleNavigateToMain = () => {
         navigate("/business-profile/"+id);
     }
