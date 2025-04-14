@@ -18,6 +18,7 @@ function BusinessManagementPicturesPage() {
     const client = generateClient();
 
     const [paths, setPaths] = useState([]);
+    const [resetKey, setResetKey] = useState(0);
 
     const [loading, setLoading] = useState(false);
 
@@ -79,9 +80,8 @@ function BusinessManagementPicturesPage() {
 
         if(file) {
             try {
-                console.log("Uploading");
                 const response = await uploadData({
-                    path: `business-photos/${businessId}/${file.name}`,
+                    path: `business-photos/${businessId}/${file.name}-${Date.now()}`,
                     data: file,
                     options: {
                         bucket: 'AWSMBG4-private',
@@ -106,6 +106,7 @@ function BusinessManagementPicturesPage() {
                 
                 //await setPaths([linkToStorageFile.url.href, ...paths]);
                 await setPaths([response.path, ...paths]);
+                setResetKey(resetKey => resetKey + 1);
             } catch(error) {
                 console.error(error);
                 window.alert("Failed to upload image. Try renaming the file to something unique and try again.");
@@ -163,7 +164,7 @@ function BusinessManagementPicturesPage() {
                     <div>
                         <div className='spread'>
                             <h2>All Pictures</h2>
-                            <input type='file' ref={outsideImgUpload} accept='image/*' className='hidden' onChange={handleFileUpload}/>
+                            <input key={resetKey} type='file' ref={outsideImgUpload} accept='image/*' className='hidden' onChange={handleFileUpload}/>
                             <button className="btn" onClick={handleOutsideImgUpload}>Upload Image</button>
                         </div>
                         <div className='spread scroll'>
