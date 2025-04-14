@@ -537,6 +537,15 @@ export function BusinessFormProvider({ children }) {
     }
   }
 
+  // Function to navigate to a specific step
+  function navigateToStep(stepNumber) {
+    const adjustedStep = isSignedIn && stepNumber >= 7 ? stepNumber + 1 : stepNumber;
+    if (adjustedStep <= step && stepToRouteMap[adjustedStep]) {
+      setStep(adjustedStep);
+      navigate(stepToRouteMap[adjustedStep]);
+    }
+  }
+
   useEffect(() => {
     const pathNoSlash = location.pathname.replace(/\/$/, '');
     const storedStep = localStorage.getItem('businessFormStep');
@@ -644,6 +653,9 @@ export function BusinessFormProvider({ children }) {
     prevStep,
     isStepComplete,
     resendVerificationCode,
+    navigate,
+    stepToRouteMap, // Add stepToRouteMap to context
+    navigateToStep, // Add navigateToStep function to context
   };
 
   return (

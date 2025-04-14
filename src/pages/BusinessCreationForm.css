@@ -87,6 +87,7 @@
   margin: 50px 10px 50px 10px;
 }
 
+
 .form-step h1 {
   font-size: 24px;
   font-weight: bold;
@@ -182,19 +183,34 @@ textarea {
 
 .phone-input {
   display: flex;
-  gap: 16px;
+  gap: 12px; /* Reduced gap to match the tighter spacing in the UI */
   width: 100%;
-  margin-bottom: 2px;
+  margin-bottom: 8px; /* Adjusted to align with other inputs */
 }
 
-.country-code {
-  width: 100px;
-  padding: 14px;
+.country-code.revamped-input {
+  width: 80px; /* Fixed width for the country code dropdown */
+  padding: 14px 10px; /* Adjusted padding for a tighter look */
   border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
+  border-radius: 6px;
   font-size: 16px;
+  background-color: white;
   color: #333;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.country-code.revamped-input:hover {
+  border-color: #F7931E; /* Orange border on hover */
+}
+
+.country-code.revamped-input:focus {
+  outline: none;
+  border-color: #F7931E;
+  box-shadow: 0 0 5px rgba(247, 147, 30, 0.3); /* Subtle glow on focus */
+}
+
+.phone-input .revamped-input {
+  flex: 1; /* Allow the phone number input to take the remaining space */
 }
 
 input::placeholder {
@@ -653,6 +669,19 @@ input[type="email"] {
   height: auto;
   position: relative;
   padding: 40px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Fade-in animation keyframes */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .revamped-progress-indicator {
@@ -707,11 +736,6 @@ input[type="email"] {
   text-align: center;
 }
 
-.revamped-continue-button {
-  width: 100%;
-  border-radius: 5px;
-}
-
 .revamped-footer {
   background-color: #2C3E50;
   color: white;
@@ -760,4 +784,96 @@ input[type="email"] {
 .revamped-copyright {
   margin-top: 10px;
   font-size: 12px;
+}
+
+.input-label {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.revamped-input {
+  color: black;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  background-color: white;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover/focus */
+}
+
+.revamped-input:hover {
+  border-color: #F7931E; /* Orange border on hover */
+}
+
+.revamped-input:focus {
+  outline: none;
+  border-color: #F7931E;
+  box-shadow: 0 0 5px rgba(247, 147, 30, 0.3); /* Subtle glow on focus */
+}
+
+.revamped-input::placeholder {
+  color: #999;
+}
+
+/* Tooltip styling */
+.info-tooltip {
+  position: relative;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+.info-icon {
+  vertical-align: middle;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  border-radius: 4px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%; /* Position above the icon */
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  font-size: 12px;
+}
+
+.info-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Continue button styling with hover/active states */
+.revamped-continue-button {
+  width: 100%;
+  border-radius: 5px;
+  background-color: #F7931E;
+  color: white;
+  border: 1px solid #F7931E;
+  padding: 14px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 25px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.revamped-continue-button:hover {
+  background-color: #F77A1A; /* Slightly darker orange on hover */
+  box-shadow: 0 2px 6px rgba(247, 147, 30, 0.3); /* Subtle shadow on hover */
+}
+
+.revamped-continue-button:active {
+  background-color: #E66D17; /* Even darker orange on click */
 }
