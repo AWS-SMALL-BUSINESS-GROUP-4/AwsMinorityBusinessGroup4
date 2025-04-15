@@ -1,22 +1,21 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom'; // Import useLocation
+import { useLocation } from 'react-router-dom';
 import '../App.css';
 import '../components/ContainerStyles.css';
 import './BusinessManagementPage.css';
 import '../components/TextStyles.css';
-import BusinessNavBar from '../components/BusinessNavBar';
 import BusinessManagementSidebar from '../components/BusinessManagementSideBar';
 import { generateClient } from 'aws-amplify/data';
+import { FaMapMarkerAlt, FaPhone, FaGlobe, FaFacebookF, FaTwitter } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 function BusinessManagementPage({ id }) {
   const client = generateClient();
-  const location = useLocation(); // Get navigation state
+  const location = useLocation();
 
-  // State to track if edit mode is active
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Default business data
   const [business, setBusiness] = useState({
     name: 'Negril',
     address_1: '2301 Georgia Ave. NW',
@@ -38,7 +37,6 @@ function BusinessManagementPage({ id }) {
 
   const [storedState, setStoredState] = useState(business);
 
-  // Fetch business data from backend
   useEffect(() => {
     async function fetchBusiness() {
       try {
@@ -73,9 +71,8 @@ function BusinessManagementPage({ id }) {
     fetchBusiness();
   }, [id]);
 
-  // Update business with formData from navigation state
   useEffect(() => {
-    const formData = location.state?.formData; // Access formData from navigation state
+    const formData = location.state?.formData;
     if (formData) {
       const hours = (formData.businessHours || []).map((dayObj) => ({
         day: dayObj.day,
@@ -96,7 +93,6 @@ function BusinessManagementPage({ id }) {
         about: formData.description || '',
       };
 
-      console.log('Updated business with formData:', newBusiness);
       setBusiness(newBusiness);
       setStoredState(newBusiness);
     }
@@ -107,7 +103,7 @@ function BusinessManagementPage({ id }) {
       const updatedHours = [...business.hours];
       updatedHours[index] = {
         ...updatedHours[index],
-        [e.target.name]: e.target.value, // Assumes inputs have name="openTime" or "closeTime"
+        [e.target.name]: e.target.value,
       };
       setBusiness({ ...business, hours: updatedHours });
     } else {
@@ -118,10 +114,8 @@ function BusinessManagementPage({ id }) {
   const toggleEditMode = () => setIsEditing(!isEditing);
 
   const saveChanges = () => {
-    console.log('Saving changes:', business);
     setStoredState(business);
     setIsEditing(false);
-    // TODO: Add logic to save changes to backend if needed
   };
 
   const cancelEdit = () => {
@@ -133,167 +127,206 @@ function BusinessManagementPage({ id }) {
     if (!time) return 'Not set';
     let [hours, minutes] = time.split(':').map(Number);
     let period = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12; // Convert 0 to 12 for midnight
+    hours = hours % 12 || 12;
     return `${hours}:${minutes.toString().padStart(2, '0')} ${period}`;
   }
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="loading">Loading...</div>;
 
   return (
-    <>
-      <BusinessNavBar />
-      <div className="sidebar-page-container">
-        <BusinessManagementSidebar />
-        <div className="main">
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <h1 className="blue-text">Business Information</h1>
-            {isEditing ? (
-              <div>
-                <button className="btn" onClick={saveChanges}>
-                  Save
-                </button>
-                <button className="btn" onClick={cancelEdit}>
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button className="btn" onClick={toggleEditMode}>
-                Edit
-              </button>
-            )}
+    <div className="management-container">
+      <header className="revamped-header">
+        <div className="nav-content">
+          <div className="header-left">
+            <Link to="/" className="logo-link">
+              <span className="logo-icon">
+                <FaMapMarkerAlt />
+              </span>
+              <span className="logo-text revamped-logo">
+                <span className="logo-explore">Explore</span>
+                <span className="logo-local">Local</span>
+              </span>
+            </Link>
           </div>
-          <hr />
-          <h2 className="blue-text">Basic Information</h2>
-          {isEditing ? (
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'block', marginBottom: '5px' }}>Business Name:</label>
-                <input
-                  type="text"
-                  value={business.name}
-                  onChange={(e) => handleChange(e, 'name')}
-                  style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-                />
-              </div>
-              <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'block', marginBottom: '5px' }}>Address Line 1:</label>
-                <input
-                  type="text"
-                  value={business.address_1}
-                  onChange={(e) => handleChange(e, 'address_1')}
-                  style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-                />
-              </div>
-              <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'block', marginBottom: '5px' }}>Address Line 2:</label>
-                <input
-                  type="text"
-                  value={business.address_2}
-                  onChange={(e) => handleChange(e, 'address_2')}
-                  style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-                />
-              </div>
-              <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'block', marginBottom: '5px' }}>Phone:</label>
-                <input
-                  type="text"
-                  value={business.phone}
-                  onChange={(e) => handleChange(e, 'phone')}
-                  style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-                />
-              </div>
-              <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'block', marginBottom: '5px' }}>Categories:</label>
-                <input
-                  type="text"
-                  value={business.categories}
-                  onChange={(e) => handleChange(e, 'categories')}
-                  style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
-                />
-              </div>
-              <div style={{ marginBottom: '10px' }}>
-                <label style={{ display: 'block', marginBottom: '5px' }}>Website:</label>
-                <input
-                  type="text"
-                  value={business.website}
-                  onChange={(e) => handleChange(e, 'website')}
-                  style={{ width: '100%', padding: '8px' }}
-                />
-              </div>
+          <nav className="header-nav">
+            <a href="#">Home</a>
+            <a href="#">Support</a>
+            <a href="#">Logout</a>
+          </nav>
+        </div>
+      </header>
+      <div className="management-content">
+        <BusinessManagementSidebar />
+        <div className="management-main">
+          <div className="revamped-profile-panel">
+            <div className="profile-header">
+              <h1 className="business-name">{business.name || 'Not set'}</h1>
             </div>
-          ) : (
-            <p>
-              {business.name || 'Not set'}<br />
-              {business.address_1 || 'Not set'}<br />
-              {business.address_2 || 'Not set'}<br />
-              <br />
-              {business.phone || 'Not set'}<br />
-              <br />
-              <b>Categories</b>: {business.categories || 'Not set'}<br />
-              {business.website || 'Not set'}
-            </p>
-          )}
-          <hr />
-          <h2 className="blue-text">Hours</h2>
-          <table className="hours">
-            <tbody>
-              {business.hours.map((hour, index) => (
-                <tr key={index}>
-                  <th>{hour.day}</th>
-                  <td className="spread">
-                    {isEditing ? (
-                      <>
-                        <input
-                          type="time"
-                          name="openTime"
-                          value={hour.openTime}
-                          onChange={(e) => handleChange(e, 'hours', index)}
-                          style={{ width: '100%', padding: '5px' }}
-                        />{' '}
-                        -{' '}
-                        <input
-                          type="time"
-                          name="closeTime"
-                          value={hour.closeTime}
-                          onChange={(e) => handleChange(e, 'hours', index)}
-                          style={{ width: '100%', padding: '5px' }}
-                        />
-                      </>
-                    ) : (
-                      <p>
-                        {hour.isClosed
-                          ? 'Closed'
-                          : hour.isOpen24
-                          ? 'Open 24 hours'
-                          : `${convertTo12Hour(hour.openTime)} - ${convertTo12Hour(hour.closeTime)}`}
-                      </p>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <hr />
-          <h2 className="blue-text">About</h2>
-          {isEditing ? (
-            <textarea
-              value={business.about}
-              onChange={(e) => handleChange(e, 'about')}
-              style={{ width: '100%', minHeight: '200px', padding: '10px' }}
-            />
-          ) : (
-            <p>{business.about || 'Not set'}</p>
-          )}
+            <div className="section">
+              <div className="section-header">
+                <h2>Basic Information</h2>
+                {isEditing ? (
+                  <div className="action-buttons">
+                    <button className="revamped-continue-button save-button" onClick={saveChanges}>
+                      Save
+                    </button>
+                    <button className="revamped-skip-button cancel-button" onClick={cancelEdit}>
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button className="revamped-continue-button edit-button" onClick={toggleEditMode}>
+                    Edit
+                  </button>
+                )}
+              </div>
+              {isEditing ? (
+                <div className="edit-form">
+                  <label className="input-label">Business Name</label>
+                  <input
+                    type="text"
+                    className="revamped-input"
+                    value={business.name}
+                    onChange={(e) => handleChange(e, 'name')}
+                  />
+                  <label className="input-label">Address Line 1</label>
+                  <input
+                    type="text"
+                    className="revamped-input"
+                    value={business.address_1}
+                    onChange={(e) => handleChange(e, 'address_1')}
+                  />
+                  <label className="input-label">Address Line 2</label>
+                  <input
+                    type="text"
+                    className="revamped-input"
+                    value={business.address_2}
+                    onChange={(e) => handleChange(e, 'address_2')}
+                  />
+                  <label className="input-label">Phone</label>
+                  <input
+                    type="text"
+                    className="revamped-input"
+                    value={business.phone}
+                    onChange={(e) => handleChange(e, 'phone')}
+                  />
+                  <label className="input-label">Categories</label>
+                  <input
+                    type="text"
+                    className="revamped-input"
+                    value={business.categories}
+                    onChange={(e) => handleChange(e, 'categories')}
+                  />
+                  <label className="input-label">Website</label>
+                  <input
+                    type="text"
+                    className="revamped-input"
+                    value={business.website}
+                    onChange={(e) => handleChange(e, 'website')}
+                  />
+                </div>
+              ) : (
+                <div className="info-display">
+                  <p className="info-item">
+                    <FaMapMarkerAlt className="info-icon" />
+                    {business.address_1 || 'Not set'}, {business.address_2 || 'Not set'}
+                  </p>
+                  <p className="info-item">
+                    <FaPhone className="info-icon" />
+                    {business.phone || 'Not set'}
+                  </p>
+                  <p className="info-item">
+                    <strong>Categories:</strong> {business.categories || 'Not set'}
+                  </p>
+                  <p className="info-item">
+                    <FaGlobe className="info-icon" />
+                    <a href={business.website} target="_blank" rel="noopener noreferrer">
+                      {business.website || 'Not set'}
+                    </a>
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="section">
+              <h2 className="section-header">Hours</h2>
+              <table className="revamped-hours-table">
+                <tbody>
+                  {business.hours.map((hour, index) => (
+                    <tr key={index} className="hours-row">
+                      <th className="hours-day">{hour.day}</th>
+                      <td className="hours-time">
+                        {isEditing ? (
+                          <div className="time-inputs">
+                            <input
+                              type="time"
+                              name="openTime"
+                              className="revamped-input time-input"
+                              value={hour.openTime}
+                              onChange={(e) => handleChange(e, 'hours', index)}
+                            />
+                            <span> - </span>
+                            <input
+                              type="time"
+                              name="closeTime"
+                              className="revamped-input time-input"
+                              value={hour.closeTime}
+                              onChange={(e) => handleChange(e, 'hours', index)}
+                            />
+                          </div>
+                        ) : (
+                          <p>
+                            {hour.isClosed
+                              ? 'Closed'
+                              : hour.isOpen24
+                              ? 'Open 24 hours'
+                              : `${convertTo12Hour(hour.openTime)} - ${convertTo12Hour(hour.closeTime)}`}
+                          </p>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="section">
+              <h2 className="section-header">About</h2>
+              {isEditing ? (
+                <textarea
+                  className="revamped-textarea"
+                  value={business.about}
+                  onChange={(e) => handleChange(e, 'about')}
+                />
+              ) : (
+                <p className="about-text">{business.about || 'Not set'}</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-    </>
+      <footer className="revamped-footer">
+        <div className="revamped-footer-content">
+          <div className="revamped-footer-logo">
+            <span className="logo-explore">Explore</span>
+            <span className="logo-local">Local</span>
+          </div>
+          <div className="revamped-footer-links">
+            <a href="#">About Us</a>
+            <a href="#">Contact</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+          </div>
+          <div className="revamped-social-icons">
+            <a href="#" aria-label="Facebook">
+              <FaFacebookF />
+            </a>
+            <a href="#" aria-label="Twitter">
+              <FaTwitter />
+            </a>
+          </div>
+        </div>
+        <div className="revamped-copyright">© ExploreLocal 2025 All Reserved.</div>
+      </footer>
+    </div>
   );
 }
 

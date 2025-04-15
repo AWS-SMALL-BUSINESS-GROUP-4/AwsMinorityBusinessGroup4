@@ -105,7 +105,7 @@ export function BusinessFormProvider({ children }) {
     1: ['businessName'],
     2: ['email'],
     3: ['phoneNumber'],
-    4: [],
+    4: [], // Keeping this empty since the website is technically optional (can be skipped)
     5: ['categories'],
     6: ['street', 'city', 'state', 'zip', 'country'],
     7: ['firstName', 'lastName', 'emailaddress', 'password'],
@@ -259,9 +259,19 @@ export function BusinessFormProvider({ children }) {
       const err = validateField(field, data[field]);
       if (err) stepErrors[field] = err;
     });
-    if (stepNumber === 4 && data.website.trim() && !urlRegex.test(data.website)) {
-      stepErrors.website = 'Please enter a valid website URL (e.g., https://example.com)';
+    
+    // Special validation for step 4 (Business Website)
+    if (stepNumber === 4) {
+      // If the website field is empty, trigger an error
+      if (!data.website.trim()) {
+        stepErrors.website = 'Please enter a website URL or click "I don\'t have a website" to skip.';
+      }
+      // If the website field has a value, validate the URL format
+      else if (data.website.trim() && !urlRegex.test(data.website)) {
+        stepErrors.website = 'Please enter a valid website URL (e.g., https://example.com)';
+      }
     }
+
     return stepErrors;
   }
 
@@ -537,6 +547,26 @@ export function BusinessFormProvider({ children }) {
     }
   }
 
+  // Function to navigate to a specific step
+  function navigateToStep(stepNumber) {
+    // Prevent navigation to skipped steps (7 or 7.5) for signed-in users
+    if (isSignedIn && (stepNumber === 7 || stepNumber === 7.5)) {
+      // If coming from a later step, go to step 6
+      if (step > 7.5) {
+        stepNumber = 6;
+      }
+      // If coming from an earlier step, go to step 8
+      else if (step < 7) {
+        stepNumber = 8;
+      }
+    }
+  
+    if (stepNumber <= step && stepToRouteMap[stepNumber]) {
+      setStep(stepNumber);
+      navigate(stepToRouteMap[stepNumber]);
+    }
+  }
+
   useEffect(() => {
     const pathNoSlash = location.pathname.replace(/\/$/, '');
     const storedStep = localStorage.getItem('businessFormStep');
@@ -644,6 +674,9 @@ export function BusinessFormProvider({ children }) {
     prevStep,
     isStepComplete,
     resendVerificationCode,
+    navigate,
+    stepToRouteMap, // Add stepToRouteMap to context
+    navigateToStep, // Add navigateToStep function to context
   };
 
   return (

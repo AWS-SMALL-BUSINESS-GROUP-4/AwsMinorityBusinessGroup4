@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBusinessForm } from './BusinessFormContext';
+import { FaFacebookF, FaTwitter, FaMapMarkerAlt } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 import './BusinessCreationForm.css';
 
 export default function BusinessAddress() {
@@ -10,31 +12,38 @@ export default function BusinessAddress() {
     handleBlur,
     errors,
     nextStep,
-    prevStep,
-    setFormData
+    setFormData,
+    isSignedIn,
+    navigateToStep,
   } = useBusinessForm();
 
-  // Local states for Google Maps, inputs and predictions for each field.
+  const totalSteps = isSignedIn ? 9 : 10;
+
+  const handleStepClick = (stepNumber) => {
+    navigateToStep(stepNumber);
+  };
+
+  // Local states for Google Maps, inputs, and predictions for each field.
   const [isMapsLoaded, setIsMapsLoaded] = useState(false);
 
   // Street state and predictions
-  const [streetInput, setStreetInput] = useState(formData.street || "");
+  const [streetInput, setStreetInput] = useState(formData.street || '');
   const [streetPredictions, setStreetPredictions] = useState([]);
 
   // City state and predictions
-  const [cityInput, setCityInput] = useState(formData.city || "");
+  const [cityInput, setCityInput] = useState(formData.city || '');
   const [cityPredictions, setCityPredictions] = useState([]);
 
   // State (region) state and predictions
-  const [stateInput, setStateInput] = useState(formData.state || "");
+  const [stateInput, setStateInput] = useState(formData.state || '');
   const [statePredictions, setStatePredictions] = useState([]);
 
   // Zip state and predictions
-  const [zipInput, setZipInput] = useState(formData.zip || "");
+  const [zipInput, setZipInput] = useState(formData.zip || '');
   const [zipPredictions, setZipPredictions] = useState([]);
 
   // Country state and predictions
-  const [countryInput, setCountryInput] = useState(formData.country || "");
+  const [countryInput, setCountryInput] = useState(formData.country || '');
   const [countryPredictions, setCountryPredictions] = useState([]);
 
   const autocompleteServiceRef = useRef(null);
@@ -46,7 +55,7 @@ export default function BusinessAddress() {
 
   // Load the Google Maps script (if not already loaded)
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_PLACES_API_KEY; 
+    const apiKey = import.meta.env.VITE_PLACES_API_KEY;
     if (!apiKey) {
       console.error('Google Maps API key is missing (VITE_PLACES_API_KEY)!');
       return;
@@ -258,44 +267,76 @@ export default function BusinessAddress() {
 
   return (
     <div className="form-container">
-      <header className="header">
+      <header className="header revamped-header">
         <div className="nav-content">
           <div className="header-left">
-            <span className="logo-text">Logo</span>
-            <span className="for-businesses">for Businesses</span>
+            <Link to="/" className="logo-link">
+              <span className="logo-icon">
+                <FaMapMarkerAlt />
+              </span>
+              <span className="logo-text revamped-logo">
+                <span className="logo-explore">Explore</span>
+                <span className="logo-local">Local</span>
+              </span>
+            </Link>
           </div>
           <nav className="header-nav">
-            <a href="#">My Business</a>
-            <a href="#">Account Settings</a>
+            <a href="#">Home</a>
             <a href="#">Support</a>
+            <a href="#">Business Login</a>
           </nav>
         </div>
       </header>
-
-      <div className="form-area">
-        <div className="grey-container">
-          {step > 1 && (
-            <button className="back-button" onClick={prevStep}>
-              ←
-            </button>
-          )}
-
+      <div className="revamped-hero-section">
+        <div className="revamped-hero-content">
+          <h1 className="revamped-hero-heading">
+            Get Your Business Listed Today
+          </h1>
+          <p className="revamped-hero-subheading">
+            Join thousands of local businesses on ExploreLocal!
+          </p>
+        </div>
+        <div className="revamped-progress-indicator">
+          {Array.from({ length: totalSteps }, (_, i) => {
+            const stepNumber = i + 1;
+            const adjustedStep = isSignedIn && stepNumber >= 7 ? stepNumber + 1 : stepNumber;
+            return (
+              <div key={i} className="revamped-step-wrapper">
+                <div
+                  className={`revamped-step ${step === adjustedStep ? 'active' : ''} ${
+                    step > adjustedStep ? 'completed' : ''
+                  }`}
+                  onClick={() => handleStepClick(stepNumber)}
+                >
+                  {stepNumber}
+                </div>
+                {i < totalSteps - 1 && <div className="revamped-step-connector"></div>}
+              </div>
+            );
+          })}
+        </div>
+        <div className="grey-container revamped-grey-container">
           <div className="form-step">
-            <h1>Where is your business located?</h1>
-            <p>Enter the address where customers can find you, or provide your official registered address.</p>
+            <h1>Where is Your Business Located?</h1>
+            <p>
+              Provide your full address so customers can easily locate you. Include street, city, state, and postal code.
+            </p>
 
             <div className="innerLocation">
               <div className="street" style={{ position: 'relative' }}>
+                <label htmlFor="street" className="input-label">Street Address</label>
                 <input
                   ref={streetInputRef}
+                  id="street"
                   type="text"
                   name="street"
-                  placeholder="Street Address"
+                  placeholder="123 Main St"
                   value={streetInput}
                   onChange={handleStreetChange}
                   onBlur={handleBlur}
                   required
                   aria-describedby="street-error"
+                  className="revamped-input"
                 />
                 {errors.street && (
                   <span id="street-error" className="error">{errors.street}</span>
@@ -314,27 +355,33 @@ export default function BusinessAddress() {
                 )}
               </div>
               <div className="apt">
+                <label htmlFor="apt" className="input-label">Apt/Suite/Other</label>
                 <input
+                  id="apt"
                   type="text"
                   name="apt"
-                  placeholder="Apt/Suite/Other"
+                  placeholder="Apt 101"
                   value={formData.apt}
                   onChange={handleInputChange}
+                  className="revamped-input"
                 />
               </div>
             </div>
 
             <div className="outerLocation">
               <div className="city" style={{ position: 'relative' }}>
+                <label htmlFor="city" className="input-label">City</label>
                 <input
+                  id="city"
                   type="text"
                   name="city"
-                  placeholder="City"
+                  placeholder="New York"
                   value={cityInput}
                   onChange={handleCityChange}
                   onBlur={handleBlur}
                   required
                   aria-describedby="city-error"
+                  className="revamped-input"
                 />
                 {errors.city && <span id="city-error" className="error">{errors.city}</span>}
                 {cityPredictions.length > 0 && (
@@ -351,15 +398,18 @@ export default function BusinessAddress() {
                 )}
               </div>
               <div className="state" style={{ position: 'relative' }}>
+                <label htmlFor="state" className="input-label">State</label>
                 <input
+                  id="state"
                   type="text"
                   name="state"
-                  placeholder="State"
+                  placeholder="NY"
                   value={stateInput}
                   onChange={handleStateChange}
                   onBlur={handleBlur}
                   required
                   aria-describedby="state-error"
+                  className="revamped-input"
                 />
                 {errors.state && (
                   <span id="state-error" className="error">{errors.state}</span>
@@ -378,15 +428,18 @@ export default function BusinessAddress() {
                 )}
               </div>
               <div className="zip" style={{ position: 'relative' }}>
+                <label htmlFor="zip" className="input-label">Zip Code</label>
                 <input
+                  id="zip"
                   type="text"
                   name="zip"
-                  placeholder="Zip Code"
+                  placeholder="10001"
                   value={zipInput}
                   onChange={handleZipChange}
                   onBlur={handleBlur}
                   required
                   aria-describedby="zip-error"
+                  className="revamped-input"
                 />
                 {errors.zip && <span id="zip-error" className="error">{errors.zip}</span>}
                 {zipPredictions.length > 0 && (
@@ -403,15 +456,18 @@ export default function BusinessAddress() {
                 )}
               </div>
               <div className="country" style={{ position: 'relative' }}>
+                <label htmlFor="country" className="input-label">Country</label>
                 <input
+                  id="country"
                   type="text"
                   name="country"
-                  placeholder="Country"
+                  placeholder="United States"
                   value={countryInput}
                   onChange={handleCountryChange}
                   onBlur={handleBlur}
                   required
                   aria-describedby="country-error"
+                  className="revamped-input"
                 />
                 {errors.country && (
                   <span id="country-error" className="error">{errors.country}</span>
@@ -431,14 +487,35 @@ export default function BusinessAddress() {
               </div>
             </div>
 
-            <div className="button-group">
-              <button className="continue-button" onClick={nextStep}>
-                Continue
-              </button>
-            </div>
+            <button className="continue-button revamped-continue-button" onClick={nextStep}>
+              Continue
+            </button>
           </div>
         </div>
       </div>
+      <footer className="revamped-footer">
+        <div className="revamped-footer-content">
+          <div className="revamped-footer-logo">
+            <span className="logo-explore">Explore</span>
+            <span className="logo-local">Local</span>
+          </div>
+          <div className="revamped-footer-links">
+            <a href="#">About Us</a>
+            <a href="#">Contact</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+          </div>
+          <div className="revamped-social-icons">
+            <a href="#" aria-label="Facebook">
+              <FaFacebookF />
+            </a>
+            <a href="#" aria-label="Twitter">
+              <FaTwitter />
+            </a>
+          </div>
+        </div>
+        <div className="revamped-copyright">© ExploreLocal 2025 All Rights Reserved.</div>
+      </footer>
     </div>
   );
 }

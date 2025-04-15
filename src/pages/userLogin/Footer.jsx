@@ -8,7 +8,6 @@ function Footer() {
     <footer>
       <div className="footer-content">
         <div className="logo">
-          <FaMapMarkerAlt/>
           <span className="explore">Explore</span>
           <span className="local">Local</span>
         </div>
