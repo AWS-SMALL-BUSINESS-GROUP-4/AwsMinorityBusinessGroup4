@@ -1,18 +1,23 @@
 // src/components/Header.jsx
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaMapMarkerAlt } from "react-icons/fa";
+import { FaMapMarkerAlt, FaUser } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
 import "./Header.css";
 
 function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  const { isLoggedIn, logout } = useAuth();
 
-  const handleMouseEnter = () => {
-    setShowDropdown(true);
-  };
+  const handleMouseEnter = () => setShowDropdown(true);
+  const handleMouseLeave = () => setShowDropdown(false);
+  const handleAccountMouseEnter = () => setShowAccountDropdown(true);
+  const handleAccountMouseLeave = () => setShowAccountDropdown(false);
 
-  const handleMouseLeave = () => {
-    setShowDropdown(false);
+  const handleLogout = () => {
+    logout();
+    setShowAccountDropdown(false);
   };
 
   return (
@@ -48,6 +53,38 @@ function Header() {
               <Link to="/write-review" className="nav-link">
                 Write a Review
               </Link>
+              {isLoggedIn ? (
+                <div
+                  className="dropdown-container"
+                  onMouseEnter={handleAccountMouseEnter}
+                  onMouseLeave={handleAccountMouseLeave}
+                >
+                  <span className="account-trigger">
+                    <FaUser className="account-icon" />
+                    My Account
+                  </span>
+                  {showAccountDropdown && (
+                    <div className="dropdown-menu">
+                      <Link to="/about-me" className="dropdown-item">
+                        About Me
+                      </Link>
+                      <Link to="/my-collections" className="dropdown-item">
+                        My Collections
+                      </Link>
+                      <Link to="/account-settings" className="dropdown-item">
+                        Account Settings
+                      </Link>
+                      <div onClick={handleLogout} className="dropdown-item">
+                        Log Out
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link to="/login" className="sign-in-button">
+                  Sign In/Up
+                </Link>
+              )}
             </div>
           </nav>
         </div>

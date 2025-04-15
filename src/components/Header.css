@@ -6,28 +6,28 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  position: relative; /* Ensure absolute positioning is relative to the header */
+  position: relative;
 }
 
 .header-content {
   display: flex;
-  justify-content: flex-end; /* Align navigation to the right */
+  justify-content: flex-end;
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
-  position: relative; /* For absolute positioning of the logo */
-  min-height: 60px; /* Ensure enough height for the logo */
+  position: relative;
+  min-height: 60px;
 }
 
 /* Logo styling */
 .logo {
   display: flex;
   align-items: center;
-  position: absolute; /* Position the logo absolutely */
-  left: 1rem; /* 1rem from the left edge of the header */
-  top: 50%; /* Center vertically */
-  transform: translateY(-50%); /* Adjust for vertical centering */
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .logo-link {
@@ -37,24 +37,24 @@
 }
 
 .logo-icon {
-  color: white; /* White location pin */
+  color: white;
   font-size: 1.5rem;
   margin-right: 0.5rem;
 }
 
 .logo-explore {
-  color: white; /* White for "Explore" */
+  color: white;
   font-size: 1.5rem;
   font-weight: bold;
   font-family: "Inter", sans-serif;
 }
 
 .logo-local {
-  color: #ff9800; /* Orange for "Local" */
+  color: #ff9800;
   font-size: 1.5rem;
   font-weight: bold;
   font-family: "Inter", sans-serif;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle shadow to make it stand out */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* Navigation container */
@@ -73,11 +73,11 @@
 .nav-items {
   display: flex;
   align-items: center;
-  gap: 1rem; /* Space between nav items */
+  gap: 1rem;
 }
 
 .nav-link {
-  color: white; /* White for better contrast against orange */
+  color: white;
   text-decoration: none;
   padding: 0.5rem 1rem;
   font-family: "Inter", sans-serif;
@@ -86,17 +86,58 @@
 }
 
 .nav-link:hover {
-  opacity: 0.8; /* Subtle opacity change on hover */
+  opacity: 0.8;
 }
 
-/* Dropdown styling */
+/* Sign In/Up Button */
+.sign-in-button {
+  color: white;
+  background-color: transparent;
+  border: 2px solid white;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sign-in-button:hover {
+  background-color: white;
+  color: #ff9800;
+}
+
+/* My Account Dropdown */
+.account-trigger {
+  color: white;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.2s ease;
+}
+
+.account-trigger:hover {
+  opacity: 0.8;
+}
+
+.account-icon {
+  color: white;
+  font-size: 1rem;
+}
+
+/* Dropdown styling (used for both My Business and My Account) */
 .dropdown-container {
   position: relative;
   display: inline-block;
 }
 
 .dropdown-trigger {
-  color: white; /* White for better contrast */
+  color: white;
   padding: 0.5rem 1rem;
   text-decoration: none;
   cursor: pointer;
@@ -106,14 +147,14 @@
 }
 
 .dropdown-trigger:hover {
-  opacity: 0.8; /* Subtle opacity change on hover */
+  opacity: 0.8;
 }
 
 .dropdown-menu {
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: white; /* White background for dropdown */
+  background-color: white;
   min-width: 200px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
@@ -132,7 +173,7 @@
 }
 
 .dropdown-item:hover {
-  background-color: #f5f5f5; /* Light gray on hover */
+  background-color: #f5f5f5;
 }
 
 /* Responsive Design */
@@ -141,7 +182,7 @@
     flex-direction: column;
     align-items: center;
     gap: 1rem;
-    justify-content: center; /* Center content on mobile */
+    justify-content: center;
   }
 
   .nav-container {
@@ -155,16 +196,23 @@
   }
 
   .nav-link,
-  .dropdown-trigger {
+  .dropdown-trigger,
+  .account-trigger,
+  .sign-in-button {
     padding: 0.75rem;
     text-align: center;
     width: 100%;
+    box-sizing: border-box;
+  }
+
+  .account-trigger {
+    justify-content: center;
   }
 
   .dropdown-menu {
-    position: static; /* Makes dropdown part of the flow on mobile */
+    position: static;
     width: 100%;
-    box-shadow: none; /* Remove shadow for a cleaner look */
+    box-shadow: none;
     border-radius: 0;
   }
 
@@ -173,7 +221,7 @@
   }
 
   .logo {
-    position: static; /* Reset absolute positioning on mobile */
-    transform: none; /* Reset transform */
+    position: static;
+    transform: none;
   }
 }
