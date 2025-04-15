@@ -1,227 +1,356 @@
+/* src/pages/HomePage.css */
 /* =============================================
    Homepage Container
    ============================================= */
-.home-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* =============================================
-   Hero Search Section
-   ============================================= */
-.hero-search {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    url("/images/food-background.jpeg");
-  background-size: cover;
-  background-position: center;
-  color: white;
-  padding: 3rem 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 350px;
-}
-
-.search-container {
-  max-width: 800px;
-  width: 100%;
-  text-align: left;
-}
-
-.search-container h2 {
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-}
-
-.search-input-group {
-  display: flex;
-  width: 100%;
-}
-
-.search-input-group input {
-  flex: 1;
-  padding: 1rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 4px 0 0 4px;
-}
-
-.search-input-group button {
-  background-color: #ff9800;
-  color: white;
-  border: none;
-  border-radius: 0 4px 4px 0;
-  padding: 0 1.5rem;
-  cursor: pointer;
-  font-size: 1.25rem;
-}
-
-/* =============================================
-   Category Navigation
-   ============================================= */
-.category-nav {
-  background-color: white;
-  padding: 2rem 1rem;
-  flex: 1;
-}
-.category-container {
-  display: flex;
-  justify-content: space-between;
-  max-width: 1000px;
-  margin: 0 auto;
-  flex-wrap: wrap;
-}
-
-.category-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100px;
-  text-align: center;
-  margin: 0.5rem;
-}
-
-.category-icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  /* color: #ff9800; */
-  color: #333;
-}
-
-/* =============================================
-   Responsive Design
-   ============================================= */
-/* @media (max-width: 768px) {
+   .home-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0; /* Ensure no default margins */
+  }
+  
+  /* =============================================
+     Hero Search Section
+     ============================================= */
   .hero-search {
-    padding: 2rem 1rem;
-  }
-
-  .category-container {
-    gap: 1rem;
-  }
-
-  .category-item {
-    width: calc(25% - 1rem);
-  }
-} */
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  .nav-container {
-    width: 100%;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+      url("/images/food-background.jpeg");
+    background-size: cover;
+    background-position: center;
+    color: white;
+    padding: 0 1rem 4rem 1rem;
+    display: flex;
     justify-content: center;
-    flex-direction: column;
-    gap: 1rem;
+    align-items: center;
+    min-height: 400px;
+    margin: 0; /* Ensure no default margins */
   }
-
-  .main-nav {
+  
+  .search-container {
+    max-width: 800px;
     width: 100%;
+    text-align: center;
+    padding-top: 4rem;
+  }
+  
+  .search-container h1 {
+    margin-bottom: 1.5rem;
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+  
+  .search-input-group {
+    display: flex;
     justify-content: center;
-  }
-
-  .category-container {
-    justify-content: center;
-  }
-
-  .category-item {
-    width: 80px;
-    margin: 0.3rem;
-  }
-}
-
-/* =============================================
-   More Categories Dropdown
-   ============================================= */
-.more-categories-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 1rem;
-  min-width: 250px;
-  z-index: 1000;
-  margin-top: 0.5rem;
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.more-category-item {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  border-radius: 4px;
-}
-
-.more-category-item:hover {
-  background-color: #f5f5f5;
-}
-
-.more-category-icon {
-  margin-right: 1rem;
-  font-size: 1.25rem;
-  color: #333;
-  width: 24px;
-  text-align: center;
-}
-
-/* Update existing category styles */
-.category-item {
-  cursor: pointer;
-  transition: transform 0.2s ease;
-  position: relative;
-}
-
-.category-item:hover {
-  transform: translateY(-2px);
-}
-
-.category-icon {
-  transition: color 0.2s ease;
-}
-
-.category-item:hover .category-icon {
-  color: #ff9800;
-}
-
-/* Responsive Design Updates */
-@media (max-width: 768px) {
-  .more-categories-dropdown {
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
     width: 100%;
-    border-radius: 12px 12px 0 0;
-    max-height: 60vh;
   }
-
+  
+  .search-input-group input {
+    flex: 1;
+    max-width: 500px;
+    padding: 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 25px 0 0 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .search-input-group button {
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    border-radius: 0 25px 25px 0;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* =============================================
+     Category Navigation
+     ============================================= */
   .category-nav {
-    position: relative;
+    background-color: #fff5e6;
+    padding: 2rem 1rem;
+    flex: 1;
   }
-}
-
-/* Animation for dropdown */
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+  
+  .category-container {
+    display: flex;
+    justify-content: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .category-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100px;
+    text-align: center;
+    margin: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
   }
-}
-
-.more-categories-dropdown {
-  animation: slideDown 0.2s ease-out;
-}
+  
+  .category-item:hover {
+    transform: translateY(-2px);
+  }
+  
+  .category-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: #ff9800;
+    background-color: #fff;
+    border-radius: 50%;
+    padding: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease;
+  }
+  
+  .category-item:hover .category-icon {
+    background-color: #ff9800;
+    color: white;
+  }
+  
+  /* =============================================
+     Featured Local Favorites Section
+     ============================================= */
+  .featured-local-favorites {
+    padding: 3rem 1rem;
+    background-color: white;
+  }
+  
+  .featured-local-favorites h2 {
+    text-align: left;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .favorites-container {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+  
+  .favorite-item {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 300px;
+    text-align: left;
+  }
+  
+  .favorite-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+  }
+  
+  .favorite-details {
+    padding: 1rem;
+  }
+  
+  .favorite-type {
+    font-size: 1rem;
+    color: #333;
+    font-weight: bold;
+  }
+  
+  .favorite-rating {
+    color: #ff9800;
+    margin: 0.5rem 0;
+  }
+  
+  .favorite-details p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+  }
+  
+  .view-more-btn {
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  /* =============================================
+     Add Your Business Section
+     ============================================= */
+  .add-your-business {
+    padding: 2rem 1rem;
+    background-color: #fff5e6;
+    text-align: center;
+  }
+  
+  .add-your-business h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .add-your-business p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+  }
+  
+  .add-business-btn {
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+  
+  /* =============================================
+     Footer
+     ============================================= */
+  footer {
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  footer .footer-container {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  footer a {
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  
+  footer a:hover {
+    text-decoration: underline;
+  }
+  
+  /* =============================================
+     Responsive Design
+     ============================================= */
+  @media (max-width: 768px) {
+    .hero-search {
+      padding: 0 1rem 3rem 1rem;
+      min-height: 300px;
+    }
+  
+    .search-container {
+      padding-top: 3rem;
+    }
+  
+    .search-container h1 {
+      font-size: 1.8rem;
+    }
+  
+    .category-container {
+      justify-content: center;
+      gap: 0.5rem;
+    }
+  
+    .category-item {
+      width: 80px;
+      margin: 0.3rem;
+    }
+  
+    .favorites-container {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .favorite-item {
+      width: 100%;
+      max-width: 350px;
+    }
+  
+    .featured-local-favorites h2 {
+      text-align: center;
+    }
+  }
+  
+  /* More Categories Dropdown (unchanged) */
+  .more-categories-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 1rem;
+    min-width: 250px;
+    z-index: 1000;
+    margin-top: 0.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .more-category-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-radius: 4px;
+  }
+  
+  .more-category-item:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .more-category-icon {
+    margin-right: 1rem;
+    font-size: 1.25rem;
+    color: #333;
+    width: 24px;
+    text-align: center;
+  }
+  
+  @media (max-width: 768px) {
+    .more-categories-dropdown {
+      position: fixed;
+      top: auto;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      border-radius: 12px 12px 0 0;
+      max-height: 60vh;
+    }
+  }
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .more-categories-dropdown {
+    animation: slideDown 0.2s ease-out;
+  }

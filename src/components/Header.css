@@ -1,45 +1,82 @@
-/* Header.css */
+/* src/components/Header.css */
 .header {
   width: 100%;
-  background: #fc941d;
-  /* overflow: hidden; */
+  background: #ff9800;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  position: relative;
+  margin: 0;
+}
+
+/* Extend the header background to cover any gap */
+.header::after {
+  content: "";
+  position: absolute;
+  top: 100%; /* Start at the bottom of the header */
+  left: 0;
+  width: 100%;
+  height: 20px; /* Extend downward by 20px to cover potential gap */
+  background: #ff9800; /* Match header background */
+  z-index: -1; /* Place behind content */
 }
 
 .header-content {
-  width: 100%;
-  margin: 0;
-  padding: 0;
   display: flex;
-  justify-content: space-between;
-}
-
-/* .header-content {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
-} */
+  padding: 1rem;
+  min-height: 60px;
+}
 
 /* Logo styling */
 .logo {
-  float: left;
+  display: flex;
+  align-items: center;
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-.logo a {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
+.logo-link {
+  display: flex;
+  align-items: center;
   text-decoration: none;
+  padding: 14px 16px;
+  color: white;
   font-family: "Inter", sans-serif;
+}
+
+.logo-icon {
+  color: white;
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+}
+
+.logo-explore {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: "Inter", sans-serif;
+}
+
+.logo-local {
+  color: #ff9800;
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: "Inter", sans-serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 /* Navigation container */
 .nav-container {
-  float: right;
-  display: flex;
-  align-items: center;
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .main-nav {
@@ -52,44 +89,100 @@
 .nav-items {
   display: flex;
   align-items: center;
+  gap: 1rem;
 }
 
 .nav-link {
-  display: block;
   color: white;
-  text-align: center;
-  padding: 14px 16px;
   text-decoration: none;
-  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  padding: 14px 16px;
   font-family: "Inter", sans-serif;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
-/* Dropdown styling */
+.nav-link:hover {
+  opacity: 0.8;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Sign In/Up Button */
+.sign-in-button {
+  color: white;
+  background-color: transparent;
+  border: 2px solid white;
+  border-radius: 20px;
+  padding: 6px 8px;
+  text-decoration: none;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sign-in-button:hover {
+  background-color: white;
+  color: #ff9800;
+}
+
+/* My Account Dropdown */
+.account-trigger {
+  color: white;
+  padding: 14px 16px;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.2s ease;
+  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.account-trigger:hover {
+  opacity: 0.8;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.account-icon {
+  color: white;
+  font-size: 1rem;
+}
+
+/* Dropdown styling (used for both My Business and My Account) */
 .dropdown-container {
   position: relative;
   display: inline-block;
 }
 
 .dropdown-trigger {
-  display: block;
   color: white;
-  text-align: center;
   padding: 14px 16px;
   text-decoration: none;
   cursor: pointer;
-  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   font-family: "Inter", sans-serif;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.dropdown-trigger:hover {
+  opacity: 0.8;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .dropdown-menu {
   position: absolute;
   top: 100%;
-  left: 0;
-  background-color: #fc941d;
-  min-width: 180px;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  left: auto;
+  right: 0;
+  background-color: #ff9800;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-  display: block;
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .dropdown-item {
@@ -97,19 +190,13 @@
   color: white;
   padding: 14px 16px;
   text-decoration: none;
-  text-align: left;
-  cursor: pointer;
   font-family: "Inter", sans-serif;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
   text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
-/* Hover effects - removed blue background */
 .dropdown-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.nav-link:hover,
-.dropdown-trigger:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -118,19 +205,49 @@
   .header-content {
     flex-direction: column;
     align-items: center;
+    gap: 1rem;
+    justify-content: center;
   }
 
   .nav-container {
+    position: static;
+    transform: none;
     width: 100%;
   }
 
   .nav-items {
     flex-direction: column;
     width: 100%;
+    gap: 0.5rem;
+  }
+
+  .nav-link,
+  .dropdown-trigger,
+  .account-trigger,
+  .sign-in-button {
+    padding: 0.75rem;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .account-trigger {
+    justify-content: center;
   }
 
   .dropdown-menu {
-    position: relative;
+    position: static;
     width: 100%;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .dropdown-item {
+    text-align: center;
+  }
+
+  .logo {
+    position: static;
+    transform: none;
   }
 }

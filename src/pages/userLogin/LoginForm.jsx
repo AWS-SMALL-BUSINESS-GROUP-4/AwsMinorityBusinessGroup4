@@ -1,27 +1,30 @@
-import React, { useState } from 'react';
-import { signIn } from 'aws-amplify/auth';
-import Input from './Input';
-import PasswordInput from './PasswordInput';
-import { FaEnvelope } from 'react-icons/fa';
+// src/pages/userLogin/LoginForm.jsx
+import React, { useState } from "react";
+import { signIn } from "aws-amplify/auth";
+import { useNavigate } from "react-router-dom"; // Add useNavigate
+import Input from "./Input";
+import PasswordInput from "./PasswordInput";
+import { FaEnvelope } from "react-icons/fa";
 
 function LoginForm() {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate(); // Add navigate hook
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const validateField = (name, value) => {
     if (!value.trim()) {
-      return `${name === 'email' ? 'Email Address' : 'Password'} is required`;
+      return `${name === "email" ? "Email Address" : "Password"} is required`;
     }
-    if (name === 'email' && !emailRegex.test(value)) {
-      return 'Please enter a valid email address';
+    if (name === "email" && !emailRegex.test(value)) {
+      return "Please enter a valid email address";
     }
-    return '';
+    return "";
   };
 
   const handleInputChange = (e) => {
@@ -39,8 +42,8 @@ function LoginForm() {
 
   const validateForm = () => {
     const newErrors = {};
-    newErrors.email = validateField('email', formData.email);
-    newErrors.password = validateField('password', formData.password);
+    newErrors.email = validateField("email", formData.email);
+    newErrors.password = validateField("password", formData.password);
     return Object.fromEntries(Object.entries(newErrors).filter(([_, v]) => v));
   };
 
@@ -52,32 +55,40 @@ function LoginForm() {
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
-      console.error('Login validation errors:', validationErrors);
+      console.error("Login validation errors:", validationErrors);
       setIsLoading(false);
       return;
     }
 
     try {
-      console.log('Attempting manual login with:', { email: formData.email });
-      const signInResult = await signIn({ username: formData.email, password: formData.password });
-      console.log('Sign-in result:', signInResult);
+      console.log("Attempting manual login with:", { email: formData.email });
+      const signInResult = await signIn({
+        username: formData.email,
+        password: formData.password,
+      });
+      console.log("Sign-in result:", signInResult);
       if (signInResult.isSignedIn) {
-        console.log('Sign-in successful');
+        console.log("Sign-in successful");
+        navigate("/"); // Redirect to homepage on successful sign-in
       } else {
-        console.log('Sign-in incomplete, next step:', signInResult.nextStep);
+        console.log("Sign-in incomplete, next step:", signInResult.nextStep);
       }
     } catch (error) {
-      console.error('Manual login error:', error);
-      let errorMessage = 'Failed to log in. Please try again.';
+      console.error("Manual login error:", error);
+      let errorMessage = "Failed to log in. Please try again.";
       switch (error.name) {
-        case 'NotAuthorizedException':
-          errorMessage = 'Incorrect email or password.';
+        case "UserAlreadyAuthenticatedException":
+          console.log("User already authenticated, redirecting to homepage");
+          navigate("/"); // Redirect to homepage
+          return; // Exit early
+        case "NotAuthorizedException":
+          errorMessage = "Incorrect email or password.";
           break;
-        case 'UserNotConfirmedException':
-          errorMessage = 'Please verify your email before logging in.';
+        case "UserNotConfirmedException":
+          errorMessage = "Please verify your email before logging in.";
           break;
-        case 'InvalidParameterException':
-          errorMessage = 'Invalid input provided.';
+        case "InvalidParameterException":
+          errorMessage = "Invalid input provided.";
           break;
         default:
           errorMessage = error.message || errorMessage;
@@ -121,9 +132,11 @@ function LoginForm() {
           />
           {errors.password && <span className="error">{errors.password}</span>}
         </div>
-        <a href="#" className="forgot-password">Forgot Password?</a>
+        <a href="#" className="forgot-password">
+          Forgot Password?
+        </a>
         <button type="submit" className="submit-button" disabled={isLoading}>
-          {isLoading ? 'Logging In...' : 'Log In'}
+          {isLoading ? "Logging In..." : "Log In"}
         </button>
       </form>
       {errors.login && <span className="error">{errors.login}</span>}

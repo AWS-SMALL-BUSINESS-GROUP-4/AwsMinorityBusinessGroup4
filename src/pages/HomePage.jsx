@@ -1,6 +1,6 @@
-// src/pages/HomePage.js
+// src/pages/HomePage.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   FaSearch,
   FaUtensils,
@@ -14,6 +14,7 @@ import {
   FaWrench,
   FaDumbbell,
   FaSpa,
+  FaStar,
 } from "react-icons/fa";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -26,6 +27,8 @@ function HomePage() {
       <main>
         <HeroSearch />
         <CategoryNav />
+        <FeaturedLocalFavorites />
+        <AddYourBusiness />
       </main>
       <Footer />
     </div>
@@ -46,18 +49,18 @@ function HeroSearch() {
   return (
     <section className="hero-search">
       <div className="search-container">
-        <h2>Looking for a place?</h2>
+        <h1>Discover the Best Local Spots Near You!</h1>
         <form onSubmit={handleSearch}>
           <div className="search-input-group">
             <input
               type="text"
-              placeholder="Search businesses..."
+              placeholder="Find restaurants, shops, and more..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               aria-label="Search businesses"
             />
             <button type="submit" aria-label="Submit search">
-              <FaSearch />
+              Search
             </button>
           </div>
         </form>
@@ -85,7 +88,6 @@ function CategoryNav() {
     { id: "repair", icon: <FaWrench />, name: "Phone Repair" },
     { id: "fitness", icon: <FaDumbbell />, name: "Gyms" },
     { id: "massage", icon: <FaSpa />, name: "Massage" },
-    // Add more categories as needed
   ];
 
   const handleCategoryClick = (categoryId) => {
@@ -126,6 +128,67 @@ function CategoryNav() {
           ))}
         </div>
       )}
+    </section>
+  );
+}
+
+function FeaturedLocalFavorites() {
+  const favorites = [
+    {
+      type: "Restaurant",
+      name: "Cozy Italian Eatery",
+      description: "Cozy Italian eatery with the best pasta in town.",
+      image: "/images/pizza.jpg",
+      rating: 5,
+    },
+    {
+      type: "Fast aurant",
+      name: "Great Steak",
+      description: "Great steak and seasonal sides.",
+      image: "/images/steak.jpeg",
+      rating: 5,
+    },
+    {
+      type: "Spa",
+      name: "Spa Name",
+      description: "Relaxing massages and facial treatments.",
+      image: "/images/spa.jpg",
+      rating: 5,
+    },
+  ];
+
+  return (
+    <section className="featured-local-favorites">
+      <h2>Featured Local Favorites</h2>
+      <div className="favorites-container">
+        {favorites.map((favorite, index) => (
+          <div key={index} className="favorite-item">
+            <img src={favorite.image} alt={favorite.name} />
+            <div className="favorite-details">
+              <span className="favorite-type">{favorite.type}</span>
+              <div className="favorite-rating">
+                {[...Array(favorite.rating)].map((_, i) => (
+                  <FaStar key={i} />
+                ))}
+              </div>
+              <p>{favorite.description}</p>
+              <button className="view-more-btn">View More</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AddYourBusiness() {
+  return (
+    <section className="add-your-business">
+      <h2>Own a Business? Get Listed Today!</h2>
+      <p>Reach more customers and grow your business with us.</p>
+      <Link to="/add-business">
+        <button className="add-business-btn">Add Your Business</button>
+      </Link>
     </section>
   );
 }
