@@ -6,6 +6,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    margin: 0; /* Ensure no default margins */
   }
   
   /* =============================================
@@ -13,21 +14,23 @@
      ============================================= */
   .hero-search {
     background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-      url("/images/street-background.jpg"); /* Replace with your image */
+      url("/images/food-background.jpeg");
     background-size: cover;
     background-position: center;
     color: white;
-    padding: 4rem 1rem;
+    padding: 0 1rem 4rem 1rem;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 400px;
+    margin: 0; /* Ensure no default margins */
   }
   
   .search-container {
     max-width: 800px;
     width: 100%;
     text-align: center;
+    padding-top: 4rem;
   }
   
   .search-container h1 {
@@ -250,8 +253,12 @@
      ============================================= */
   @media (max-width: 768px) {
     .hero-search {
-      padding: 3rem 1rem;
+      padding: 0 1rem 3rem 1rem;
       min-height: 300px;
+    }
+  
+    .search-container {
+      padding-top: 3rem;
     }
   
     .search-container h1 {
