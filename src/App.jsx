@@ -10,6 +10,7 @@ import BusinessProfilePage from "./pages/BusinessProfilePage";
 import React from "react";
 import "./App.css";
 import '../AmplifyClient'; // Import to configure Amplify
+import { AuthProvider } from "./context/AuthContext";
 
 // The multi-step routes
 import BusinessFormRoutes from "./pages/BusinessFormRoutes";
@@ -17,25 +18,27 @@ import UserLogin from "./pages/userLogin/userLogin"; // Add this import
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Main Routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<UserLogin />} /> Add this route
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Main Routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<UserLogin />} /> Add this route
 
-        {/* Business Routes */}
-        <Route path="/search" element={<SearchResultPage />} />
+          {/* Business Routes */}
+          <Route path="/search" element={<SearchResultPage />} />
 
-        {/* Our new multi-step forms, handle /my-businesses/stepX */}
-        <Route path="/business-profile" element={<BusinessManagementPage />} />
-        <Route path="/add-business/*" element={<BusinessFormRoutes />} />
-        <Route path="/write-review" element={<ReviewPage />} />
-        <Route path="/business/:id" element={<BusinessProfilePage />} />
+          {/* Our new multi-step forms, handle /my-businesses/stepX */}
+          <Route path="/business-profile" element={<BusinessManagementPage />} />
+          <Route path="/add-business/*" element={<BusinessFormRoutes />} />
+          <Route path="/write-review" element={<ReviewPage />} />
+          <Route path="/business/:id" element={<BusinessProfilePage />} />
 
-        {/* 404 Route */}
-        <Route path="*" element={<div>404 Page Not Found</div>} />
-      </Routes>
-    </Router>
+          {/* 404 Route */}
+          <Route path="*" element={<div>404 Page Not Found</div>} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
