@@ -53,26 +53,26 @@ export default function BusinessEmail() {
             Join thousands of local businesses on ExploreLocal!
           </p>
         </div>
-        <div className="grey-container revamped-grey-container">
-          <div className="revamped-progress-indicator">
-            {Array.from({ length: totalSteps }, (_, i) => {
-              const stepNumber = i + 1;
-              const adjustedStep = isSignedIn && stepNumber >= 7 ? stepNumber + 1 : stepNumber;
-              return (
-                <div key={i} className="revamped-step-wrapper">
-                  <div
-                    className={`revamped-step ${step === adjustedStep ? 'active' : ''} ${
-                      step > adjustedStep ? 'completed' : ''
-                    }`}
-                    onClick={() => handleStepClick(stepNumber)}
-                  >
-                    {stepNumber}
-                  </div>
-                  {i < totalSteps - 1 && <div className="revamped-step-connector"></div>}
+        <div className="revamped-progress-indicator">
+          {Array.from({ length: totalSteps }, (_, i) => {
+            const stepNumber = i + 1;
+            const adjustedStep = isSignedIn && stepNumber >= 7 ? stepNumber + 1 : stepNumber;
+            return (
+              <div key={i} className="revamped-step-wrapper">
+                <div
+                  className={`revamped-step ${step === adjustedStep ? 'active' : ''} ${
+                    step > adjustedStep ? 'completed' : ''
+                  }`}
+                  onClick={() => handleStepClick(stepNumber)}
+                >
+                  {stepNumber}
                 </div>
-              );
-            })}
-          </div>
+                {i < totalSteps - 1 && <div className="revamped-step-connector"></div>}
+              </div>
+            );
+          })}
+        </div>
+        <div className="grey-container revamped-grey-container">
           <div className="form-step">
             <h1>What's Your Business Email Address?</h1>
             <p>

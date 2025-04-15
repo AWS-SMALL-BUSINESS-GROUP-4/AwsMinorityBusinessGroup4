@@ -55,38 +55,16 @@
   justify-content: left;
 }
 
-.grey-container {
-  background-color: #D9D9D9;
-  width: 650px;
-  border-radius: 8px;
-  padding: 40px;
-  position: relative;
-  margin: 0 auto;
-  min-height: 700px;
-  height: 100%;
-}
-
-.grey-container.wide {
-  width: 900px;
-  height: auto;
-}
-
-.back-button {
-  position: absolute;
-  left: 20px;
-  top: 40px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: black;
-}
 
 .form-step {
-  max-width: 450px;
-  margin: 50px 10px 50px 10px;
+  max-width: 325px;
+  margin: 50px auto;
 }
 
+.form-step-hours {
+  min-width: 450px;
+  margin: 50px auto;
+}
 
 .form-step h1 {
   font-size: 24px;
@@ -144,53 +122,48 @@ textarea {
   justify-content: center;
 }
 
-.continue-button {
-  background-color: #FC941D;
-  color: white;
-  border: 1px solid #FC941D;
-  padding: 14px;
-  border-radius: 7px;
-  cursor: pointer;
-  font-size: 16px;
-  width: 30%;
-  font-weight: 500;
-  margin-top: 25px;
-}
 
 .no-website-button {
   background: none;
-  border: 1px solid #FC941D;
-  color: #FC941D;
+  border: 1px solid #F7931E;
+  color: #F7931E;
   padding: 14px;
-  border-radius: 10px;
+  border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  width: 60%;
+  width: 100%;
   font-weight: 500;
-  margin-top: 16px;
-  margin-left: 10%;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .no-website-button:hover {
-  border: 1px solid #FC941D;
-  background-color: #FC941D;
+  background-color: #F7931E;
   color: white;
+  box-shadow: 0 2px 6px rgba(247, 147, 30, 0.3);
+}
+
+.no-website-button:active {
+  background-color: #E66D17;
 }
 
 .button-group {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 }
 
 .phone-input {
   display: flex;
-  gap: 12px; /* Reduced gap to match the tighter spacing in the UI */
+  gap: 12px;
   width: 100%;
-  margin-bottom: 8px; /* Adjusted to align with other inputs */
+  margin-bottom: 8px;
 }
 
 .country-code.revamped-input {
-  width: 80px; /* Fixed width for the country code dropdown */
-  padding: 14px 10px; /* Adjusted padding for a tighter look */
+  width: 80px;
+  padding: 14px 10px;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 16px;
@@ -200,17 +173,17 @@ textarea {
 }
 
 .country-code.revamped-input:hover {
-  border-color: #F7931E; /* Orange border on hover */
+  border-color: #F7931E;
 }
 
 .country-code.revamped-input:focus {
   outline: none;
   border-color: #F7931E;
-  box-shadow: 0 0 5px rgba(247, 147, 30, 0.3); /* Subtle glow on focus */
+  box-shadow: 0 0 5px rgba(247, 147, 30, 0.3);
 }
 
 .phone-input .revamped-input {
-  flex: 1; /* Allow the phone number input to take the remaining space */
+  flex: 1;
 }
 
 input::placeholder {
@@ -223,26 +196,26 @@ input[type="email"] {
 
 .innerLocation {
   display: flex;
-  justify-content: space-around;
-  margin-bottom: 10px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .street {
-  margin-right: 5px;
-  width: 100%;
+  flex: 2;
 }
 
 .apt {
-  width: 50%;
+  flex: 1;
 }
 
 .outerLocation {
   display: flex;
-  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .city, .state, .zip, .country {
-  width: 23%;
+  flex: 1;
 }
 
 .full-name {
@@ -255,7 +228,7 @@ input[type="email"] {
   width: 48%;
 }
 
-.emailaddress {
+.emailaddress, .password, .verification-input {
   display: block;
   margin-bottom: 10px;
 }
@@ -263,14 +236,21 @@ input[type="email"] {
 .separator {
   width: 40%;
   height: 15px;
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid #ccc;
 }
 
 .signup-separator {
   display: flex;
   justify-content: space-between;
-  width: 30%;
-  margin-top: 10px;
+  width: 100%;
+  margin: 20px 0;
+  align-items: center;
+}
+
+.signup-separator p {
+  margin: 0 10px;
+  color: #555;
+  font-size: 14px;
 }
 
 .google-button {
@@ -341,31 +321,15 @@ input[type="email"] {
 .hours-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.day-row {
-  display: flex;
-  align-items: center;
-  width: 800px;
-  justify-content: space-between;
-}
-
-.day-name {
-  width: 100px;
-  font-weight: 500;
-  box-sizing: border-box;
-}
-
-.time-select {
-  display: flex;
-  flex-direction: column;
+  gap: 5px;
+  margin-top: 20px;
 }
 
 .checkbox-group {
   display: flex;
   gap: 16px;
   align-items: center;
+  justify-content: space-evenly;
 }
 
 #isopen24 {
@@ -522,9 +486,9 @@ input[type="email"] {
 }
 
 .verify-group {
-  width: 100%;
   display: flex;
-  justify-content: left;
+  gap: 16px;
+  align-items: center;
 }
 
 .verify-button {
@@ -564,9 +528,9 @@ input[type="email"] {
 }
 
 .revamped-header {
-  background-color: rgba(255, 255, 255, 0.1); /* Slight transparency for the blur effect */
-  backdrop-filter: blur(10px); /* Blur effect for the background */
-  -webkit-backdrop-filter: blur(10px); /* For Safari compatibility */
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   height: auto;
   position: absolute;
   top: 0;
@@ -578,7 +542,7 @@ input[type="email"] {
 .nav-content {
   width: 100%;
   margin: 0 auto;
-  padding: 15px 24px; /* Adjusted padding for a tighter look */
+  padding: 15px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -587,7 +551,6 @@ input[type="email"] {
 .header-left {
   display: flex;
   align-items: center;
-  
 }
 
 .logo-link {
@@ -618,24 +581,24 @@ input[type="email"] {
 
 .header-nav {
   display: flex;
-  gap: 20px; /* Adjusted gap to match target UI */
+  gap: 20px;
   align-items: center;
 }
 
 .header-nav a {
   color: white;
-  font-weight: 500; /* Slightly bolder to match target UI */
+  font-weight: 500;
   font-size: 14px;
   text-decoration: none;
 }
 
 .header-nav a:hover {
-  color: #F7931E; /* Hover effect to match the orange theme */
+  color: #F7931E;
 }
 
 .revamped-hero-section {
-  background-color: #4A4A4A; /* Placeholder; replace with background-image when provided */
-  padding: 100px 0 50px 0; /* Increased top padding for more space below header */
+  background-color: #4A4A4A;
+  padding: 100px 0 50px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -664,12 +627,13 @@ input[type="email"] {
   background-color: white;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  width: 400px;
-  min-height: auto;
+  min-width: 200px;
   height: auto;
   position: relative;
   padding: 40px;
   animation: fadeIn 0.5s ease-in-out;
+  margin: 0 auto;
+  min-height: 650px;
 }
 
 /* Fade-in animation keyframes */
@@ -694,7 +658,6 @@ input[type="email"] {
 .revamped-step-wrapper {
   display: flex;
   align-items: center;
-  
 }
 
 .revamped-step {
@@ -718,22 +681,12 @@ input[type="email"] {
 .revamped-step.completed {
   background-color: #F7931E;
   cursor: pointer;
-  
 }
 
 .revamped-step-connector {
   width: 20px;
   height: 2px;
   background-color: #ccc;
-}
-
-.revamped-form-step h1 {
-  font-size: 24px;
-  text-align: center;
-}
-
-.revamped-form-step p {
-  text-align: center;
 }
 
 .revamped-footer {
@@ -803,21 +756,27 @@ input[type="email"] {
   border-radius: 6px;
   font-size: 16px;
   background-color: white;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover/focus */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .revamped-input:hover {
-  border-color: #F7931E; /* Orange border on hover */
+  border-color: #F7931E;
 }
 
 .revamped-input:focus {
   outline: none;
   border-color: #F7931E;
-  box-shadow: 0 0 5px rgba(247, 147, 30, 0.3); /* Subtle glow on focus */
+  box-shadow: 0 0 5px rgba(247, 147, 30, 0.3);
 }
 
 .revamped-input::placeholder {
   color: #999;
+}
+
+.revamped-input:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
 }
 
 /* Tooltip styling */
@@ -841,7 +800,7 @@ input[type="email"] {
   padding: 8px;
   position: absolute;
   z-index: 1;
-  bottom: 125%; /* Position above the icon */
+  bottom: 125%;
   left: 50%;
   transform: translateX(-50%);
   opacity: 0;
@@ -865,15 +824,347 @@ input[type="email"] {
   cursor: pointer;
   font-size: 16px;
   font-weight: 500;
-  margin-top: 25px;
+  margin-top: 15px;
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .revamped-continue-button:hover {
-  background-color: #F77A1A; /* Slightly darker orange on hover */
-  box-shadow: 0 2px 6px rgba(247, 147, 30, 0.3); /* Subtle shadow on hover */
+  background-color: #F77A1A;
+  box-shadow: 0 2px 6px rgba(247, 147, 30, 0.3);
 }
 
 .revamped-continue-button:active {
-  background-color: #E66D17; /* Even darker orange on click */
+  background-color: #E66D17;
+}
+
+.revamped-continue-button.disabled {
+  background-color: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Resend Button Styling (Revamped) */
+.revamped-resend-button {
+  padding: 14px 20px;
+  width: auto;
+  box-sizing: border-box;
+  margin-top: 25px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #F7931E;
+  background-color: transparent;
+  border: 1px solid #F7931E;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.revamped-resend-button:hover {
+  background-color: #F7931E;
+  color: white;
+  box-shadow: 0 2px 6px rgba(247, 147, 30, 0.3);
+}
+
+.revamped-resend-button:active {
+  background-color: #E66D17;
+  color: white;
+}
+
+/* Skip Button Styling (Revamped) */
+.revamped-skip-button {
+  padding: 9px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #F7931E;
+  background-color: transparent;
+  border: 1px solid #F7931E;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.revamped-skip-button:hover {
+  background-color: #F7931E;
+  color: white;
+  box-shadow: 0 2px 6px rgba(247, 147, 30, 0.3);
+}
+
+.revamped-skip-button:active {
+  background-color: #E66D17;
+  color: white;
+}
+
+/* Google Button Styling (Revamped) */
+.revamped-google-button {
+  width: 100%;
+  border-radius: 5px;
+  background-color: white;
+  color: #333;
+  border: 1px solid #ddd;
+  padding: 14px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.revamped-google-button:hover {
+  border-color: #F7931E;
+  box-shadow: 0 2px 6px rgba(247, 147, 30, 0.3);
+}
+
+.revamped-google-button:active {
+  border-color: #E66D17;
+}
+
+.revamped-google-button:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  border-color: #ddd;
+  cursor: not-allowed;
+}
+
+.google-logo {
+  width: 24px;
+  height: 24px;
+}
+
+/* ======= Category Grid ======= */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 32px;
+  margin: 5px;
+}
+
+.category-tile {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 14px;
+  text-align: center;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.category-tile:hover {
+  border-color: #F7931E;
+  box-shadow: 0 2px 6px rgba(247, 147, 30, 0.3);
+}
+
+.category-tile.selected {
+  background-color: #F7931E;
+  color: white;
+  border-color: #F7931E;
+}
+
+.category-tile:focus {
+  outline: none;
+  border-color: #F7931E;
+  box-shadow: 0 0 5px rgba(247, 147, 30, 0.3);
+}
+
+/* ======= Business Hours Styling ======= */
+.revamped-day-row {
+  display: grid;
+  grid-template-columns: 120px 300px 200px; /* Fixed widths for day name, time slots, and checkboxes */
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  justify-content: space-evenly;
+}
+
+.revamped-day-row:last-child {
+  border-bottom: none;
+}
+
+.revamped-day-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  text-align: left;
+}
+
+.revamped-time-slot {
+  display: flex;
+  gap: 30px;
+  justify-content: space-between;
+  width: 300px; /* Fixed width to match grid column */
+}
+
+.revamped-time-select {
+  display: flex;
+  flex-direction: column;
+  width: 120px;
+}
+
+.revamped-checkbox-group {
+  display: flex;
+  gap: 20px;
+  width: 225px;
+  justify-content: right;
+  align-items: center;
+  margin-top: 35px;
+}
+
+.revamped-checkbox-label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.revamped-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.revamped-checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  margin-right: 5px;
+  display: inline-block;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.revamped-checkbox:checked + .revamped-checkbox-custom {
+  background-color: #F7931E;
+  border-color: #F7931E;
+}
+
+.revamped-checkbox:checked + .revamped-checkbox-custom::after {
+  content: '✔';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+}
+
+.revamped-checkbox-label:hover .revamped-checkbox-custom {
+  border-color: #F7931E;
+}
+
+.revamped-button-group {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 40px;
+}
+
+.revamped-textarea {
+  resize: vertical;
+  min-height: 150px;
+  font-family: inherit;
+}
+
+.revamped-grey-container--description {
+  width: 800px;
+  min-height: auto;
+  height: auto;
+}
+
+/* Page-specific container width for Business Photos */
+.revamped-grey-container--photos {
+  width: 800px;
+  min-height: auto;
+  height: auto;
+}
+
+/* Revamped Photo Upload Styling */
+.revamped-photo-upload-label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 200px;
+  background-color: #f9f9f9;
+  border: 2px dashed #ddd;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #666;
+  gap: 10px;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.revamped-photo-upload-label:hover {
+  border-color: #F7931E;
+  background-color: #fff;
+}
+
+.revamped-photo-upload-label:focus-within {
+  border-color: #F7931E;
+  box-shadow: 0 0 5px rgba(247, 147, 30, 0.3);
+}
+
+/* Revamped Uploaded Photos Grid */
+.revamped-uploaded-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+/* Revamped Photo Preview */
+.revamped-photo-preview {
+  position: relative;
+  width: 150px;
+  height: 150px;
+}
+
+.revamped-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Revamped Remove Photo Button */
+.revamped-remove-photo-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(255, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 24px;
+  text-align: center;
+  transition: background 0.3s ease;
+}
+
+.revamped-remove-photo-btn:hover {
+  background: rgba(255, 0, 0, 1);
+}
+
+.revamped-remove-photo-btn:focus {
+  outline: none;
+  box-shadow: 0 0 5px rgba(247, 147, 30, 0.3);
 }

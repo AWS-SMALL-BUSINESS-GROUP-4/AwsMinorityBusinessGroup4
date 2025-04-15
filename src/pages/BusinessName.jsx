@@ -12,7 +12,6 @@ export default function BusinessName() {
     handleBlur,
     errors,
     nextStep,
-    prevStep,
     isSignedIn,
   } = useBusinessForm();
 
@@ -31,7 +30,7 @@ export default function BusinessName() {
           <div className="header-left">
             <Link to="/" className="logo-link">
               <span className="logo-icon">
-                <FaMapMarkerAlt/>
+                <FaMapMarkerAlt />
               </span>
               <span className="logo-text revamped-logo">
                 <span className="logo-explore">Explore</span>
@@ -55,31 +54,26 @@ export default function BusinessName() {
             Join thousands of local businesses on ExploreLocal!
           </p>
         </div>
-        <div className="grey-container revamped-grey-container">
-          {step > 1 && (
-            <button className="back-button" onClick={prevStep}>
-              ←
-            </button>
-          )}
-          <div className="revamped-progress-indicator">
-            {Array.from({ length: totalSteps }, (_, i) => {
-              const stepNumber = i + 1;
-              const adjustedStep = isSignedIn && stepNumber >= 7 ? stepNumber + 1 : stepNumber;
-              return (
-                <div key={i} className="revamped-step-wrapper">
-                  <div
-                    className={`revamped-step ${step === adjustedStep ? 'active' : ''} ${
-                      step > adjustedStep ? 'completed' : ''
-                    }`}
-                    onClick={() => handleStepClick(adjustedStep)}
-                  >
-                    {stepNumber}
-                  </div>
-                  {i < totalSteps - 1 && <div className="revamped-step-connector"></div>}
+        <div className="revamped-progress-indicator">
+          {Array.from({ length: totalSteps }, (_, i) => {
+            const stepNumber = i + 1;
+            const adjustedStep = isSignedIn && stepNumber >= 7 ? stepNumber + 1 : stepNumber;
+            return (
+              <div key={i} className="revamped-step-wrapper">
+                <div
+                  className={`revamped-step ${step === adjustedStep ? 'active' : ''} ${
+                    step > adjustedStep ? 'completed' : ''
+                  }`}
+                  onClick={() => handleStepClick(adjustedStep)}
+                >
+                  {stepNumber}
                 </div>
-              );
-            })}
-          </div>
+                {i < totalSteps - 1 && <div className="revamped-step-connector"></div>}
+              </div>
+            );
+          })}
+        </div>
+        <div className="revamped-grey-container">
           <div className="form-step">
             <h1>Let's Start With Your Business Name!</h1>
             <p>
