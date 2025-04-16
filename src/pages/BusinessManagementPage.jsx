@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import '../App.css';
 import '../components/ContainerStyles.css';
 import './BusinessManagementPage.css';
@@ -12,7 +12,6 @@ import { Link } from 'react-router-dom';
 
 function BusinessManagementPage() {
   const client = generateClient();
-  const location = useLocation();
   const { id } = useParams()
 
   const [isEditing, setIsEditing] = useState(false);
@@ -58,6 +57,7 @@ function BusinessManagementPage() {
 
 
         setBusiness(response.data);
+        setStoredState(response.data);
       } catch(e) {
         console.log(e);
       } finally {
@@ -152,7 +152,7 @@ function BusinessManagementPage() {
         </div>
       </header>
       <div className="management-content">
-        <BusinessManagementSidebar />
+        <BusinessManagementSidebar id={id} />
         <div className="management-main">
           <div className="revamped-profile-panel">
             <div className="profile-header">
