@@ -7,7 +7,7 @@ import BusinessManagementPicturesPage from "./pages/BusinessManagementPicturesPa
 import SearchResultPage from "./pages/SearchResultPage";
 import BusinessProfilePage from "./pages/BusinessProfilePage";
 import React, { useEffect, useState } from "react";
-import { AuthProvider } from "./AuthContext";
+//import { AuthProvider } from "./AuthContext";
 import AuthCallback from "./pages/AuthCallback";
 import "./App.css";
 import '../AmplifyClient'; // Import to configure Amplify

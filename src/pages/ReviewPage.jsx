@@ -4,8 +4,10 @@ import './ReviewPage.css'
 import { AuthContext } from "../AuthContext"
 import { Login } from "../LoginFunctions";
 import { generateClient } from 'aws-amplify/api';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getCurrentUser } from '@aws-amplify/auth';
+import { useAuth } from '../context/AuthContext.jsx';
+import Header  from '../components/Header.jsx'
 
 
 function ReviewPage() {
@@ -16,14 +18,17 @@ function ReviewPage() {
   const [reviewText, setReviewText] = useState('');
   const [file, setFile] = useState(null);
   
-  const { isAuthenticated, userId, setUserId, authLoading } = useContext(AuthContext);
+  //const { isAuthenticated, userId, setUserId, authLoading } = useContext(AuthContext);
+  const {isLoggedIn, user} = useAuth();
+
 
   const client = generateClient();
   const businessId = useParams().id ?? null;
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchBusiness() {
-      if(businessId == null || businessId === '' || !isAuthenticated) {
+      if(businessId == null || businessId === '' || !isLoggedIn) {
         setValidBusiness(false);
         setLoading(false);
         return;
@@ -44,20 +49,20 @@ function ReviewPage() {
 
     fetchBusiness();
 
-  }, [businessId, client, isAuthenticated])
+  }, [businessId, client, isLoggedIn])
 
-  useEffect(() => {
-    async function fetchUserId() {
-      try {
-        const response = await getCurrentUser();
-        setUserId(response.userId);
-      } catch(error) {
-        setUserId(null);
-      }
-    }
+  // useEffect(() => {
+  //   async function fetchUserId() {
+  //     try {
+  //       const response = await getCurrentUser();
+  //       setUserId(response.userId);
+  //     } catch(error) {
+  //       setUserId(null);
+  //     }
+  //   }
 
-    fetchUserId();
-  }, [client]);
+  //   fetchUserId();
+  // }, [client]);
   
   
   // Sample recent reviews data
@@ -89,10 +94,10 @@ function ReviewPage() {
   const handlePostReview = async () => {
     // Logic to post the review
     const timestamp =  Math.floor(Date.now() / 1000);
-    console.log('Posting review:', { businessId, userId, rating, reviewText, timestamp });
+    console.log('Posting review:', { businessId, ...user.userId, rating, reviewText, timestamp });
     const response = await client.models.Review.create({
       businessId: businessId,
-      userId: userId,
+      userId: user.userId,
       rating: rating,
       content: reviewText,
       reviewDate: timestamp
@@ -144,14 +149,15 @@ function ReviewPage() {
   };
 
   const handleLogin = () => {
-    setLoading(true);
-    Login();
+    // setLoading(true);
+    // Login();
+    navigate('/login');
   }
 
-  if(loading || authLoading)
+  if(loading /*|| authLoading*/)
       return (<p>Loading...</p>)
 
-  if(isAuthenticated === false) {
+  if(isLoggedIn === false) {
     return(
       <>
         <h1>Please log in to write a review!</h1>
@@ -166,7 +172,8 @@ function ReviewPage() {
   return (
     <div className="business-management-container">
       {/* Header/Navigation */}
-      <NavBar/>
+      {/* <NavBar/> */}
+      <Header />
 
       {/* Main Content */}
       <main className="main-content">
