@@ -1,68 +1,65 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import '../App.css';
 import '../components/ContainerStyles.css';
 import './BusinessManagementPage.css';
 import '../components/TextStyles.css';
+
 import BusinessManagementSidebar from '../components/BusinessManagementSideBar';
 import { generateClient } from 'aws-amplify/data';
 import { FaMapMarkerAlt, FaPhone, FaGlobe, FaFacebookF, FaTwitter } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
-function BusinessManagementPage({ id }) {
+function BusinessManagementPage() {
   const client = generateClient();
   const location = useLocation();
+  const { id } = useParams()
 
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
 
-  const [business, setBusiness] = useState({
-    name: 'Negril',
-    address_1: '2301 Georgia Ave. NW',
-    address_2: 'Washington, DC 20001',
-    phone: '(202) 332-3737',
-    categories: 'Restaurants, Jamaican',
-    website: 'negrileats.com',
-    hours: [
-      { day: 'Monday', openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
-      { day: 'Tuesday', openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
-      { day: 'Wednesday', openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
-      { day: 'Thursday', openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
-      { day: 'Friday', openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
-      { day: 'Saturday', openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: true },
-      { day: 'Sunday', openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: true },
-    ],
-    about: `Founded in 1979 by Jamaican native Earl Chinn, Negril Jamaican Eatery is a family-owned, fast casual storefront serving up a taste of the island...`,
-  });
+  const [business, setBusiness] = useState();
+
+  const [loading, setLoading] = useState(true);
 
   const [storedState, setStoredState] = useState(business);
 
+  function sortBusinessHoursByDay(businessHours) {
+    const dayOrder = {
+      Monday: 1,
+      Tuesday: 2,
+      Wednesday: 3,
+      Thursday: 4,
+      Friday: 5,
+      Saturday: 6,
+      Sunday: 7
+    };
+  
+    return businessHours.sort((a, b) => {
+      return dayOrder[a.day] - dayOrder[b.day];
+    });
+  }
+
+  // Fetch business data from backend
   useEffect(() => {
     async function fetchBusiness() {
       try {
-        if (id) {
-          const { data: fb, errors } = await client.models.Business.get({ id });
-          if (errors) throw new Error(errors[0].message);
-          if (fb) {
-            const parsedHours = fb.businessHours ? JSON.parse(fb.businessHours) : business.hours;
-            setBusiness({
-              name: fb.name || '',
-              address_1: fb.streetAddress || '',
-              address_2: `${fb.city || ''}, ${fb.state || ''} ${fb.zipcode || ''}`,
-              phone: fb.phoneNumber || '',
-              categories: fb.category || '',
-              website: fb.website || '',
-              hours: parsedHours,
-              about: fb.description || '',
-            });
-            setStoredState({
-              ...business,
-              hours: parsedHours,
-            });
-          }
+        // get a specific item
+        const response = await client.models.Business.get(
+          { id: id },
+          { selectionSet: ["id", "name", "phoneNumber", "streetAddress", "city", "state", "country", "zipcode", "category", "website", "description", "businessHours.*"] }
+        );
+        if(response.errors) {
+          console.error("Error retrieving Business Data: ", response.errors);
         }
-      } catch (e) {
-        console.error('Error fetching business:', e);
+        console.log("This is the business I got: ", response.data);
+
+        sortBusinessHoursByDay(response.data.businessHours);
+        console.log("Sanity check for business hours: ", response.data.businessHours);
+
+
+        setBusiness(response.data);
+      } catch(e) {
+        console.log(e);
       } finally {
         setLoading(false);
       }
@@ -71,36 +68,31 @@ function BusinessManagementPage({ id }) {
     fetchBusiness();
   }, [id]);
 
-  useEffect(() => {
-    const formData = location.state?.formData;
-    if (formData) {
-      const hours = (formData.businessHours || []).map((dayObj) => ({
-        day: dayObj.day,
-        openTime: dayObj.isClosed ? '' : dayObj.isOpen24 ? '00:00' : dayObj.openTime || '',
-        closeTime: dayObj.isClosed ? '' : dayObj.isOpen24 ? '00:00' : dayObj.closeTime || '',
-        isOpen24: dayObj.isOpen24,
-        isClosed: dayObj.isClosed,
-      }));
 
-      const newBusiness = {
-        name: formData.businessName || '',
-        address_1: formData.street || '',
-        address_2: `${formData.city || ''}, ${formData.state || ''} ${formData.zip || ''}`,
-        phone: formData.phoneNumber ? `+1${formData.phoneNumber}` : '',
-        categories: formData.categories || '',
-        website: formData.website || '',
-        hours,
-        about: formData.description || '',
-      };
-
-      setBusiness(newBusiness);
-      setStoredState(newBusiness);
-    }
-  }, [location.state]);
+  const [notbusiness, setnotBusiness] = useState({
+    name: "Negril",
+    address_1: "2301 Georgia Ave. NW",
+    address_2: "Washington, DC 20001",
+    phone: "(202) 332-3737",
+    categories: "Restaurants, Jamaican",
+    website: "negrileats.com",
+    hours: [
+      {day: "Monday", openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Tuesday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Wednesday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Thursday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Friday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: false },
+      {day: "Saturday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: true },
+      {day: "Sunday",openTime: '10:30', closeTime: '19:30', isOpen24: false, isClosed: true },
+    ],
+    about: `Founded in 1979 by Jamaican native Earl Chinn, Negril Jamaican Eatery is a family-owned, fast casual storefront serving up a taste of the island. In 1975 Earl visited his sister in Washington, DC where he couldn’t find any authentic Jamaican eateries, so he later returned to open his own, supplying the bold foods and flavors of his homeland to Caribbean expats and local fans of Jamaican cuisine.
+                Negril Eats’ popularity in DC—and today’s growing Caribbean communities in the DC Metro Area—led to the gradual expansion of Negril the Jamaican Eatery into Mitchellville, Silver Spring, and Laurel, MD. Each location offers the complete menu, highlighting the most popular favorites of each storefront.
+                Today, Earl’s sister, Marguerite, his two sons, and his extended family manage the four Negril Eats locations. Like their father before them, Earl’s sons subscribe to the Jamaican national motto, “Out of Many, One People.” For the Chinns, traditionally prepared, tasty to-go meals unite their customers as blue-collar laborers, lawyers, retail salespeople, clerks, and other DC professionals line up together to pick up their jerk chicken, oxtail, or escoveitch fish.`,
+  });
 
   const handleChange = (e, field, index = null) => {
     if (index !== null) {
-      const updatedHours = [...business.hours];
+      const updatedHours = [...business.businessHours];
       updatedHours[index] = {
         ...updatedHours[index],
         [e.target.name]: e.target.value,
@@ -132,6 +124,10 @@ function BusinessManagementPage({ id }) {
   }
 
   if (loading) return <div className="loading">Loading...</div>;
+
+  if(loading) {
+    return(<p>Loading...</p>);
+  }
 
   return (
     <div className="management-container">
@@ -193,28 +189,28 @@ function BusinessManagementPage({ id }) {
                   <input
                     type="text"
                     className="revamped-input"
-                    value={business.address_1}
+                    value={business.streetAddress}
                     onChange={(e) => handleChange(e, 'address_1')}
                   />
                   <label className="input-label">Address Line 2</label>
                   <input
                     type="text"
                     className="revamped-input"
-                    value={business.address_2}
+                    value={business.city + ", " + business.state + " " + business.zipcode + ", " + business.country}
                     onChange={(e) => handleChange(e, 'address_2')}
                   />
                   <label className="input-label">Phone</label>
                   <input
                     type="text"
                     className="revamped-input"
-                    value={business.phone}
+                    value={business.phoneNumber}
                     onChange={(e) => handleChange(e, 'phone')}
                   />
                   <label className="input-label">Categories</label>
                   <input
                     type="text"
                     className="revamped-input"
-                    value={business.categories}
+                    value={business.category}
                     onChange={(e) => handleChange(e, 'categories')}
                   />
                   <label className="input-label">Website</label>
@@ -229,14 +225,14 @@ function BusinessManagementPage({ id }) {
                 <div className="info-display">
                   <p className="info-item">
                     <FaMapMarkerAlt className="info-icon" />
-                    {business.address_1 || 'Not set'}, {business.address_2 || 'Not set'}
+                    {business.streetAddress || 'Not set'}, {business.city + ", " + business.state + " " + business.zipcode + ", " + business.country || 'Not set'} {/*Fix later*/}
                   </p>
                   <p className="info-item">
                     <FaPhone className="info-icon" />
-                    {business.phone || 'Not set'}
+                    {business.phoneNumber || 'Not set'}
                   </p>
                   <p className="info-item">
-                    <strong>Categories:</strong> {business.categories || 'Not set'}
+                    <strong>Categories:</strong> {business.category || 'Not set'}
                   </p>
                   <p className="info-item">
                     <FaGlobe className="info-icon" />
@@ -251,7 +247,7 @@ function BusinessManagementPage({ id }) {
               <h2 className="section-header">Hours</h2>
               <table className="revamped-hours-table">
                 <tbody>
-                  {business.hours.map((hour, index) => (
+                  {business.businessHours.map((hour, index) => (
                     <tr key={index} className="hours-row">
                       <th className="hours-day">{hour.day}</th>
                       <td className="hours-time">
@@ -293,11 +289,11 @@ function BusinessManagementPage({ id }) {
               {isEditing ? (
                 <textarea
                   className="revamped-textarea"
-                  value={business.about}
+                  value={business.description}
                   onChange={(e) => handleChange(e, 'about')}
                 />
               ) : (
-                <p className="about-text">{business.about || 'Not set'}</p>
+                <p className="about-text">{business.description || 'Not set'}</p>
               )}
             </div>
           </div>

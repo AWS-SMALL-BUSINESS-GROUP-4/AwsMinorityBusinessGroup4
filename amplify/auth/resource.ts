@@ -27,14 +27,15 @@ export const auth = defineAuth({
         },
       },
       callbackUrls: [
-        'http://localhost:5173/', // Added homepage for general login/signup
-        'http://localhost:5173/add-business/business-hours',
-        'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/',
-        'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/add-business/business-hours',
-      ],
+        'http://localhost:5173/callback',
+        'http://localhost:5173', // Added homepage for general login/signup
+        'http://localhost:5173/add-business/business-hours', 
+        'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/add-business/business-hours', 
+        'https://main.d2p4upoo7iyfsw.amplifyapp.com/add-business/business-hours',
+      ], // Update for production
       logoutUrls: [
         'http://localhost:5173/',
-        'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/',
+        'https://feature-databasecrud.d203198uhav1xc.amplifyapp.com/', 
       ],
     },
   },

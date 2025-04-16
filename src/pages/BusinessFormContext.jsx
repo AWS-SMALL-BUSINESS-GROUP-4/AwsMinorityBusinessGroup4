@@ -14,6 +14,8 @@ import {
 import { generateClient } from 'aws-amplify/data';
 import { uploadData, getUrl, remove } from '@aws-amplify/storage';
 import axios from 'axios';
+import { element } from 'prop-types';
+import { Login } from '../LoginFunctions';
 
 const client = generateClient();
 
@@ -164,8 +166,9 @@ export function BusinessFormProvider({ children }) {
           data: file,
           options: { contentType: file.type },
         }).result;
-        const urlResult = await getUrl({ path: fileName });
-        uploadedUrls.push(urlResult.url.toString().split('?')[0]);
+        // const urlResult = await getUrl({ path: fileName });
+        // uploadedUrls.push(urlResult.url.toString().split('?')[0]);
+        uploadedUrls.push(fileName);
       }
       return uploadedUrls;
     } catch (error) {
@@ -465,17 +468,33 @@ export function BusinessFormProvider({ children }) {
           photos: formData.photos,
         };
 
-        const businessResponse = await client.models.Business.create(businessData);
-        if (businessResponse.errors) {
-          throw new Error(businessResponse.errors[0].message);
+        console.log('Attempting to create business with data:', businessData);
+        const response = await client.models.Business.create(businessData);
+        console.log('Create response:', response);
+
+        var hoursResponses = [];
+
+        formData.businessHours.forEach(async hours => {
+          const hour_response = await client.models.BusinessHours.create({businessId: response.data.id, ...hours});
+          hoursResponses.push(hour_response);
+          console.log(`Returned hour_response: `, hour_response);
+        });
+
+        if (response.errors) {
+          throw new Error(response.errors[0].message);
         }
 
-        const businessId = businessResponse.data.id;
-        await createBusinessHours(businessId);
+        hoursResponses.forEach(element => {
+          if(element.errors) {
+            throw new Error(element.errors[9].messagee);
+          }
+        });
+
+        console.log('Business created successfully:', response.data);
 
         localStorage.removeItem('businessFormStep');
         localStorage.removeItem('businessFormData');
-        navigate('/business-profile', { state: { formData } });
+        navigate(`/business-profile/${response.data.id}`);
       } catch (error) {
         console.error('Error in nextStep:', error);
         setErrors({ submit: `Failed to save business data: ${error.message}` });
@@ -523,10 +542,11 @@ export function BusinessFormProvider({ children }) {
   async function signInWithGoogle() {
     try {
       localStorage.setItem('businessFormStep', '8');
-      await signInWithRedirect({
-        provider: 'Google',
-        customState: JSON.stringify({ redirectTo: '/add-business/business-hours' }),
-      });
+      // await signInWithRedirect({
+      //   provider: 'Google',
+      //   customState: JSON.stringify({ redirectTo: '/add-business/business-hours' }),
+      // });
+      Login('/add-business/business-hours');
     } catch (error) {
       console.error('Google sign-in error:', error);
       setErrors({ google: 'Failed to sign in with Google. Please try again.' });

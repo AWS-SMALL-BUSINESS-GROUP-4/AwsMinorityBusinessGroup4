@@ -9,7 +9,8 @@ ul.nav {
   
   .orange-background {
     background: #FC941D;
-}
+    background: linear-gradient(180deg, #FC941D 0%, #fbc367 100%);
+  }
 
   li.nav {
     float: right;
@@ -28,6 +29,6 @@ ul.nav {
     background-color: #1399FF;
   }
 
-  .orange-background {
+  /*.orange-background {
     background: #FC941D;
-}
+}*/

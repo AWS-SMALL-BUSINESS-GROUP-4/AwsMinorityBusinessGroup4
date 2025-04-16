@@ -1,10 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import NavBar from '../components/NavBar.jsx'
 import './ReviewPage.css'
+import { AuthContext } from "../AuthContext"
+import { Login } from "../LoginFunctions";
+import { generateClient } from 'aws-amplify/api';
+import { useParams } from 'react-router-dom';
+import { getCurrentUser } from '@aws-amplify/auth';
+
 
 function ReviewPage() {
   const [rating, setRating] = useState(0);
+  const [validBusiness, setValidBusiness] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [businessName, setBusinessName] = useState('Negril - DC');
   const [reviewText, setReviewText] = useState('');
+  const [file, setFile] = useState(null);
+  
+  const { isAuthenticated, userId, setUserId, authLoading } = useContext(AuthContext);
+
+  const client = generateClient();
+  const businessId = useParams().id ?? null;
+
+  useEffect(() => {
+    async function fetchBusiness() {
+      if(businessId == null || businessId === '' || !isAuthenticated) {
+        setValidBusiness(false);
+        setLoading(false);
+        return;
+      }
+      const response = await client.models.Business.get(
+        {id: businessId},
+        {
+          selectionset: ['name',]
+        }
+      );
+  
+  
+      setValidBusiness(response.data != null);
+      if(validBusiness)
+        setBusinessName(response.data.name);
+      setLoading(false);
+    }
+
+    fetchBusiness();
+
+  }, [businessId, client, isAuthenticated])
+
+  useEffect(() => {
+    async function fetchUserId() {
+      try {
+        const response = await getCurrentUser();
+        setUserId(response.userId);
+      } catch(error) {
+        setUserId(null);
+      }
+    }
+
+    fetchUserId();
+  }, [client]);
+  
   
   // Sample recent reviews data
   const recentReviews = [
@@ -32,9 +86,19 @@ function ReviewPage() {
     setReviewText(e.target.value);
   };
 
-  const handlePostReview = () => {
+  const handlePostReview = async () => {
     // Logic to post the review
-    console.log('Posting review:', { rating, reviewText });
+    const timestamp =  Math.floor(Date.now() / 1000);
+    console.log('Posting review:', { businessId, userId, rating, reviewText, timestamp });
+    const response = await client.models.Review.create({
+      businessId: businessId,
+      userId: userId,
+      rating: rating,
+      content: reviewText,
+      reviewDate: timestamp
+    });
+    console.log("Review upload response: ", response);
+    handleUpload();
     // Reset form after submission
     setRating(0);
     setReviewText('');
@@ -57,6 +121,48 @@ function ReviewPage() {
     return stars;
   };
 
+
+  // Handle file upload
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
+
+  const handleUpload = () => {
+    if (file) {
+      console.log("Uploading:", file.name);
+      // Add your upload logic here (e.g., sending to a server)
+      uploadData({
+        path: `users/{user_id}/pictures/${file.name}`,
+        data: file,
+        options: {
+          bucket: 'AWSMBG4-private'
+        }
+      });
+    } else {
+      console.log("No file selected");
+    }
+  };
+
+  const handleLogin = () => {
+    setLoading(true);
+    Login();
+  }
+
+  if(loading || authLoading)
+      return (<p>Loading...</p>)
+
+  if(isAuthenticated === false) {
+    return(
+      <>
+        <h1>Please log in to write a review!</h1>
+        <button className='post-review-button' onClick={handleLogin}>Login</button>
+      </>
+    )
+  }
+
+  // if(!validBusiness)
+  //   return<p>Error - Invalid Business</p>
+
   return (
     <div className="business-management-container">
       {/* Header/Navigation */}
@@ -65,7 +171,7 @@ function ReviewPage() {
       {/* Main Content */}
       <main className="main-content">
         <div className="review-form-container">
-          <h2 className="business-name">Negril - DC</h2>
+          <h2 className="business-name">{businessName}</h2>
           <div className="review-form">
             <div className="rating-section">
               <span>Please leave a rating: </span>
@@ -77,6 +183,7 @@ function ReviewPage() {
               value={reviewText}
               onChange={handleReviewTextChange}
             />
+            <input type="file" onChange={handleFileChange}/>
           </div>
           <button 
             className="post-review-button"

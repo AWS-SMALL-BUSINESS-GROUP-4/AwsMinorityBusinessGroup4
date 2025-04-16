@@ -12,6 +12,7 @@
   "dependencies": {
     "@aws-amplify/auth": "^6.11.4",
     "@aws-amplify/core": "^6.10.4",
+    "@aws-amplify/ui-react-storage": "^3.10.0",
     "@emotion/react": "^11.14.0",
     "@mui/icons-material": "^6.4.4",
     "@mui/material": "^6.4.4",

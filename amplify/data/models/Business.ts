@@ -20,12 +20,13 @@ export const Business = a.model({
 }),
   businessHours: a.hasMany('BusinessHours', 'businessId'),
   description: a.string().required(),
-  photos: a.url().array(),
+  photos: a.string().array(),
   averageRating: a.float(),
   reviews: a.hasMany('Review', 'businessId')
 }).authorization((allow) => [
     allow.owner(), 
     allow.guest().to(['read']), 
+    allow.authenticated().to(['read', 'update']),
     allow.groups(['Admin']).to(['read', 'update', 'delete'])
 ])
 
@@ -40,5 +41,6 @@ export const BusinessHours = a.model({
 }).authorization((allow) => [
     allow.owner(), 
     allow.guest().to(['read']), 
+    allow.authenticated().to(['read']),
     allow.groups(['Admin']).to(['read', 'update', 'delete'])
 ]);
