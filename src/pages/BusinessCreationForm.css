@@ -80,7 +80,7 @@
   font-size: 16px;
 }
 
-.search-container {
+.name-search-container {
   position: relative;
   width: 100%;
   margin-bottom: 10px;
@@ -108,7 +108,7 @@ textarea {
   resize: vertical;
 }
 
-.search-icon {
+.name-search-icon {
   position: absolute;
   right: 14px;
   top: 25px;

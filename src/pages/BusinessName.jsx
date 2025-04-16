@@ -80,7 +80,7 @@ export default function BusinessName() {
               Search for your business, or if it's new, add a listing to get started.
             </p>
             <label htmlFor="businessName">Business Name</label>
-            <div className="search-container">
+            <div className="name-search-container">
               <input
                 id="businessName"
                 type="text"
@@ -92,7 +92,7 @@ export default function BusinessName() {
                 required
                 aria-describedby="businessName-error"
               />
-              <button className="search-icon">
+              <button className="name-search-icon">
                 <svg
                   width="24"
                   height="24"
