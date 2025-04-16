@@ -7,6 +7,7 @@ import './BusinessManagementPicturePage.css'
 import '../components/TextStyles.css'
 import BusinessNavBar from '../components/BusinessNavBar'
 import BusinessManagementSidebar from '../components/BusinessManagementSideBar';
+import Header from '../components/Header';
 import { useParams } from 'react-router-dom';
 import { generateClient } from 'aws-amplify/api';
 import { StorageImage } from '@aws-amplify/ui-react-storage';
@@ -122,45 +123,14 @@ function BusinessManagementPicturesPage() {
         return <p>Loading...</p>
     return (
         <>
-            <BusinessNavBar/>
+            {/* <BusinessNavBar/> */}
+            <Header />
             <div className='sidebar-page-container'>
                 <BusinessManagementSidebar id={businessId}/>
                 {/*Main*/}
                 <div className='main'>
                     <h1>Pictures</h1>
                     <hr/>
-                    {/*<div>
-                        <div className='spread'>
-                            <h2>Outside</h2>
-                            <input type='file' ref={outsideImgUpload} accept='image/*' className='hidden'/>
-                            <button className="btn" onClick={handleOutsideImgUpload}>Upload Image</button>
-                        </div>
-                        <div className='spread scroll'>
-                            {images.map((source, index) => (
-                                <div key={index} className="img-with-button"> 
-                                    <img src={source}/>
-                                    <button className="btn" onClick={handleDelete(index)}>Delete</button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <hr/>
-                    <div>
-                        <div className='spread'>
-                            <h2>Inside</h2>
-                            <input type='file' ref={outsideImgUpload} accept='image/*' className='hidden'/>
-                            <button className="btn" onClick={handleOutsideImgUpload}>Upload Image</button>
-                        </div>
-                    </div>
-                    <hr/>
-                    <div>
-                        <div className='spread'>
-                            <h2>Menu Items</h2>
-                            <input type='file' ref={outsideImgUpload} accept='image/*' className='hidden'/>
-                            <button className="btn" onClick={handleOutsideImgUpload}>Upload Image</button>
-                        </div>
-                    </div>
-                    <hr/>*/}
                     <div>
                         <div className='spread'>
                             <h2>All Pictures</h2>
