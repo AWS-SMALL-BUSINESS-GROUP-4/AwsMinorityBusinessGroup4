@@ -452,7 +452,7 @@ export function BusinessFormProvider({ children }) {
           name: formData.businessName,
           email: formData.email,
           phoneNumber: formData.phoneNumber,
-          website: formData.website || '',
+          website: formData.website || null,
           category: formData.categories,
           streetAddress: formData.street,
           aptSuiteOther: formData.apt || '',

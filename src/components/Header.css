@@ -16,7 +16,7 @@
   position: absolute;
   top: 100%; /* Start at the bottom of the header */
   left: 0;
-  width: 100%;
+  width: 0;
   height: 20px; /* Extend downward by 20px to cover potential gap */
   background: #ff9800; /* Match header background */
   z-index: -1; /* Place behind content */
