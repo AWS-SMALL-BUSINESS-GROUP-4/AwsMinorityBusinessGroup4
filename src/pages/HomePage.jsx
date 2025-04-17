@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   FaSearch,
@@ -15,9 +15,56 @@ import {
   FaSpa,
   FaStar,
 } from "react-icons/fa";
+import { generateClient } from "aws-amplify/data";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "./HomePage.css";
+
+// Helper function to normalize words for plural/singular handling
+const normalizeWord = (word) => {
+  if (!word) return "";
+  let normalized = word.toLowerCase();
+  if (normalized.endsWith("ies")) {
+    return normalized.slice(0, -3) + "y"; // e.g., "categories" -> "category"
+  } else if (normalized.endsWith("es")) {
+    return normalized.slice(0, -2); // e.g., "buses" -> "bus"
+  } else if (normalized.endsWith("s")) {
+    return normalized.slice(0, -1); // e.g., "restaurants" -> "restaurant"
+  }
+  return normalized;
+};
+
+// Helper function to calculate relevance score for autocomplete suggestions
+const calculateAutocompleteScore = (name, searchWords) => {
+  let score = 0;
+  const nameWords = name.toLowerCase().split(/\s+/);
+  const normalizedNameWords = nameWords.map(normalizeWord);
+
+  searchWords.forEach((searchWord) => {
+    const normalizedSearchWord = normalizeWord(searchWord);
+    nameWords.forEach((word, index) => {
+      const normalizedWord = normalizedNameWords[index];
+      if (normalizedWord === normalizedSearchWord) {
+        score += 10; // Exact match after normalization
+      } else if (normalizedWord.includes(normalizedSearchWord)) {
+        score += 5; // Partial match after normalization
+      } else if (word.includes(searchWord)) {
+        score += 3; // Partial match in original word
+      }
+    });
+  });
+
+  return score;
+};
+
+// Debounce function to limit how often the search is triggered
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
 
 function HomePage() {
   return (
@@ -36,7 +83,94 @@ function HomePage() {
 
 function HeroSearch() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [businessNames, setBusinessNames] = useState([]);
+  const [isFocused, setIsFocused] = useState(false);
   const navigate = useNavigate();
+  const client = generateClient();
+  const searchInputRef = useRef(null);
+
+  // Fetch all business names for autocomplete suggestions
+  useEffect(() => {
+    const fetchBusinessNames = async () => {
+      try {
+        const response = await client.models.Business.list({
+          selectionSet: ["name"],
+        });
+
+        if (!response.data || !Array.isArray(response.data)) {
+          throw new Error("Invalid response data from API");
+        }
+
+        if (response.errors) {
+          throw new Error(
+            `Failed to fetch business names: ${response.errors.message}`
+          );
+        }
+
+        const names = [
+          ...new Set(response.data.map((business) => business.name)),
+        ];
+        setBusinessNames(names);
+      } catch (err) {
+        console.error("Error fetching business names:", err);
+      }
+    };
+
+    fetchBusinessNames();
+  }, [client]);
+
+  // Handle input change for suggestions only (no navigation)
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    // Filter suggestions based on input
+    if (value.trim()) {
+      const searchWords = value
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((word) => word.length > 0);
+      const scoredSuggestions = businessNames
+        .map((name) => ({
+          name,
+          score: calculateAutocompleteScore(name, searchWords),
+        }))
+        .filter(({ score }) => score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map(({ name }) => name)
+        .slice(0, 5); // Limit to top 5 suggestions
+      setSuggestions(scoredSuggestions);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  // Handle suggestion click to populate the search input and trigger search
+  const handleSuggestionClick = (suggestion) => {
+    setSearchTerm(suggestion);
+    setSuggestions([]);
+    setIsFocused(false);
+    navigate(`/search?q=${encodeURIComponent(suggestion)}`);
+  };
+
+  // Handle click outside to close suggestions dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target)
+      ) {
+        setSuggestions([]);
+        setIsFocused(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -50,14 +184,33 @@ function HeroSearch() {
       <div className="search-container">
         <h1>Discover the Best Local Spots Near You!</h1>
         <form onSubmit={handleSearch}>
-          <div className="search-input-group">
-            <input
-              type="text"
-              placeholder="Find restaurants, shops, and more..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              aria-label="Search businesses"
-            />
+          <div className="search-input-group" ref={searchInputRef}>
+            <div className="search-input-wrapper">
+              <input
+                type="text"
+                placeholder="Find restaurants, shops, and more..."
+                value={searchTerm}
+                onChange={handleInputChange}
+                onFocus={() => setIsFocused(true)}
+                aria-label="Search businesses"
+              />
+              {suggestions.length > 0 && isFocused && (
+                <ul className="suggestions-list">
+                  {suggestions.map((suggestion, index) => (
+                    <li
+                      key={index}
+                      className="suggestion-item"
+                      onClick={() => handleSuggestionClick(suggestion)}
+                    >
+                      <span className="suggestion-icon">
+                        <FaSearch />
+                      </span>
+                      {suggestion}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
             <button type="submit" aria-label="Submit search">
               Search
             </button>
