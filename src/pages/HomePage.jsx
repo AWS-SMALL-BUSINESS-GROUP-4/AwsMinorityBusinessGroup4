@@ -1,4 +1,3 @@
-// src/pages/HomePage.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
@@ -90,11 +89,11 @@ function CategoryNav() {
     { id: "massage", icon: <FaSpa />, name: "Massage" },
   ];
 
-  const handleCategoryClick = (categoryId) => {
+  const handleCategoryClick = (categoryId, categoryName) => {
     if (categoryId === "more") {
       setShowMoreMenu(!showMoreMenu);
     } else {
-      navigate(`/search?category=${categoryId}`);
+      navigate(`/search?q=${encodeURIComponent(categoryName)}`);
       setShowMoreMenu(false);
     }
   };
@@ -106,7 +105,7 @@ function CategoryNav() {
           <div
             key={category.id}
             className="category-item"
-            onClick={() => handleCategoryClick(category.id)}
+            onClick={() => handleCategoryClick(category.id, category.name)}
           >
             <div className="category-icon">{category.icon}</div>
             <span>{category.name}</span>
@@ -120,7 +119,7 @@ function CategoryNav() {
             <div
               key={category.id}
               className="more-category-item"
-              onClick={() => handleCategoryClick(category.id)}
+              onClick={() => handleCategoryClick(category.id, category.name)}
             >
               <div className="more-category-icon">{category.icon}</div>
               <span>{category.name}</span>

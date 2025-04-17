@@ -1,75 +1,83 @@
-// src/components/searchResultComponents/BusinessList.js
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaSearch, FaArrowLeft } from "react-icons/fa";
+import { StorageImage } from "@aws-amplify/ui-react-storage";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { generateClient } from "aws-amplify/data";
 import "./SearchResultPage.css";
 
-// Mock data - this would be replaced with API calls later
-const mockBusinesses = [
-  {
-    id: 1,
-    name: "Rahama",
-    phone: "(240) 452-0155",
-    description: "RAHAMA AFRICAN RESTAURANT",
-    address: "11454 Cherry Hill Rd",
-    city: "Silver Spring",
-    state: "MD",
-    zip: "20904",
-    image: "/images/rahama.jpeg",
-  },
-  {
-    id: 2,
-    name: "Negril",
-    phone: "(202) 332-3737",
-    description: "The Jamaican Eatery",
-    address: "2301 Georgia Ave. NW",
-    city: "Washington",
-    state: "DC",
-    zip: "20001",
-    image: "/images/negril.png",
-  },
-];
-
-// =============================================
 // BusinessList Component
-// =============================================
-
 function BusinessList({ searchQuery, categoryFilter }) {
   const [businesses, setBusinesses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const client = generateClient();
 
   useEffect(() => {
-    // This is where you would fetch data from your backend API
-    // For now, we'll just simulate an API call with a timeout
-    setLoading(true);
-
     const fetchBusinesses = async () => {
+      setLoading(true);
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // In the future, replace this with actual API call:
-        // const response = await fetch(`/api/businesses?search=${searchQuery}&category=${categoryFilter}`);
-        // const data = await response.json();
-
-        // For now, just filter the mock data based on search query
-        const filteredBusinesses = mockBusinesses.filter(
-          (business) =>
-            business.name
-              .toLowerCase()
-              .includes((searchQuery || "").toLowerCase()) ||
-            business.description
-              .toLowerCase()
-              .includes((searchQuery || "").toLowerCase())
+        console.log(
+          "Fetching businesses with query:",
+          searchQuery,
+          "and category:",
+          categoryFilter
         );
+        const response = await client.models.Business.list({
+          filter: searchQuery
+            ? {
+                or: [
+                  { name: { contains: searchQuery } },
+                  { category: { contains: searchQuery } },
+                ],
+              }
+            : categoryFilter
+            ? { category: { eq: categoryFilter } }
+            : undefined,
+          selectionSet: [
+            "id",
+            "name",
+            "phoneNumber",
+            "description",
+            "streetAddress",
+            "city",
+            "state",
+            "zipcode",
+            "photos",
+          ],
+        });
 
-        setBusinesses(filteredBusinesses);
+        console.log("API Response:", response);
+
+        if (!response.data || !Array.isArray(response.data)) {
+          throw new Error("Invalid response data from API");
+        }
+
+        if (response.errors) {
+          throw new Error(
+            `Failed to fetch businesses: ${response.errors.message}`
+          );
+        }
+
+        const fetchedBusinesses = response.data.map((business) => ({
+          id: business.id,
+          name: business.name,
+          phone: business.phoneNumber,
+          description: business.description,
+          address: business.streetAddress,
+          city: business.city,
+          state: business.state,
+          zip: business.zipcode,
+          image: business.photos?.[0] || null, // Use first photo or null
+        }));
+
+        console.log("Fetched businesses:", fetchedBusinesses);
+        setBusinesses(fetchedBusinesses);
         setLoading(false);
       } catch (err) {
+        console.error("Error fetching businesses:", err);
         setError("Failed to load businesses. Please try again.");
         setLoading(false);
       }
@@ -100,14 +108,21 @@ function BusinessList({ searchQuery, categoryFilter }) {
         <div key={business.id} className="business-card">
           <div className="business-info">
             <div className="business-image">
-              <img
-                src={business.image}
-                alt={business.name}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "https://via.placeholder.com/150";
-                }}
-              />
+              {business.image ? (
+                <StorageImage
+                  alt={business.name}
+                  path={business.image}
+                  bucket="AWSMBG4-private"
+                  className="business-image-content"
+                  fallbackSrc="https://amplify-awsminoritybusine-awsmbg4privatebucket9942-u4kp8slu2wjh.s3.us-east-1.amazonaws.com/business-photos/1744853422099-rahama.jpeg"
+                />
+              ) : (
+                <img
+                  src="https://amplify-awsminoritybusine-awsmbg4privatebucket9942-u4kp8slu2wjh.s3.us-east-1.amazonaws.com/business-photos/1744853422099-rahama.jpeg"
+                  alt={business.name}
+                  className="business-image-content business-image-fallback"
+                />
+              )}
             </div>
             <div className="business-details">
               <h3 className="business-name">
@@ -127,15 +142,12 @@ function BusinessList({ searchQuery, categoryFilter }) {
   );
 }
 
-// =============================================
-// Searchbar Component
-// =============================================
+// SearchBar Component
 function SearchBar({ initialQuery = "" }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState(initialQuery);
 
-  // Update search term when initialQuery changes
   useEffect(() => {
     setSearchTerm(initialQuery);
   }, [initialQuery]);
@@ -143,7 +155,6 @@ function SearchBar({ initialQuery = "" }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      // Preserve any other query parameters
       const params = new URLSearchParams(location.search);
       params.set("q", searchTerm);
       navigate(`/search?${params.toString()}`);
@@ -179,17 +190,11 @@ function SearchBar({ initialQuery = "" }) {
   );
 }
 
-// =============================================
-// Side Component
-// =============================================
+// Sidebar Component
 function Sidebar({ currentFilters = {}, onFilterChange = () => {} }) {
-  // This would be expanded with actual filter options
   const handleFilterClick = (filterType) => {
-    // For now, just for demonstration purposes
     console.log(`Filter clicked: ${filterType}`);
-
-    // In a real implementation, this would update the filters
-    // For example: onFilterChange({ sortBy: 'rating' });
+    onFilterChange({ view: filterType });
   };
 
   return (
@@ -222,12 +227,11 @@ function Sidebar({ currentFilters = {}, onFilterChange = () => {} }) {
           Photos
         </li>
       </ul>
-      {/* Additional filter options would go here */}
     </div>
   );
 }
 
-// After all other components, before export
+// SearchResultPage Component
 function SearchResultPage() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -265,4 +269,5 @@ function SearchResultPage() {
     </div>
   );
 }
+
 export default SearchResultPage;
