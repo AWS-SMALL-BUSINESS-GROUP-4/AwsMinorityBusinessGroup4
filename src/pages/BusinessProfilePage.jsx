@@ -222,7 +222,7 @@ function BusinessProfilePage() {
           full: fullAddress,
         },
         hours: hours,
-        averageRating: response.data.averageRating || 4.6,
+        averageRating: response.data.averageRating || 5,
         reviewCount: response.data.reviews ? response.data.reviews.length : 169,
       });
     } catch (error) {
