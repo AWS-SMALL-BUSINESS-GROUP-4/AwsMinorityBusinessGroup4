@@ -431,7 +431,7 @@ function BusinessProfilePage() {
             <div className="location-hours-container">
               <div className="map-container" onClick={handleMapClick}>
                 <Wrapper
-                  apiKey={"AIzaSyBQyX-dbgagPopZvpYBxJWCoitlrnoUQbo" || ""}
+                  apiKey={import.meta.env.VITE_PLACES_API_KEY || ""}
                   render={render}
                 >
                   {business.address.full ? (
