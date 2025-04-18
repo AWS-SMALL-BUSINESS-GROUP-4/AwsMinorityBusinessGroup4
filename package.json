@@ -14,6 +14,7 @@
     "@aws-amplify/core": "^6.10.4",
     "@aws-amplify/ui-react-storage": "^3.10.0",
     "@emotion/react": "^11.14.0",
+    "@googlemaps/react-wrapper": "^1.2.0",
     "@mui/icons-material": "^6.4.4",
     "@mui/material": "^6.4.4",
     "aws-amplify": "^6.13.4",

@@ -1,53 +1,77 @@
-// BusinessProfilePage.jsx
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "./BusinessProfilePage.css";
+import { generateClient } from "aws-amplify/api";
+import { StorageImage } from "@aws-amplify/ui-react-storage";
+import { Wrapper, Status } from "@googlemaps/react-wrapper";
 
-// Mock business data structure - would be replaced with API data in production
-const mockBusinessData = {
-  phoneNumber: "240-660-6613",
-  id: "1",
-  name: "Negril Jamaican Eatery",
-  rating: 3.6,
-  reviewCount: 169,
-  categories: ["Caribbean", "Seafood", "Sandwiches"],
-  address: {
-    street: "2301 Georgia Ave. NW",
-    city: "Washington",
-    state: "DC",
-    zipCode: "20001",
-  },
-  hours: {
-    weekday: "10:30 AM - 7:30 PM",
-    weekend: "Closed",
-  },
-  photos: [
-    "/images/negril/food1.jpg",
-    "/images/negril/menu.jpg",
-    "/images/negril/food2.jpg",
-  ],
-  menuItems: [
-    { name: "Curried Chicken", image: "/images/negril/curry-chicken.webp" },
-    { name: "Oxtail", image: "/images/negril/oxtail.webp" },
-    { name: "Curried Goat", image: "/images/negril/curry-goat.webp" },
-    { name: "Jerk Wings", image: "/images/negril/jerk-wings.webp" },
-    { name: "Plantain", image: "/images/negril/plantain.jpg" },
-    { name: "Bread", image: "/images/negril/bread.jpg" },
-  ],
-  location: {
-    lat: 38.9175,
-    lng: -77.0209,
-  },
+// Google Map Component
+const Map = ({ address, zoom }) => {
+  const ref = useRef(null);
+  const [map, setMap] = useState(null);
+  const [mapError, setMapError] = useState(null);
+
+  useEffect(() => {
+    if (ref.current && !map) {
+      const newMap = new window.google.maps.Map(ref.current, {
+        zoom,
+        mapTypeControl: false,
+        streetViewControl: false,
+      });
+
+      if (address) {
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode({ address }, (results, status) => {
+          if (status === "OK" && results[0]) {
+            const location = results[0].geometry.location;
+            newMap.setCenter(location);
+            new window.google.maps.Marker({
+              position: location,
+              map: newMap,
+              title: "Business Location",
+            });
+          } else {
+            console.error("Geocoding failed:", status, "for address:", address);
+            setMapError(`Failed to load map for address: ${address}`);
+          }
+        });
+      } else {
+        setMapError("No address provided");
+      }
+
+      setMap(newMap);
+    }
+  }, [ref, map, address, zoom]);
+
+  if (mapError) {
+    return <div className="error-state">{mapError}</div>;
+  }
+
+  return <div ref={ref} className="map" />;
 };
 
-// Photo Upload Modal Component - Handles file upload interface
+// Render function for Google Maps Wrapper
+const render = (status) => {
+  switch (status) {
+    case Status.LOADING:
+      return <div className="loading-state">Loading map...</div>;
+    case Status.FAILURE:
+      return (
+        <div className="error-state">Failed to load map: API key issue</div>
+      );
+    case Status.SUCCESS:
+      return null;
+    default:
+      return null;
+  }
+};
+
 function PhotoUploadModal({ onClose, onUpload }) {
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
 
-  // Handle drag and drop functionality
   const handleDrop = useCallback((e) => {
     e.preventDefault();
     const droppedFiles = Array.from(e.dataTransfer.files);
@@ -58,7 +82,6 @@ function PhotoUploadModal({ onClose, onUpload }) {
     e.preventDefault();
   }, []);
 
-  // Handle file upload with loading state
   const handleUpload = async () => {
     setUploading(true);
     try {
@@ -100,59 +123,154 @@ function PhotoUploadModal({ onClose, onUpload }) {
   );
 }
 
-// Main Business Profile Component
 function BusinessProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const client = generateClient();
 
-  // State management
   const [business, setBusiness] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
-  // Fetch business data on component mount
-  useEffect(() => {
-    const fetchBusinessData = async () => {
-      try {
-        // Simulate API call - replace with actual API
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setBusiness(mockBusinessData);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching business data:", error);
-        setError(error);
-        setLoading(false);
+  const fetchBusinessData = async () => {
+    try {
+      setLoading(true);
+      const response = await client.models.Business.get(
+        { id },
+        {
+          selectionSet: [
+            "name",
+            "phoneNumber",
+            "photos",
+            "category",
+            "streetAddress",
+            "aptSuiteOther",
+            "city",
+            "state",
+            "zipcode",
+            "country",
+            "businessHours.day",
+            "businessHours.openTime",
+            "businessHours.closeTime",
+            "businessHours.isClosed",
+            "averageRating",
+            "reviews.id",
+          ],
+        }
+      );
+
+      if (response.errors) {
+        throw new Error("Error fetching business data: " + response.errors);
       }
-    };
 
+      const hours = {
+        weekday: "",
+        weekend: "",
+      };
+      if (response.data.businessHours) {
+        const weekdayHours = response.data.businessHours.find(
+          (h) => h.day.toLowerCase() === "monday"
+        );
+        const weekendHours = response.data.businessHours.find(
+          (h) => h.day.toLowerCase() === "saturday"
+        );
+
+        hours.weekday = weekdayHours
+          ? weekdayHours.isClosed
+            ? "Closed"
+            : `${weekdayHours.openTime} - ${weekdayHours.closeTime}`
+          : "Not available";
+
+        hours.weekend = weekendHours
+          ? weekendHours.isClosed
+            ? "Closed"
+            : `${weekendHours.openTime} - ${weekendHours.closeTime}`
+          : "Not available";
+      }
+
+      const photos = response.data.photos || [];
+      const displayPhotos = photos.length > 1 ? photos.slice(1) : photos;
+      const servicePhotos = photos.length > 1 ? photos.slice(1) : photos;
+
+      const fullAddress = [
+        response.data.streetAddress,
+        response.data.aptSuiteOther,
+        response.data.city,
+        response.data.state,
+        response.data.zipcode,
+        response.data.country,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      setBusiness({
+        id: response.data.id,
+        name: response.data.name,
+        phoneNumber: response.data.phoneNumber,
+        photos: displayPhotos,
+        servicePhotos: servicePhotos,
+        categories: [response.data.category],
+        address: {
+          street: response.data.streetAddress,
+          aptSuiteOther: response.data.aptSuiteOther,
+          city: response.data.city,
+          state: response.data.state,
+          zipCode: response.data.zipcode,
+          country: response.data.country,
+          full: fullAddress,
+        },
+        hours: hours,
+        averageRating: response.data.averageRating || 3.6,
+        reviewCount: response.data.reviews ? response.data.reviews.length : 169,
+      });
+    } catch (error) {
+      console.error("Error fetching business data:", error);
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchBusinessData();
   }, [id]);
 
-  // Handle map click - Opens Google Maps in new tab
+  useEffect(() => {
+    if (business?.photos?.length > 1) {
+      const timer = setInterval(() => {
+        setCurrentPhotoIndex(
+          (prevIndex) => (prevIndex + 1) % business.photos.length
+        );
+      }, 5000);
+      return () => clearInterval(timer);
+    }
+  }, [business?.photos]);
+
   const handleMapClick = () => {
-    if (business?.location) {
-      const { lat, lng } = business.location;
-      window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
+    if (business?.address?.full) {
+      window.open(
+        `https://www.google.com/maps?q=${encodeURIComponent(
+          business.address.full
+        )}`,
+        "_blank"
+      );
     } else {
       alert("Location information not available");
     }
   };
 
-  // Handle write review button click
   const handleWriteReview = () => {
-    navigate(`/review/${business.id}`);
+    navigate(`/review/${business?.id}`);
   };
 
-  // Handle photo upload button click
   const handleAddPhoto = () => {
     setShowPhotoUpload(true);
   };
 
-  // Handle photo upload submission
   const handlePhotoUpload = async (files) => {
     try {
-      // Validate file types
       const validFileTypes = ["image/jpeg", "image/png", "image/webp"];
       const invalidFiles = files.filter(
         (file) => !validFileTypes.includes(file.type)
@@ -162,7 +280,6 @@ function BusinessProfilePage() {
         throw new Error("Invalid file type. Please upload only images.");
       }
 
-      // Mock upload logic - replace with actual API call
       console.log("Uploading files:", files);
       setShowPhotoUpload(false);
       alert("Photos uploaded successfully!");
@@ -172,7 +289,6 @@ function BusinessProfilePage() {
     }
   };
 
-  // Handle share functionality
   const handleShare = async () => {
     if (!business) return;
 
@@ -193,7 +309,6 @@ function BusinessProfilePage() {
     }
   };
 
-  // Handle copy link fallback
   const handleCopyLink = () => {
     navigator.clipboard
       .writeText(window.location.href)
@@ -201,7 +316,6 @@ function BusinessProfilePage() {
       .catch((err) => console.error("Failed to copy link:", err));
   };
 
-  // Handle phone call
   const handleCall = () => {
     const phoneNumber = business?.phoneNumber;
     if (phoneNumber) {
@@ -211,36 +325,61 @@ function BusinessProfilePage() {
     }
   };
 
-  // Loading and error states
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error loading business: {error.message}</div>;
-  if (!business) return <div>Business not found</div>;
+  const getPhotoName = (path) => {
+    if (!path) return "Service";
+    const fileName = path.split("/").pop();
+    const nameWithoutExtension = fileName.split(".").slice(0, -1).join(".");
+    const nameParts = nameWithoutExtension.split("-");
+    const cleanName = nameParts[nameParts.length - 1] || "Service";
+    return cleanName
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
 
-  // Main render
+  if (loading) return <div className="loading-state">Loading...</div>;
+  if (error)
+    return (
+      <div className="error-state">Error loading business: {error.message}</div>
+    );
+  if (!business) return <div className="error-state">Business not found</div>;
+
+  const hasMultiplePhotos = business.photos.length > 1;
+
   return (
     <div className="business-profile">
       <Header />
       <div className="content-wrapper">
         <main className="business-content">
-          {/* Business Name */}
           <h1>{business.name}</h1>
 
-          {/* Photo Gallery */}
-          <div className="photo-gallery-container">
+          <div className="photo-gallery-container card">
             <div className="photo-gallery">
-              {business.photos.map((photo, index) => (
-                <img
-                  key={index}
-                  src={photo}
-                  alt={`${business.name} photo ${index + 1}`}
-                  className={`gallery-image-${index}`}
+              {business.photos.length > 0 && (
+                <StorageImage
+                  path={business.photos[currentPhotoIndex]}
+                  bucket="AWSMBG4-private"
+                  alt={`${business.name} photo ${currentPhotoIndex + 1}`}
+                  className="gallery-image"
                 />
-              ))}
+              )}
+              {hasMultiplePhotos && (
+                <div className="photo-indicators">
+                  {business.photos.map((_, index) => (
+                    <span
+                      key={index}
+                      className={`indicator ${
+                        index === currentPhotoIndex ? "active" : ""
+                      }`}
+                      onClick={() => setCurrentPhotoIndex(index)}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="action-buttons-container">
+          <div className="action-buttons-container card">
             <div className="action-buttons">
               <button
                 className="action-btn write-review"
@@ -260,7 +399,6 @@ function BusinessProfilePage() {
             </div>
           </div>
 
-          {/* Photo Upload Modal */}
           {showPhotoUpload && (
             <PhotoUploadModal
               onClose={() => setShowPhotoUpload(false)}
@@ -268,42 +406,63 @@ function BusinessProfilePage() {
             />
           )}
 
-          {/* Menu Items */}
-          <div className="menu-items-container">
-            <div className="menu-items">
-              {business.menuItems.map((item, index) => (
-                <div key={index} className="menu-item">
-                  <div className="menu-item-image">
-                    <img src={item.image} alt={item.name} />
+          {hasMultiplePhotos && (
+            <div className="menu-items-container card">
+              <h2>Services</h2>
+              <div className="menu-items">
+                {business.servicePhotos.map((photo, index) => (
+                  <div key={index} className="menu-item">
+                    <div className="menu-item-image">
+                      <StorageImage
+                        path={photo}
+                        bucket="AWSMBG4-private"
+                        alt={`Service ${index + 1}`}
+                      />
+                    </div>
+                    <p>{getPhotoName(photo)}</p>
                   </div>
-                  <p>{item.name}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Location and Hours Section */}
-          <section className="location-hours">
+          <section className="location-hours card">
             <h2>Location & Hours</h2>
             <div className="location-hours-container">
-              <div className="map" onClick={handleMapClick}>
-                <img
-                  src={`https://maps.googleapis.com/maps/api/staticmap?center=${business.location.lat},${business.location.lng}&zoom=15&size=400x400&key=YOUR_API_KEY`}
-                  alt="Business location map"
-                />
+              <div className="map-container" onClick={handleMapClick}>
+                <Wrapper
+                  apiKey={import.meta.env.VITE_PLACES_API_KEY || ""}
+                  render={render}
+                >
+                  {business.address.full ? (
+                    <Map address={business.address.full} zoom={15} />
+                  ) : (
+                    <div className="error-state">
+                      Map location not available
+                    </div>
+                  )}
+                </Wrapper>
               </div>
               <div className="business-info">
                 <div className="business-rating">
-                  {business.rating} ({business.reviewCount} reviews)
+                  {business.averageRating} ({business.reviewCount} reviews)
                 </div>
                 <div className="business-categories">
                   {business.categories.join(", ")}
                 </div>
                 <div className="business-address">
                   {business.address.street}
+                  {business.address.aptSuiteOther && (
+                    <>
+                      <br />
+                      {business.address.aptSuiteOther}
+                    </>
+                  )}
                   <br />
                   {business.address.city}, {business.address.state}{" "}
                   {business.address.zipCode}
+                  <br />
+                  {business.address.country}
                 </div>
               </div>
               <div className="hours-section">
