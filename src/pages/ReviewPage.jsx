@@ -142,7 +142,9 @@ function ReviewPage() {
           (sum, review) => sum + review.rating,
           0
         );
-        const averageRating = totalRating / reviews.length;
+        const averageRating = parseFloat(
+          (totalRating / reviews.length).toFixed(1)
+        );
 
         // Update the Business model with the new average rating
         await client.models.Business.update({
@@ -154,7 +156,7 @@ function ReviewPage() {
         // If no reviews exist (unlikely since we just added one), set averageRating to the current rating
         await client.models.Business.update({
           id: businessId,
-          averageRating: rating,
+          averageRating: parseFloat(rating.toFixed(1)),
         });
         console.log("Set initial business average rating:", rating);
       }
