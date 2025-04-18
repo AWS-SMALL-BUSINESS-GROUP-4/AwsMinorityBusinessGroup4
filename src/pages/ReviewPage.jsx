@@ -16,6 +16,7 @@ function ReviewPage() {
   const [loading, setLoading] = useState(true);
   const [businessName, setBusinessName] = useState('Negril - DC');
   const [reviewText, setReviewText] = useState('');
+  const [recentReviews, setRecentReivews] = useState([]);
   const [file, setFile] = useState(null);
   
   //const { isAuthenticated, userId, setUserId, authLoading } = useContext(AuthContext);
@@ -63,25 +64,43 @@ function ReviewPage() {
 
   //   fetchUserId();
   // }, [client]);
+
+  useEffect(() => {
+    const sub = client.models.Review.observeQuery({
+      filter: {
+        businessId: {
+          contains: businessId
+        }
+      },
+      selectionSet: ['rating', 'content', 'reviewDate', "user.name.*"],
+    }).subscribe({
+      next: ({ items, isSynced }) => {
+        setRecentReivews([...items]);
+      },
+    });
+    return () => sub.unsubscribe();
+  }, [recentReviews]);
   
   
   // Sample recent reviews data
-  const recentReviews = [
-    {
-      id: 1,
-      name: 'John Doe',
-      rating: 5,
-      date: '1/1/1970',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
-    },
-    {
-      id: 2,
-      name: 'John Doe',
-      rating: 5,
-      date: '1/1/1970',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
-    }
-  ];
+  // const recentReviews = [
+  //   {
+  //     id: 1,
+  //     name: 'John Doe',
+  //     rating: 5,
+  //     date: '1/1/1970',
+  //     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+  //   },
+  //   {
+  //     id: 2,
+  //     name: 'John Doe',
+  //     rating: 5,
+  //     date: '1/1/1970',
+  //     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+  //   }
+  // ];
+
+  //const recentReviews = [];
 
   const handleRatingClick = (selectedRating) => {
     setRating(selectedRating);
@@ -207,7 +226,7 @@ function ReviewPage() {
               <div className="review-header">
                 <div className="user-profile">
                   <div className="avatar-circle"></div>
-                  <span className="user-name">{review.name}</span>
+                  <span className="user-name">{review.user.name.firstName + " " + review.user.name.lastName}</span>
                 </div>
                 <div className="review-details">
                   <div className="star-rating">
