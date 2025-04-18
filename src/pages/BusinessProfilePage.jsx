@@ -222,7 +222,7 @@ function BusinessProfilePage() {
           full: fullAddress,
         },
         hours: hours,
-        averageRating: response.data.averageRating || 3.6,
+        averageRating: response.data.averageRating || 4.6,
         reviewCount: response.data.reviews ? response.data.reviews.length : 169,
       });
     } catch (error) {
@@ -262,7 +262,8 @@ function BusinessProfilePage() {
   };
 
   const handleWriteReview = () => {
-    navigate(`/review/${business?.id}`);
+    console.log("businessID:", business);
+    navigate(`/write-review/${id}`);
   };
 
   const handleAddPhoto = () => {
